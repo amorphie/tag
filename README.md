@@ -1,7 +1,7 @@
 
 # Tags
 
-Generic tagging and enrichement microservice platform for any item that relay in any system.
+Generic tagging and enrichment microservices for any item that relay in any system.
 
 
 ## Tag Definition
