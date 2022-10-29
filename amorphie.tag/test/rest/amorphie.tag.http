@@ -1,0 +1,42 @@
+
+GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag HTTP/1.1
+
+###
+GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag?limit=1 HTTP/1.1
+
+###
+GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag?limit=2&token=2 HTTP/1.1
+
+###
+GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag/xxxx HTTP/1.1
+
+###
+POST http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag HTTP/1.1
+Content-Type: application/json
+
+{
+    "Name":"retail-customer",
+    "URL":"yxxx",
+    "TTL":1500
+}
+
+###
+POST http://localhost:40001/v1.0-alpha1/state/ss-tag/query
+Content-Type: application/json
+
+{}
+
+###
+POST http://localhost:40001/v1.0-alpha1/state/ss-tag/query
+Content-Type: application/json
+
+{
+    "filter": {
+    },
+    "sort": [
+        {
+            "key": "name",
+            "order": "DESC"
+        }
+    ]
+}
