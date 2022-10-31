@@ -27,3 +27,7 @@ Hot reload
 ```
 dapr run --app-id amorphie-tag  --app-port 4001  --dapr-http-port 40001 --components-path Components dotnet watch -- urls=http://localhost:4001/
 ```
+
+
+Swagger URL: http://localhost:4001/swagger/index.html
+Ddapr endpoint: http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag

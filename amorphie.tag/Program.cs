@@ -66,6 +66,15 @@ void RegisterRoutes()
     })
     .Produces<TagInfo>(StatusCodes.Status200OK);
 
+    app.MapDelete("/tag/{tag-name}", DeleteTag)
+    .WithOpenApi(operation =>
+    {
+        operation.Summary = "Deletes existing tag.";
+        return operation;
+    })
+    .Produces(StatusCodes.Status404NotFound)
+    .Produces(StatusCodes.Status409Conflict)    
+    .Produces(StatusCodes.Status200OK);
 }
 
 #region Route Implementations
@@ -125,6 +134,23 @@ async Task<IResult> SaveTag([FromBody] TagInfo tagInfo)
         return Results.Problem(ex.Message, tagInfo.Name, 503, ex.Source);
     }
 };
+
+
+async Task<IResult> DeleteTag([FromRoute(Name = "tag-name")] string tagName)
+{
+    var (value, etag) = await client.GetStateAndETagAsync<TagInfo>(TAG_STORE_NAME, tagName);
+
+    if (value == null)
+        return Results.NotFound();
+
+    var returnValue = await client.TryDeleteStateAsync(TAG_STORE_NAME, tagName, etag);
+
+    if (returnValue)
+        return Results.Ok();
+    else
+        return Results.Conflict();
+};
+
 
 #endregion
 

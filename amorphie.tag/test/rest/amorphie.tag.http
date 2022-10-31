@@ -21,6 +21,10 @@ Content-Type: application/json
 }
 
 ###
+DELETE http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag/retail-customer2 HTTP/1.1
+Content-Type: application/json
+
+###
 POST http://localhost:40001/v1.0-alpha1/state/ss-tag/query
 Content-Type: application/json
 
