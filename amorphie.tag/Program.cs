@@ -127,6 +127,8 @@ async Task<IResult> SaveTag([FromBody] Tag tagInfo, TagDBContext context)
 {
     context.Add(tagInfo);
     context.SaveChanges();
+
+     return Results.Ok();
 };
 
 async Task<IResult> DeleteTag([FromRoute(Name = "tag-name")] string tagName)
