@@ -2,11 +2,25 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Dapr.Client;
+using amorphie.tag.data;
+using Microsoft.EntityFrameworkCore;
+
+
+
+var client = new DaprClientBuilder().Build();
+var configuration = await client.GetConfiguration("configstore", new List<string>() { "config-amorphie-ss-tag", "config-amorphie-tag-db" });
+string TAG_STATE_STORE_NAME = configuration.Items["config-amorphie-ss-tag"].Value;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddJsonConsole();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<TagDBContext>
+    (options => options.UseNpgsql(configuration.Items["config-amorphie-tag-db"].Value, b => b.MigrationsAssembly("amorphie.tag")));
+
 
 var app = builder.Build();
 
@@ -20,29 +34,31 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-var client = new DaprClientBuilder().Build();
-
-string TAG_STORE_NAME = "ss-tag";
-
 RegisterRoutes();
 
-// Ensure to Dapr sidecar is activated.
-using (var tokenSource = new CancellationTokenSource())
+try
 {
-    await client.WaitForSidecarAsync(tokenSource.Token);
-}
+    app.Logger.LogInformation("Starting application...");
+    app.Run();
 
-app.Run();
+}
+catch (Exception ex)
+{
+    app.Logger.LogCritical(ex, "Aplication is terminated unexpectedly ");
+}
 
 
 void RegisterRoutes()
 {
+    app.Logger.LogInformation("Registering Routes");
+
     app.MapGet("/tag", GetAllTags)
     .WithOpenApi(operation =>
     {
         operation.Summary = "Returns saved tag records.";
-        operation.Parameters[0].Description = "Paging parameter. **limit** is the page size of resultset.";
-        operation.Parameters[1].Description = "Paging parameter. **Token** is returned from last query.";
+        operation.Parameters[0].Description = "Filtering parameter. Given **label** is used to filter tags.";
+        operation.Parameters[1].Description = "Paging parameter. **limit** is the page size of resultset.";
+        operation.Parameters[2].Description = "Paging parameter. **Token** is returned from last query.";
         return operation;
     })
     .Produces<TagInfoList>(StatusCodes.Status200OK);
@@ -73,31 +89,33 @@ void RegisterRoutes()
         return operation;
     })
     .Produces(StatusCodes.Status404NotFound)
-    .Produces(StatusCodes.Status409Conflict)    
+    .Produces(StatusCodes.Status409Conflict)
     .Produces(StatusCodes.Status200OK);
 }
 
 #region Route Implementations
 
 async Task<IResult> GetAllTags(
-    [Range(5, 100)]
-    [FromQuery] int? limit,
-    [FromQuery] string? token)
+    [FromQuery] string? label,
+    [FromQuery][Range(5, 100)] int limit = 100,
+    [FromQuery] string token = "")
 {
-    if (!limit.HasValue) limit = 100;
+
+    //"filter": { "IN": { "lavels": [ "Dev Ops", "Hardware" ] }  }
+
 
     var query = $"{{ \"page\": {{ \"limit\": {limit}, \"token\": \"{token}\" }} }}";
-    var tags = await client.QueryStateAsync<TagInfo>(TAG_STORE_NAME, query);
+    var tags = await client.QueryStateAsync<TagInfo>(TAG_STATE_STORE_NAME, query);
 
     return Results.Ok(new TagInfoList(tags.Results.Select(tag =>
-        new TagInfo(tag.Data.Name, tag.Data.URL, tag.Data.TTL))
+        new TagInfo(tag.Data.Name, tag.Data.URL, tag.Data.TTL, tag.Data.Labels))
         .ToArray(), tags.Token));
 };
 
-
-async Task<IResult> GetTag([FromRoute(Name = "tag-name")] string tagName)
+async Task<IResult> GetTag([FromRoute(Name = "tag-name")] string tagName, TagDBContext context)
 {
-    var returnValue = await client.GetStateAsync<TagInfo>(TAG_STORE_NAME, tagName);
+
+    var returnValue = context.Tags.First(t => t.Name == tagName);
 
     if (returnValue == null)
         return Results.NotFound();
@@ -105,45 +123,20 @@ async Task<IResult> GetTag([FromRoute(Name = "tag-name")] string tagName)
     return Results.Ok(returnValue);
 };
 
-
-
-async Task<IResult> SaveTag([FromBody] TagInfo tagInfo)
+async Task<IResult> SaveTag([FromBody] Tag tagInfo, TagDBContext context)
 {
-    try
-    {
-        //throw new Exception("FOR TESTING PURPOSE");
-
-        // Check is the tag exists ?
-        var existingRecord = await client.GetStateAsync<TagInfo>(TAG_STORE_NAME, tagInfo.Name);
-
-        await client.SaveStateAsync(TAG_STORE_NAME, tagInfo.Name, tagInfo);
-        var returnValue = await client.GetStateAsync<TagInfo>(TAG_STORE_NAME, tagInfo.Name);
-
-        if (existingRecord == null)
-        {
-            return Results.Created($"/tag/{tagInfo.Name}", returnValue);
-        }
-        else
-        {
-            return Results.Ok(returnValue);
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.StackTrace);
-        return Results.Problem(ex.Message, tagInfo.Name, 503, ex.Source);
-    }
+    context.Add(tagInfo);
+    context.SaveChanges();
 };
-
 
 async Task<IResult> DeleteTag([FromRoute(Name = "tag-name")] string tagName)
 {
-    var (value, etag) = await client.GetStateAndETagAsync<TagInfo>(TAG_STORE_NAME, tagName);
+    var (value, etag) = await client.GetStateAndETagAsync<TagInfo>(TAG_STATE_STORE_NAME, tagName);
 
     if (value == null)
         return Results.NotFound();
 
-    var returnValue = await client.TryDeleteStateAsync(TAG_STORE_NAME, tagName, etag);
+    var returnValue = await client.TryDeleteStateAsync(TAG_STATE_STORE_NAME, tagName, etag);
 
     if (returnValue)
         return Results.Ok();
@@ -151,12 +144,11 @@ async Task<IResult> DeleteTag([FromRoute(Name = "tag-name")] string tagName)
         return Results.Conflict();
 };
 
-
 #endregion
 
 #region Models
 
-record TagInfo(string Name, string URL, int TTL);
+record TagInfo(string Name, string URL, int TTL, string[] Labels);
 record TagInfoList(TagInfo[] items, string token);
 
 #endregion 

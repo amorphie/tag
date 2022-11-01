@@ -13,8 +13,15 @@
 ```
 docker run -d --rm -p 27017:27017 --name mongodb mongo:5
 ```
+### Set configurations
+
+With Redis CLI save below configruration items.
+
+> MSET config-amorphie-ss-tag "ss-tag||1" 
 
 ## Amorphie.tag
+Tag repository for general use. 
+
 
 ###  Direct
 ```
