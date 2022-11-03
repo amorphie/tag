@@ -1,23 +1,29 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace amorphie.tag.data;
 
+class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
+{
+   public TagDBContext CreateDbContext(string[] args)
+   {
+      var builder = new DbContextOptionsBuilder<TagDBContext>();
+      
+      var connStr = "Host=localhost:5432;Database=tags;Username=postgres;Password=example";
+      builder.UseNpgsql(connStr);
+      return new TagDBContext(builder.Options);
+   }
+}
+
 public class TagDBContext : DbContext
 {
-    public DbSet<Tag>? Tags { get; set; }
+   public DbSet<Tag>? Tags { get; set; }
+   public DbSet<TagRelation>? TagRelations { get; set; }
 
-    public TagDBContext(DbContextOptions options) : base(options) {}
-
-    
-    /*
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //=> optionsBuilder.UseNpgsql("Host=localhost:5432;Database=tags;Username=postgres;Password=example");
-        => optionsBuilder.UseNpgsql("Host=localhost:5432;Database=tags;Username=postgres;Password=example", b => b.MigrationsAssembly("amorphie.tag"));
-    */
-    
-        
+   public TagDBContext(DbContextOptions options) : base(options) {}
 }
 
 public class Tag
@@ -25,7 +31,7 @@ public class Tag
     [Key]
     public string Name { get; set; } = string.Empty;
     public string? Url { get; set; }
-    public int TTL { get; set; }
+    public int Ttl { get; set; }
 
     [InverseProperty("Owner")]
     public List<TagRelation> Tags { get; set; } = new List<TagRelation>();
@@ -42,3 +48,4 @@ public class TagRelation
     public string TagName { get; set; } = string.Empty;
     public Tag? Tag { get; set; }
 }
+

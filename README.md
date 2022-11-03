@@ -11,7 +11,7 @@
 ### For **Queryable State Store** install MongoDB, *optionally MongoDB Compass*
 
 ```
-docker run -d --rm -p 27017:27017 --name mongodb mongo:5
+docker run -d --rm -p 27017:27017 --name mongodb mongo
 ```
 ### Set configurations
 

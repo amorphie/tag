@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace amorphie.tag.Migrations
+namespace amorphie.tag.data.Migrations
 {
     /// <inheritdoc />
-    public partial class deneme2 : Migration
+    public partial class data3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

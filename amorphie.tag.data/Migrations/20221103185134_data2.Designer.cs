@@ -8,11 +8,11 @@ using amorphie.tag.data;
 
 #nullable disable
 
-namespace amorphie.tag.Migrations
+namespace amorphie.tag.data.Migrations
 {
     [DbContext(typeof(TagDBContext))]
-    [Migration("20221101162607_deneme")]
-    partial class deneme
+    [Migration("20221103185134_data2")]
+    partial class data2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,7 +29,7 @@ namespace amorphie.tag.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<int>("TTL")
+                    b.Property<int>("Ttl")
                         .HasColumnType("integer");
 
                     b.Property<string>("Url")
@@ -52,7 +52,7 @@ namespace amorphie.tag.Migrations
 
                     b.HasIndex("TagName");
 
-                    b.ToTable("TagRelation");
+                    b.ToTable("TagRelations");
                 });
 
             modelBuilder.Entity("amorphie.tag.data.TagRelation", b =>

@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace amorphie.tag.Migrations
+namespace amorphie.tag.data.Migrations
 {
     /// <inheritdoc />
-    public partial class deneme : Migration
+    public partial class data1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +16,7 @@ namespace amorphie.tag.Migrations
                 {
                     Name = table.Column<string>(type: "text", nullable: false),
                     Url = table.Column<string>(type: "text", nullable: true),
-                    TTL = table.Column<int>(type: "integer", nullable: false)
+                    Ttl = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
