@@ -11,12 +11,15 @@ GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag?pagesize=2&page=2
 GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag/retail-customer HTTP/1.1
 
 ###
+GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag/idm HTTP/1.1
+
+###
 POST http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag HTTP/1.1
 Content-Type: application/json
 
 {
-    "Name":"idm",
-    "Url":"-",
+    "Name":"retail-customer",
+    "Url":"http://localhost:3000/cb.customers/@param1?dbid=@param2&loveid=@param3",
     "Ttl":161
 }
 

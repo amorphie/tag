@@ -1,27 +1,14 @@
-
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using Dapr.Client;
-using amorphie.tag.data;
-using Microsoft.EntityFrameworkCore;
+var builder = WebApplication.CreateBuilder(args);
 
 var client = new DaprClientBuilder().Build();
-//var configuration = await client.GetConfiguration("configstore", new List<string>() { "config-amorphie-ss-tag", "config-amorphie-tag-db" });
-//string TAG_STATE_STORE_NAME = configuration.Items["config-amorphie-ss-tag"].Value;
-string TAG_STATE_STORE_NAME = "ss-tag";
-
-
-var builder = WebApplication.CreateBuilder(args);
+var configurations = await client.GetConfiguration("configstore", new List<string>() { "config-amorphie-tag-db" });
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TagDBContext>
-    //(options => options.UseNpgsql(configuration.Items["config-amorphie-tag-db"].Value, b => b.MigrationsAssembly("amorphie.tag")));
-    (options => options.UseNpgsql("Host=localhost:5432;Database=tags;Username=postgres;Password=example", b => b.MigrationsAssembly("amorphie.tag")));
-
-
+    (options => options.UseNpgsql(configurations.Items["config-amorphie-tag-db"].Value, b => b.MigrationsAssembly("amorphie.tag")));
 
 var app = builder.Build();
 
@@ -35,7 +22,71 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-RegisterRoutes();
+app.Logger.LogInformation("Registering Routes");
+
+app.MapGet("/tag", GetAllTags)
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Returns saved tag records.";
+    operation.Parameters[0].Description = "Filtering parameter. Given **tag** is used to filter tags.";
+    operation.Parameters[1].Description = "Paging parameter. **limit** is the page size of resultset.";
+    operation.Parameters[2].Description = "Paging parameter. **Token** is returned from last query.";
+    return operation;
+})
+.Produces<GetTagResponse[]>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status204NoContent);
+
+app.MapGet("/tag/{tag-name}", GetTag)
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Returns requested tag.";
+    operation.Parameters[0].Description = "Name of the requested tag.";
+    return operation;
+})
+.Produces<GetTagResponse>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapPost("/tag/{tag-name}/tags", AddTagToTag)
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Add tag to tag :)";
+    operation.Parameters[0].Description = "Tag name";
+    return operation;
+})
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status304NotModified)
+.Produces(StatusCodes.Status404NotFound);
+
+app.MapDelete("/tag/{tag-name}/tags/{tag-name-to-delete}", DeleteTagFromTag)
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Delete tag from tag ";
+    operation.Parameters[0].Description = "Tag name";
+    operation.Parameters[1].Description = "Tag name to be deleted.";
+    return operation;
+})
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status304NotModified)
+.Produces(StatusCodes.Status404NotFound);
+
+
+app.MapPost("/tag", SaveTag)
+.WithTopic("pubsub", "SaveTag") // Default topic for bulk save requirement
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Saves or updates requested tag.";
+    return operation;
+})
+.Produces<GetTagResponse>(StatusCodes.Status200OK);
+
+app.MapDelete("/tag/{tag-name}", DeleteTag)
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Deletes existing tag.";
+    return operation;
+})
+.Produces(StatusCodes.Status404NotFound)
+.Produces(StatusCodes.Status200OK);
 
 try
 {
@@ -48,79 +99,7 @@ catch (Exception ex)
     app.Logger.LogCritical(ex, "Aplication is terminated unexpectedly ");
 }
 
-
-void RegisterRoutes()
-{
-    app.Logger.LogInformation("Registering Routes");
-
-    app.MapGet("/tag", GetAllTags)
-    .WithOpenApi(operation =>
-    {
-        operation.Summary = "Returns saved tag records.";
-        operation.Parameters[0].Description = "Filtering parameter. Given **tag** is used to filter tags.";
-        operation.Parameters[1].Description = "Paging parameter. **limit** is the page size of resultset.";
-        operation.Parameters[2].Description = "Paging parameter. **Token** is returned from last query.";
-        return operation;
-    })
-    .Produces<GetTagResponse[]>(StatusCodes.Status200OK)
-    .Produces(StatusCodes.Status204NoContent);
-
-    app.MapGet("/tag/{tag-name}", GetTag)
-    .WithOpenApi(operation =>
-    {
-        operation.Summary = "Returns requested tag.";
-        operation.Parameters[0].Description = "Name of the requested tag.";
-        return operation;
-    })
-    .Produces<GetTagResponse>(StatusCodes.Status200OK)
-    .Produces(StatusCodes.Status404NotFound);
-
-    app.MapPost("/tag/{tag-name}/tags", AddTagToTag)
-    .WithOpenApi(operation =>
-    {
-        operation.Summary = "Add tag to tag :)";
-        operation.Parameters[0].Description = "Tag name";
-        return operation;
-    })
-    .Produces(StatusCodes.Status200OK)
-    .Produces(StatusCodes.Status304NotModified)
-    .Produces(StatusCodes.Status404NotFound);
-
-     app.MapDelete("/tag/{tag-name}/tags/{tag-name-to-delete}", DeleteTagFromTag)
-    .WithOpenApi(operation =>
-    {
-        operation.Summary = "Delete tag from tag ";
-        operation.Parameters[0].Description = "Tag name";
-        operation.Parameters[1].Description = "Tag name to be deleted.";
-        return operation;
-    })
-    .Produces(StatusCodes.Status200OK)
-    .Produces(StatusCodes.Status304NotModified)
-    .Produces(StatusCodes.Status404NotFound);
-
-
-    app.MapPost("/tag", SaveTag)
-    .WithTopic("pubsub", "SaveTag") // Default topic for bulk save requirement
-    .WithOpenApi(operation =>
-    {
-        operation.Summary = "Saves or updates requested tag.";
-        return operation;
-    })
-    .Produces<GetTagResponse>(StatusCodes.Status200OK);
-
-    app.MapDelete("/tag/{tag-name}", DeleteTag)
-    .WithOpenApi(operation =>
-    {
-        operation.Summary = "Deletes existing tag.";
-        return operation;
-    })
-    .Produces(StatusCodes.Status404NotFound)
-    .Produces(StatusCodes.Status200OK);
-}
-
-#region Route Implementations
-
-async Task<IResult> GetAllTags(
+IResult GetAllTags(
     [FromServices] TagDBContext context,
     [FromQuery] string? tagName,
     [FromQuery][Range(0, 100)] int page = 0,
@@ -178,6 +157,11 @@ IResult SaveTag(
     [FromServices] TagDBContext context
     )
 {
+/*
+    Uri uriResult;
+bool result = Uri.TryCreate(uriName, UriKind.Absolute, out uriResult) 
+    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+*/
     var existingRecord = context?.Tags?.FirstOrDefault(t => t.Name == data.Name);
 
     if (existingRecord == null)
@@ -205,7 +189,7 @@ IResult SaveTag(
     }
 };
 
-async Task<IResult> DeleteTag(
+IResult DeleteTag(
     [FromRoute(Name = "tag-name")] string tagName,
     [FromServices] TagDBContext context)
 {
@@ -223,7 +207,6 @@ async Task<IResult> DeleteTag(
         return Results.Ok();
     }
 };
-
 
 IResult AddTagToTag(
     [FromRoute(Name = "tag-name")] string tagName,
@@ -269,6 +252,7 @@ IResult DeleteTagFromTag(
 
     var tagToDelete = context.TagRelations.FirstOrDefault(t => t.TagName == tagNameToDelete);
 
+
     if (tagToDelete == null)
         return Results.NotFound("Tag to delete is not found");
 
@@ -276,19 +260,6 @@ IResult DeleteTagFromTag(
     context.SaveChanges();
     return Results.Ok();
 
+   
+   
 };
-
-
-#endregion
-
-#region Models
-
-record GetTagResponse(string Name, string Url, int Ttl, string[] Tags);
-public record SaveTagRequest(string Name, string? Url, int? Ttl);
-
-#endregion 
-
-
-
-
-

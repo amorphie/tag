@@ -1,0 +1,2 @@
+
+GET http://localhost:40002/v1.0/invoke/amorphie-tag-execute/method/tag/retail-customer/execute?param1=23342234&param2=ugur  HTTP/1.1
