@@ -1,4 +1,3 @@
-
 var client = new DaprClientBuilder().Build();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +27,11 @@ app.MapGet("/tag/{tag-name}/execute", ExecuteTag)
     return operation;
 })
 .Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status500InternalServerError)
+.Produces(StatusCodes.Status510NotExtended)
+.Produces(StatusCodes.Status400BadRequest)
 .Produces(StatusCodes.Status204NoContent);
+
 
 try
 {
@@ -47,8 +50,8 @@ async Task<IResult> ExecuteTag(
     )
 {
     app.Logger.LogInformation("ExecuteTag is calling");
-
-    GetTagResponse tag = null;
+   
+    GetTagResponse? tag;
 
     try
     {
@@ -58,22 +61,42 @@ async Task<IResult> ExecuteTag(
     {
         if (ex.Response.StatusCode == HttpStatusCode.NotFound)
             return Results.NotFound("Tag is not found.");
+
+        if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
+            return Results.Problem("Tag query service is unavailable", null, 510);
+
+        return Results.Problem($"Tag query service error : {ex.Response.StatusCode}", null, 510);
+    }
+    catch (Exception ex)
+    {
+       
+        return Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510);
     }
 
     if (string.IsNullOrEmpty(tag.Url))
     {
-        return Results.Problem("This tag does not have URL",null,510);
+        return Results.BadRequest("This tag does not have URL");
     }
 
+    var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
+    var urlToConsume = tag.Url;
 
-    
-    var parameters = targetUrl.Split(new Char[] { '/', '?', '&', '=' },StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToArray();
+    foreach (var p in parameters)
+    {
+        if (!request.Query.ContainsKey(p.TrimStart('@')))
+            return Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}");
 
-    app.Logger.LogInformation($"Url parameters{  string.Join(",", parameters) }");
+        urlToConsume = urlToConsume.Replace(p, request.Query[p.TrimStart('@')].ToString());
+    }
 
-    app.Logger.LogInformation($"ExecuteTag is called with {request.Query["Param1"].ToString()}");
+    // This process will be replaced with with dapr 1.10 version service invoke for better telemetry: https://github.com/dapr/dapr/issues/4549
+    HttpClient httpClient = new();
+    var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
 
-    return Results.Ok(tag);
+    if (response == null)
+        return Results.Ok(response);
+    else
+        return Results.NoContent();
 };
 
 
