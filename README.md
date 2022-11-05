@@ -2,35 +2,31 @@
 
 ## Prerequisites
 
-### Install Dotnet 7.0 : https://dotnet.microsoft.com/en-us/download/dotnet/7.0
+### Install Dotnet 7.0
+https://dotnet.microsoft.com/en-us/download/dotnet/7.0
 
 *if you are using RC-2 add below enviroment variable*
 >export DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER=1
 
-###  Install Dapr : https://docs.dapr.io/getting-started/install-dapr-cli/
-### For **Queryable State Store** install MongoDB, *optionally MongoDB Compass*
+###  Install Dapr
+https://docs.dapr.io/getting-started/install-dapr-cli/
+
+### Install Postgres
 
 ```
-docker run -d --rm -p 27017:27017 --name mongodb mongo
+docker run -e POSTGRES_PASSWORD=example -d postgres
 ```
 ### Set configurations
 
 With Redis CLI save below configruration items.
-
-> MSET config-amorphie-ss-tag "ss-tag||1" 
+> MSET config-amorphie-tag-db "Host=localhost:5432;Database=tags;Username=postgres;Password=example||1" 
 
 ## Amorphie.tag
 Tag repository for general use. 
 
-
-###  Direct
+To Run
 ```
 dapr run --app-id amorphie-tag  --app-port 4001  --dapr-http-port 40001 --components-path Components dotnet run -- urls=http://localhost:4001/
-```
-
-###  Hot reload
-```
-dapr run --app-id amorphie-tag  --app-port 4001  --dapr-http-port 40001 --components-path Components dotnet watch -- urls=http://localhost:4001/
 ```
 
 ### Endpoints 
@@ -41,7 +37,14 @@ dapr run --app-id amorphie-tag  --app-port 4001  --dapr-http-port 40001 --compon
 
 ## Amorphie.tag.execute
 
-###  Direct
+Tag related enricchment service
+
+To Run
 ```
 dapr run --app-id amorphie-tag-execute  --app-port 4002  --dapr-http-port 40002 --components-path Components dotnet run -- urls=http://localhost:4002/
 ```
+
+### Endpoints 
+* Swagger URL: http://localhost:4002/swagger/index.html
+* Dapr endpoint: http://localhost:40002/v1.0/invoke/amorphie-tag-execute/method/tag/{tag-name}/execute?{parameters}
+* Test calls: https://github.com/amorphie/tag/blob/6f78038bdd5bc74c0e542fffa468734e579cf201/amorphie.tag.execute/rest/amorphie.tag.execute.http
