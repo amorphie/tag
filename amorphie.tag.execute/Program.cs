@@ -2,6 +2,8 @@ var client = new DaprClientBuilder().Build();
 
 var builder = WebApplication.CreateBuilder(args);
 
+var STATE_STORE = "tag-execute-cache";
+
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 
@@ -50,7 +52,7 @@ async Task<IResult> ExecuteTag(
     )
 {
     app.Logger.LogInformation("ExecuteTag is calling");
-   
+
     GetTagResponse? tag;
 
     try
@@ -69,7 +71,7 @@ async Task<IResult> ExecuteTag(
     }
     catch (Exception ex)
     {
-       
+
         return Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510);
     }
 
@@ -89,14 +91,17 @@ async Task<IResult> ExecuteTag(
         urlToConsume = urlToConsume.Replace(p, request.Query[p.TrimStart('@')].ToString());
     }
 
+
+
     // This process will be replaced with with dapr 1.10 version service invoke for better telemetry: https://github.com/dapr/dapr/issues/4549
     HttpClient httpClient = new();
     var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
 
-    if (response == null)
-        return Results.Ok(response);
-    else
-        return Results.NoContent();
+    //await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata:  "TtlInseconds" = "100");
+
+
+return Results.Ok(response);
+
 };
 
 
