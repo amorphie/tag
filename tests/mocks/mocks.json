@@ -1,0 +1,124 @@
+{
+  "uuid": "d63f60ec-ab86-47d5-a21f-7d86f9db2f6c",
+  "lastMigration": 24,
+  "name": "tag",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3000,
+  "hostname": "0.0.0.0",
+  "routes": [
+    {
+      "uuid": "e0514197-ac3f-4a8c-af13-f633d72d3e31",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "",
+      "responses": [
+        {
+          "uuid": "7ed52517-14b3-48e9-aa14-61918e8f3e0f",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "8807aa88-f2dd-45bb-b71f-652b64976383",
+      "documentation": "Generate random body (JSON, text, CSV, etc) with templating",
+      "method": "get",
+      "endpoint": "cb.customers/:ssn",
+      "responses": [
+        {
+          "uuid": "ed4a289a-85c0-4c92-8b17-7455760aae72",
+          "body": "{\n  \"user\": {\n    \"ssn\": \"{{urlParam 'ssn'}}\",\n    \"citizenshipnumber\": \"{{ faker 'datatype.number' min=10000000001 max=90000000001 }}\",\n    \"firstname\": \"{{ faker 'name.firstName' }}\",\n    \"lastname\": \"{{ faker 'name.lastName' }}\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Returns user info",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "2e18bfc5-37bf-4ac9-b967-bea1e28039bc",
+      "documentation": "Generate random body (JSON, text, CSV, etc) with templating",
+      "method": "get",
+      "endpoint": "cb.partners/:partner",
+      "responses": [
+        {
+          "uuid": "b2be3e5e-0b5c-4e09-b2cd-f2b090fef874",
+          "body": "{\n  \"partner\": {\n    \"partner\": \"{{urlParam 'partner'}}\",\n    \"name\": \"{{ faker 'company.Name' }}\",\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Returns user info",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": []
+}

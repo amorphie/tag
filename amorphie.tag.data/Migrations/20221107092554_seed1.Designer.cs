@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using amorphie.tag.data;
@@ -11,9 +12,11 @@ using amorphie.tag.data;
 namespace amorphie.tag.data.Migrations
 {
     [DbContext(typeof(TagDBContext))]
-    partial class TagDBContextModelSnapshot : ModelSnapshot
+    [Migration("20221107092554_seed1")]
+    partial class seed1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,33 +82,6 @@ namespace amorphie.tag.data.Migrations
                     b.HasIndex("TagName");
 
                     b.ToTable("TagRelations");
-
-                    b.HasData(
-                        new
-                        {
-                            OwnerName = "idm",
-                            TagName = "corporate-customer"
-                        },
-                        new
-                        {
-                            OwnerName = "idm",
-                            TagName = "retail-customer"
-                        },
-                        new
-                        {
-                            OwnerName = "idm",
-                            TagName = "loan-partner"
-                        },
-                        new
-                        {
-                            OwnerName = "retail-loan",
-                            TagName = "retail-customer"
-                        },
-                        new
-                        {
-                            OwnerName = "retail-loan",
-                            TagName = "loan-partner"
-                        });
                 });
 
             modelBuilder.Entity("amorphie.tag.data.TagRelation", b =>
