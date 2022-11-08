@@ -48,7 +48,8 @@ catch (Exception ex)
 
 async Task<IResult> ExecuteTag(
     [FromRoute(Name = "tag-name")] string tagName,
-    HttpRequest request
+    HttpRequest request,
+    HttpContext httpContext
     )
 {
     app.Logger.LogInformation("ExecuteTag is calling");
@@ -92,15 +93,25 @@ async Task<IResult> ExecuteTag(
     }
 
 
+    var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, urlToConsume);
 
-    // This process will be replaced with with dapr 1.10 version service invoke for better telemetry: https://github.com/dapr/dapr/issues/4549
-    HttpClient httpClient = new();
-    var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
+    if (cachedResponse is not null)
+    {
+        httpContext.Response.Headers.Add("X-Content-Source", "Cache");
+        return Results.Ok(cachedResponse);
+    }
+    else
+    {
+        // This process will be replaced with with dapr 1.10 version service invoke for better telemetry: https://github.com/dapr/dapr/issues/4549
+        HttpClient httpClient = new();
+        var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
 
-    //await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata:  "TtlInseconds" = "100");
+        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
+        await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
 
-
-return Results.Ok(response);
+        httpContext.Response.Headers.Add("X-Content-Source", "Original");
+        return Results.Ok(response);
+    }
 
 };
 

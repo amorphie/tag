@@ -30,7 +30,7 @@ public class TagDBContext : DbContext
     {
         modelBuilder.Entity<Tag>().HasData(new { Name = "retail-loan" });
         modelBuilder.Entity<Tag>().HasData(new { Name = "idm" });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3000/cb.customers/@param1?dbid=@param2&loveid=@param3", Ttl = 100 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3000/cb.customers/@param1?dbid=@param2&loveid=@param3", Ttl = 5 });
         modelBuilder.Entity<Tag>().HasData(new { Name = "corporate-customer", Url = "http://localhost:3000/cb.customers/@param1", Ttl = 10 });
         modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner", Url = "http://localhost:3000/cb.partner/@partner", Ttl = 10 });
 
