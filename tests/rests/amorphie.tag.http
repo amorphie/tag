@@ -20,7 +20,7 @@ Content-Type: application/json
 {
     "Name":"retail-customer",
     "Url":"http://localhost:3000/cb.customers/@param1?dbid=@param2&loveid=@param3",
-    "Ttl":161
+    "Ttl":10
 }
 
 ###

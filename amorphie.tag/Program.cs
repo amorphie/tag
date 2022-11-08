@@ -157,11 +157,7 @@ IResult SaveTag(
     [FromServices] TagDBContext context
     )
 {
-/*
-    Uri uriResult;
-bool result = Uri.TryCreate(uriName, UriKind.Absolute, out uriResult) 
-    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
-*/
+
     var existingRecord = context?.Tags?.FirstOrDefault(t => t.Name == data.Name);
 
     if (existingRecord == null)
