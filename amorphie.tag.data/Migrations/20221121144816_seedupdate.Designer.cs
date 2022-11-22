@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using amorphie.tag.data;
@@ -11,9 +12,11 @@ using amorphie.tag.data;
 namespace amorphie.tag.data.Migrations
 {
     [DbContext(typeof(TagDBContext))]
-    partial class TagDBContextModelSnapshot : ModelSnapshot
+    [Migration("20221121144816_seedupdate")]
+    partial class seedupdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -146,56 +149,56 @@ namespace amorphie.tag.data.Migrations
                         {
                             EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 1,
-                            DataPath = "$.firstname",
+                            DataPath = "$body.firstname",
                             TagName = "burgan-staff"
                         },
                         new
                         {
                             EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 2,
-                            DataPath = "$.partner-staff.fullname",
+                            DataPath = "$body.partner-staff.fullname",
                             TagName = "loan-partner-staff"
                         },
                         new
                         {
                             EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 3,
-                            DataPath = "$.firstname",
+                            DataPath = "$body.firstname",
                             TagName = "retail-customer"
                         },
                         new
                         {
                             EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 1,
-                            DataPath = "$.lastname",
+                            DataPath = "$body.lastname",
                             TagName = "burgan-staff"
                         },
                         new
                         {
                             EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 2,
-                            DataPath = "$.partner-staff.fullname",
+                            DataPath = "body.partner-staff.fullname",
                             TagName = "loan-partner-staff"
                         },
                         new
                         {
                             EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 3,
-                            DataPath = "$.lastname",
+                            DataPath = "$body.lastname",
                             TagName = "retail-customer"
                         },
                         new
                         {
                             EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 1,
-                            DataPath = "$.firstname",
+                            DataPath = "$body.firstname",
                             TagName = "burgan-staff"
                         },
                         new
                         {
                             EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 2,
-                            DataPath = "$.partner-staff.fullname",
+                            DataPath = "$body.partner-staff.fullname",
                             TagName = "loan-partner-staff"
                         });
                 });

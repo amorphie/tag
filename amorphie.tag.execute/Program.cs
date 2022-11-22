@@ -25,7 +25,7 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/tag/{tag-name}/execute", ExecuteTag)
 .WithOpenApi(operation =>
 {
-    operation.Summary = "Executes given tag with using body parameters.";
+    operation.Summary = "Executes given tag with using query parameters.";
     return operation;
 })
 .Produces(StatusCodes.Status200OK)
@@ -34,6 +34,19 @@ app.MapGet("/tag/{tag-name}/execute", ExecuteTag)
 .Produces(StatusCodes.Status400BadRequest)
 .Produces(StatusCodes.Status204NoContent);
 
+
+
+app.MapGet("/domain/{domain-name}/entity/{entity-name}/Execute", ExecuteEntity)
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Executes given entity with using tag-in query- parameters.";
+    return operation;
+})
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status500InternalServerError)
+.Produces(StatusCodes.Status510NotExtended)
+.Produces(StatusCodes.Status400BadRequest)
+.Produces(StatusCodes.Status204NoContent);
 
 try
 {
@@ -58,7 +71,7 @@ async Task<IResult> ExecuteTag(
 
     try
     {
-        tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", "tag/" + tagName);
+        tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
     }
     catch (Dapr.Client.InvocationException ex)
     {
@@ -110,12 +123,71 @@ async Task<IResult> ExecuteTag(
         await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
 
         httpContext.Response.Headers.Add("X-Content-Source", "Original");
+
+
+        app.Logger.LogInformation($"ExecuteTag is responded with {response}");
+
         return Results.Ok(response);
     }
 };
 
 
 
+async Task<IResult> ExecuteEntity(
+    [FromRoute(Name = "domain-name")] string domainName,
+    [FromRoute(Name = "entity-name")] string entityName,
+    [FromQuery(Name = "tag")] string[] tags,
+    HttpRequest request,
+    HttpContext httpContext
+    )
+{
+    if (!request.Query.ContainsKey("tag"))
+    {
+        return Results.BadRequest("Any tag is not suplied. At least one tag must be suplied.");
+    }
+    var queryTags = request.Query["tag"].ToList();
 
+    GetEntityResponse? entity;
+
+    try
+    {
+        entity = await client.InvokeMethodAsync<GetEntityResponse>(HttpMethod.Get, "amorphie-tag", $"domain/{domainName}/entity/{entityName}");
+    }
+    catch (Dapr.Client.InvocationException ex)
+    {
+        if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+            return Results.NotFound("Entity is not found.");
+
+        if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
+            return Results.Problem("Entity query service is unavailable", null, 510);
+
+        return Results.Problem($"Entity query service error : {ex.Response.StatusCode}", null, 510);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Unhandled Entity query service error : {ex.Message}", null, 510);
+    }
+
+    var returnValue = new Dictionary<string, dynamic>();
+
+    foreach (var field in entity.Data)
+    {
+        var sourceTags = field.Sources.OrderBy(f => f.Order).ToArray();
+
+        foreach (var targetTag in sourceTags)
+        {
+            if (queryTags.Contains(targetTag.Tag))
+            {
+                var data = await client.InvokeMethodAsync<dynamic>(HttpMethod.Get, "amorphie-tag-execute", $"tag/{targetTag.Tag}/execute{request.QueryString.Value}");
+                JToken dataAsJson = JToken.Parse(data.ToString());
+                returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path).Value<string>());
+                break;
+            }
+
+        }
+    }
+
+    return Results.Ok(returnValue);
+}
 
 

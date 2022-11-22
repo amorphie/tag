@@ -20,7 +20,7 @@ public static class DomainModule
             return operation;
 
         })
-        .Produces<GetDomainResponse[]>(StatusCodes.Status200OK)
+        .Produces<GetEntityResponse[]>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
     }
 

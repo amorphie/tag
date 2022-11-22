@@ -45,11 +45,11 @@ public class TagDBContext : DbContext
 
         modelBuilder.Entity<Tag>().HasData(new { Name = "retail-loan" });
         modelBuilder.Entity<Tag>().HasData(new { Name = "idm" });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3000/cb.customers/@param1", Ttl = 5 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "corporate-customer", Url = "http://localhost:3000/cb.customers/@param1", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner", Url = "http://localhost:3000/cb.partner/@partner", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner-staff", Url = "http://localhost:3000/cb.partner/@partner/staff/@user", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-staff", Url = "http://localhost:3000/cb.staff/@param1", Ttl = 10 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3000/cb.customers?reference=@reference", Ttl = 5 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "corporate-customer", Url = "http://localhost:3000/cb.customers?reference=@reference", Ttl = 10 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner", Url = "http://localhost:3000/cb.partner/@reference", Ttl = 10 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner-staff", Url = "http://localhost:3000/cb.partner/@partner/staff/@reference", Ttl = 10 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-staff", Url = "http://localhost:3000/cb.staff/@reference", Ttl = 10 });
         modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-bank-turkey", Url = "http://localhost:3000/cb.bankInfo", Ttl = 10 });
 
         modelBuilder.Entity<TagRelation>().HasData(new { TagName = "corporate-customer", OwnerName = "idm" });
@@ -74,16 +74,16 @@ public class TagDBContext : DbContext
         modelBuilder.Entity<EntityData>().HasData(new { Id = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), EntityName = "user", Field = "lastname" });
         modelBuilder.Entity<EntityData>().HasData(new { Id = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), EntityName = "scope", Field = "title" });
 
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), Order = 1, TagName = "burgan-staff", DataPath = "$body.name" });
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), Order = 2, TagName = "loan-partner-staff", DataPath = "$body.staf-name" });
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), Order = 3, TagName = "retail-customer", DataPath = "$body.firstname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), Order = 1, TagName = "burgan-staff", DataPath = "$.firstname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), Order = 2, TagName = "loan-partner-staff", DataPath = "$.partner-staff.fullname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), Order = 3, TagName = "retail-customer", DataPath = "$.firstname" });
 
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), Order = 1, TagName = "burgan-staff", DataPath = "$body.last" });
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), Order = 2, TagName = "loan-partner-staff", DataPath = "$body.staf-last-name" });
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), Order = 3, TagName = "retail-customer", DataPath = "$body.lastname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), Order = 1, TagName = "burgan-staff", DataPath = "$.lastname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), Order = 2, TagName = "loan-partner-staff", DataPath = "$.partner-staff.fullname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), Order = 3, TagName = "retail-customer", DataPath = "$.lastname" });
 
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), Order = 1, TagName = "burgan-staff", DataPath = "$body.fullname" });
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), Order = 2, TagName = "loan-partner-staff", DataPath = "$body.fullname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), Order = 1, TagName = "burgan-staff", DataPath = "$.firstname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), Order = 2, TagName = "loan-partner-staff", DataPath = "$.partner-staff.fullname" });
     }
 
 }
