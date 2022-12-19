@@ -2,7 +2,9 @@
 var builder = WebApplication.CreateBuilder(args);
 
 var client = new DaprClientBuilder().Build();
+#pragma warning disable 618
 var configurations = await client.GetConfiguration("configstore", new List<string>() { "config-amorphie-tag-db" });
+#pragma warning restore 618
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();

@@ -5,9 +5,6 @@
 ### Install Dotnet 7.0
 https://dotnet.microsoft.com/en-us/download/dotnet/7.0
 
-*if you are using RC-2 add below enviroment variable*
->export DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER=1
-
 ###  Install Dapr
 https://docs.dapr.io/getting-started/install-dapr-cli/
 
