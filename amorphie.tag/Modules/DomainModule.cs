@@ -34,7 +34,12 @@ public static class DomainModule
             .Include(t => t.Entities)
             .ToList();
 
-        await client.SaveStateAsync("amorphie-cache", "ugur","karatas");
+
+        //var clientx = new DaprClientBuilder().Build();
+
+        //var result = await client.CheckHealthAsync();
+        await client.SaveStateAsync("amorphie-cache", "ugur","karatas2");
+
 
         if (domains.Count() > 0)
         {

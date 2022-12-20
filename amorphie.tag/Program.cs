@@ -1,15 +1,15 @@
 var builder = WebApplication.CreateBuilder(args);
 
-var client = new DaprClientBuilder().Build();
+//var client = new DaprClientBuilder().Build();
 #pragma warning disable 618
 //var configurations = await client.GetConfiguration("amorphie-config", new List<string>() { "config-amorphie-tag-db" });
 #pragma warning restore 618
 
 
-
-builder.Services.AddDaprClient();
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
+
+builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TagDBContext>
@@ -21,6 +21,7 @@ var app = builder.Build();
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
+
 
 if (app.Environment.IsDevelopment())
 {

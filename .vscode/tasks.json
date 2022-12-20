@@ -14,16 +14,14 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "dapr-debug",
             "appId": "amorphie-tag",
-            "appPort": 6101,
+            "appPort": 4101,
+            "httpPort": 41010,
+            "grpcPort": 41011,
+            "label": "dapr-debug",
             "type": "dapr",
             "dependsOn": "build",
-            "httpPort": 61010,
-            "grpcPort": 51010,
-            "componentsPath": "amorphie.tag/Components",
-            "logLevel":"debug"
-
+            "componentsPath": "amorphie.tag/components"
         },
         {
             "appId": "amorphie-tag",
