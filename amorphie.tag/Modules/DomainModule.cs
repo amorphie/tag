@@ -1,6 +1,7 @@
 
 public static class DomainModule
 {
+
     public static void MapDomainEndpoints(this WebApplication app)
     {
         app.MapGet("/domain", getAllDomains)
@@ -24,13 +25,16 @@ public static class DomainModule
         .Produces(StatusCodes.Status204NoContent);
     }
 
-    public static IResult getAllDomains(
-        [FromServices] TagDBContext context
+    public async static Task<IResult> getAllDomains(
+        [FromServices] TagDBContext context,
+        [FromServices] DaprClient client
         )
     {
         var domains = context!.Domains!
             .Include(t => t.Entities)
             .ToList();
+
+        await client.SaveStateAsync("amorphie-cache", "ugur","karatas");
 
         if (domains.Count() > 0)
         {
@@ -50,6 +54,7 @@ public static class DomainModule
         [FromRoute(Name = "domain-name")] string domainName,
         [FromRoute(Name = "entity-name")] string tagName,
         [FromServices] TagDBContext context
+       
     )
     {
         var entity = context!.Entites!

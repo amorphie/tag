@@ -1,5 +1,5 @@
 
-GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/domain
+GET http://localhost:61010/v1.0/invoke/amorphie-tag/method/domain
 ###
 
 GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/domain/idm/entity/user

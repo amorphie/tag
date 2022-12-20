@@ -14,28 +14,21 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/amorphie.tag/amorphie.tag.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
+            "label": "dapr-debug",
+            "appId": "amorphie-tag",
+            "appPort": 6101,
+            "type": "dapr",
+            "dependsOn": "build",
+            "httpPort": 61010,
+            "grpcPort": 51010,
+            "componentsPath": "amorphie.tag/Components",
+            "logLevel":"debug"
+
         },
         {
-            "label": "watch",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "--project",
-                "${workspaceFolder}/amorphie.tag/amorphie.tag.csproj"
-            ],
-            "problemMatcher": "$msCompile"
+            "appId": "amorphie-tag",
+            "label": "daprd-down",
+            "type": "daprd-down"
         }
     ]
 }
