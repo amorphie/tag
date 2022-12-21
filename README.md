@@ -5,57 +5,41 @@
 ### Install Dotnet 7.0
 https://dotnet.microsoft.com/en-us/download/dotnet/7.0
 
-*if you are using RC-2 add below enviroment variable*
->export DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER=1
-
 ###  Install Dapr
 https://docs.dapr.io/getting-started/install-dapr-cli/
 
-### Install Postgres
+> **Warning**
+> Init dapr in slim mode. If any dapr component is running on docker, delete them.
 
 ```
-docker run -e POSTGRES_PASSWORD=example -d postgres
+dapr init --slim
 ```
-### Set configurations
+### Prepare Development Enviroment
 
-With Redis CLI save below configruration items.
-> MSET config-amorphie-tag-db "Host=localhost:5432;Database=tags;Username=postgres;Password=example||1" 
-
-### Mockoon 
-
-Install Mockoon and load mocks https://github.com/amorphie/tag/blob/main/tests/mocks/mocks.json
-
-## Amorphie.tag.data
-
-EF Core based persistancy module. Also includes common poco models.
-
-To build database run;
-
-> dotnet ef database update
-
-## Amorphie.tag
-Tag repository for general use. 
-
-To Run
 ```
-dapr run --app-id amorphie-tag  --app-port 4001  --dapr-http-port 40001 --components-path Components dotnet run -- urls=http://localhost:4001/
+docker-compose up -d
 ```
 
-### Endpoints 
-* Swagger URL: http://localhost:4001/swagger/index.html
-* Dapr endpoint: http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag
 
+The compose file is installs 
+* Redis *(with blank password)*
+* Redis Insight for Redis management
+* Postgres *(user:posgres, password:posgres)*
+* PG Admin for Posgres management
+* Dapr placement server
 
-## Amorphie.tag.execute
+Redis Insight : http://localhost:5501
+PGAdmin : http://localhost:5502
 
-Tag related enricchment service
+## Project
 
-To Run
-```
-dapr run --app-id amorphie-tag-execute  --app-port 4002  --dapr-http-port 40002 --components-path Components dotnet run -- urls=http://localhost:4002/
-```
+Then just press F5
 
-### Endpoints 
-* Swagger URL: http://localhost:4002/swagger/index.html
-* Dapr endpoint: http://localhost:40002/v1.0/invoke/amorphie-tag-execute/method/tag/{tag-name}/execute?{parameters}
+Project endpoints
+
+* Tag Swagger URL: http://localhost:4101/swagger/index.html
+* Dapr endpoint: http://localhost:41010/v1.0/invoke/amorphie-tag/method/tag
+
+* Tag.Execute Swagger URL: http://localhost:4102/swagger/index.html
+* Dapr endpoint: http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/{tag-name}/execute?{parameters}
 

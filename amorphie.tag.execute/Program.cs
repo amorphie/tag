@@ -180,7 +180,12 @@ async Task<IResult> ExecuteEntity(
             {
                 var data = await client.InvokeMethodAsync<dynamic>(HttpMethod.Get, "amorphie-tag-execute", $"tag/{targetTag.Tag}/execute{request.QueryString.Value}");
                 JToken dataAsJson = JToken.Parse(data.ToString());
-                returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path).Value<string>());
+
+                if (dataAsJson.SelectToken(targetTag.Path) != null)
+                {
+                    returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path)!.Value<string>()!);
+                }
+
                 break;
             }
 

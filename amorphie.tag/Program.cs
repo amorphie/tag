@@ -1,21 +1,27 @@
-
 var builder = WebApplication.CreateBuilder(args);
 
-var client = new DaprClientBuilder().Build();
-var configurations = await client.GetConfiguration("configstore", new List<string>() { "config-amorphie-tag-db" });
+//var client = new DaprClientBuilder().Build();
+#pragma warning disable 618
+//var configurations = await client.GetConfiguration("amorphie-config", new List<string>() { "config-amorphie-tag-db" });
+#pragma warning restore 618
+
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
+
+builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TagDBContext>
-    (options => options.UseNpgsql(configurations.Items["config-amorphie-tag-db"].Value, b => b.MigrationsAssembly("amorphie.tag")));
+    (options => options.UseNpgsql("Host=localhost:5432;Database=tags;Username=postgres;Password=postgres"));
+    //(options => options.UseNpgsql(configurations.Items["config-amorphie-tag-db"].Value, b => b.MigrationsAssembly("amorphie.tag")));
 
 var app = builder.Build();
 
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -32,7 +38,6 @@ try
 {
     app.Logger.LogInformation("Starting application...");
     app.Run();
-
 }
 catch (Exception ex)
 {

@@ -1,23 +1,22 @@
-
-GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/domain
+GET http://localhost:41010/v1.0/invoke/amorphie-tag/method/domain
 ###
 
-GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/domain/idm/entity/user
+GET http://localhost:41010/v1.0/invoke/amorphie-tag/method/domain/idm/entity/user
 ###
 
-GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag HTTP/1.1
+GET http://localhost:41010/v1.0/invoke/amorphie-tag/method/tag HTTP/1.1
 
 ###
-GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag?pagesize=2&page=2 HTTP/1.1
+GET http://localhost:41010/v1.0/invoke/amorphie-tag/method/tag?pagesize=2&page=2 HTTP/1.1
 
 ###
-GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag/retail-customer HTTP/1.1
+GET http://localhost:41010/v1.0/invoke/amorphie-tag/method/tag/retail-customer HTTP/1.1
 
 ###
-GET http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag/idm HTTP/1.1
+GET http://localhost:41010/v1.0/invoke/amorphie-tag/method/tag/idm HTTP/1.1
 
 ###
-POST http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag HTTP/1.1
+POST http://localhost:41010/v1.0/invoke/amorphie-tag/method/tag HTTP/1.1
 Content-Type: application/json
 
 {
@@ -27,14 +26,14 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag/retail-customer/tags HTTP/1.1
+POST http://localhost:41010/v1.0/invoke/amorphie-tag/method/tag/retail-customer/tags HTTP/1.1
 Content-Type: application/json
 "idm"
 
 ###
-DELETE http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag/retail-customer HTTP/1.1
+DELETE http://localhost:41010/v1.0/invoke/amorphie-tag/method/tag/retail-customer HTTP/1.1
 Content-Type: application/json
 
 ###
-DELETE http://localhost:40001/v1.0/invoke/amorphie-tag/method/tag/retail-customer/tags/idm HTTP/1.1
+DELETE http://localhost:41010/v1.0/invoke/amorphie-tag/method/tag/retail-customer/tags/idm HTTP/1.1
 Content-Type: application/json
