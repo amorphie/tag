@@ -2,10 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (web) with Dapr",
+            "name": "Mocks",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:4101/swagger",
+            "preLaunchTask": "init mocks",
+            "postDebugTask": "stop mocks"
+        },
+        {
+            "name": "amorphie-tag",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "dapr-debug",
+            "preLaunchTask": "dapr-debug-amorphie-tag",
             "program": "${workspaceFolder}/amorphie.tag/bin/Debug/net7.0/amorphie.tag.dll",
             "args": [],
             "cwd": "${workspaceFolder}/amorphie.tag",
@@ -16,7 +24,35 @@
                 "DAPR_HTTP_PORT": "41010",
                 "DAPR_GRPC_PORT": "41011"
             },
-            "postDebugTask": "daprd-down"
+            "postDebugTask": "daprd-down-amorphie-tag"
+        },
+        {
+            "name": "amorphie-tag-execute",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "dapr-debug-amorphie-tag-execute",
+            "program": "${workspaceFolder}/amorphie.tag.execute/bin/Debug/net7.0/amorphie.tag.execute.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/amorphie.tag.execute",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:4102",
+                "DAPR_HTTP_PORT": "41020",
+                "DAPR_GRPC_PORT": "41021"
+            },
+            "postDebugTask": "daprd-down-amorphie-tag-execute"
         }
-    ]
+    ],
+    "compounds": [
+        {
+            "name": "Halay Mode",
+            "configurations": [
+                "amorphie-tag",
+                "amorphie-tag-execute",
+                "Mocks"
+            ],
+            "stopAll": true
+        }
+    ],
 }

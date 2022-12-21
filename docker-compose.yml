@@ -1,0 +1,74 @@
+version: "3.9"
+services:
+
+  redis:
+    container_name: redis_container
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning
+    volumes: 
+      - redis:/data
+    networks:
+      - bbt-development
+
+  redisinsight:
+    container_name: bbt-red-insight
+    image: redislabs/redisinsight:latest
+    ports:
+      - '5501:8001'
+    volumes:
+      - redisinsight:/db
+    restart: unless-stopped
+    networks:
+      - bbt-development
+
+  postgres:
+    container_name: bbt-postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - bbt-development
+
+  pgadmin:
+    container_name: bbt-pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "info@info.com"
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5502:80"
+    restart: unless-stopped
+    networks:
+      - bbt-development
+
+  placement:
+    container_name: bbt-dapr
+    image: "daprio/dapr"
+    command: ["./placement", "--port", "50006"]
+    ports:
+      - "50006:50006"
+    networks:
+      - bbt-development
+
+networks:
+  bbt-development:
+    external: true
+
+volumes:
+  redis:
+  redisinsight:
+  postgres:
+  pgadmin:

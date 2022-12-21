@@ -2,7 +2,17 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "init mocks",
+            "type": "shell",
+            "command": "docker run --name amorphie-tag-mocks -d -v ${workspaceFolder}/tests/mocks/mocks.json:/data  -p 3000:3000 mockoon/cli:latest -d data -p 3000"
+        },
+        {
+            "label": "stop mocks",
+            "type": "shell",
+            "command": "docker rm -f amorphie-tag-mocks"
+        },
+        {
+            "label": "build-amorphie-tag",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -14,18 +24,45 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "build-amorphie-tag-execute",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/amorphie.tag.execute/amorphie.tag.execute.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
             "appId": "amorphie-tag",
             "appPort": 4101,
             "httpPort": 41010,
             "grpcPort": 41011,
-            "label": "dapr-debug",
+            "label": "dapr-debug-amorphie-tag",
             "type": "dapr",
-            "dependsOn": "build",
-            "componentsPath": "amorphie.tag/components"
+            "dependsOn": "build-amorphie-tag",
+            "componentsPath": "amorphie.tag/Components"
+        },
+        {
+            "appId": "amorphie-tag-execute",
+            "appPort": 4102,
+            "httpPort": 41020,
+            "grpcPort": 41021,
+            "label": "dapr-debug-amorphie-tag-execute",
+            "type": "dapr",
+            "dependsOn": "build-amorphie-tag-execute",
+            "componentsPath": "amorphie.tag.execute/Components"
         },
         {
             "appId": "amorphie-tag",
-            "label": "daprd-down",
+            "label": "daprd-down-amorphie-tag",
+            "type": "daprd-down"
+        },
+        {
+            "appId": "amorphie-tag-execute",
+            "label": "daprd-down-amorphie-tag-execute",
             "type": "daprd-down"
         }
     ]
