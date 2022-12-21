@@ -8,8 +8,9 @@ https://dotnet.microsoft.com/en-us/download/dotnet/7.0
 ###  Install Dapr
 https://docs.dapr.io/getting-started/install-dapr-cli/
 
-**Warning**
-Init dapr in slim mode
+> **Warning**
+> Init dapr in slim mode
+
 ```
 dapr init --slim
 ```
