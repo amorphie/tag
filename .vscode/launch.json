@@ -2,14 +2,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Mocks",
-            "type": "chrome",
-            "request": "launch",
-            "url": "http://localhost:4101/swagger",
-            "preLaunchTask": "init mocks",
-            "postDebugTask": "stop mocks"
-        },
-        {
             "name": "amorphie-tag",
             "type": "coreclr",
             "request": "launch",
@@ -49,8 +41,7 @@
             "name": "Halay Mode",
             "configurations": [
                 "amorphie-tag",
-                "amorphie-tag-execute",
-                "Mocks"
+                "amorphie-tag-execute"
             ],
             "stopAll": true
         }

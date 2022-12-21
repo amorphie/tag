@@ -11,7 +11,7 @@ class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
     {
         var builder = new DbContextOptionsBuilder<TagDBContext>();
 
-        var connStr = "Host=localhost:5432;Database=tags;Username=postgres;Password=example";
+        var connStr = "Host=localhost:5432;Database=tags;Username=postgres;Password=postgres";
         builder.UseNpgsql(connStr);
         return new TagDBContext(builder.Options);
     }

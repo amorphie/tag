@@ -13,7 +13,7 @@ builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TagDBContext>
-    (options => options.UseNpgsql("Host=localhost:5432;Database=tags;Username=postgres;Password=example"));
+    (options => options.UseNpgsql("Host=localhost:5432;Database=tags;Username=postgres;Password=postgres"));
     //(options => options.UseNpgsql(configurations.Items["config-amorphie-tag-db"].Value, b => b.MigrationsAssembly("amorphie.tag")));
 
 var app = builder.Build();

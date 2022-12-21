@@ -2,17 +2,31 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "init mocks",
+            "label": "update-database",
+            "dependsOn": "init-mocks",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "ef",
+                "database",
+                "update",
+                "--project", "${workspaceFolder}/amorphie.tag.data/amorphie.tag.data.csproj"
+            ],
+            "problemMatcher": "$tsc"
+        },
+        {
+            "label": "init-mocks",
             "type": "shell",
             "command": "docker run --name amorphie-tag-mocks -d -v ${workspaceFolder}/tests/mocks/mocks.json:/data  -p 3000:3000 mockoon/cli:latest -d data -p 3000"
         },
         {
-            "label": "stop mocks",
+            "label": "stop-mocks",
             "type": "shell",
             "command": "docker rm -f amorphie-tag-mocks"
         },
         {
             "label": "build-amorphie-tag",
+            "dependsOn": "update",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -63,7 +77,8 @@
         {
             "appId": "amorphie-tag-execute",
             "label": "daprd-down-amorphie-tag-execute",
-            "type": "daprd-down"
+            "type": "daprd-down",
+            "dependsOn" :"stop-mocks"
         }
     ]
 }

@@ -8,23 +8,32 @@ https://dotnet.microsoft.com/en-us/download/dotnet/7.0
 ###  Install Dapr
 https://docs.dapr.io/getting-started/install-dapr-cli/
 
-### Install Postgres
-
+**Warning**
+Init dapr in slim mode
 ```
-docker run -e POSTGRES_PASSWORD=example -d postgres
+dapr init --slim
 ```
-### Set configurations
 
-With Redis CLI save below configruration items.
-> MSET config-amorphie-tag-db "Host=localhost:5432;Database=tags;Username=postgres;Password=example||1" 
+## Project
 
-### Mockoon 
+Prepare dapr
+```
+dapr init --slim
+```
 
-Install Mockoon and load mocks https://github.com/amorphie/tag/blob/main/tests/mocks/mocks.json
+Prepare development enviroment
+```
+docker-compose up -d
+```
 
-## Amorphie.tag.data
+Then just press F5
 
-EF Core based persistancy module. Also includes common poco models.
+
+
+
+
+
+## OBSLOTE 
 
 To build database run;
 

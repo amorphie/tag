@@ -2,7 +2,7 @@ version: "3.9"
 services:
 
   redis:
-    container_name: redis_container
+    container_name: bbt-redis
     image: redis:latest
     restart: always
     ports:
