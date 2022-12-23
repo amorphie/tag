@@ -1,0 +1,23 @@
+[
+  {
+    "_id": "cf8cf55e-8773-4da2-8bf0-71efbb646339",
+    "colId": "dce8eb86-650d-43af-80b9-afbdd1bc4c85",
+    "containerId": "",
+    "name": "get",
+    "url": "http://localhost:41010/v1.0/invoke/amorphie-tag/method/domain",
+    "method": "GET",
+    "sortNum": 20000,
+    "created": "2022-12-23T14:13:27.825Z",
+    "modified": "2022-12-23T14:13:45.463Z",
+    "headers": [],
+    "params": [],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      }
+    ]
+  }
+]
