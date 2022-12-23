@@ -27,29 +27,40 @@ public static class DomainModule
 
     public async static Task<IResult> getAllDomains(
         [FromServices] TagDBContext context,
-        [FromServices] DaprClient client
+        [FromServices] DaprClient client,
+        HttpContext httpContext
         )
     {
+
+        var cacheData = await client.GetStateAsync<GetDomainResponse[]>("amorphie-cache", "GetAllDomains");
+        if (cacheData != null)
+        {
+            httpContext.Response.Headers.Add("X-Cache", "Hit");
+            return Results.Ok(cacheData);
+        }
+
+
         var domains = context!.Domains!
             .Include(t => t.Entities)
             .ToList();
 
 
-        //var clientx = new DaprClientBuilder().Build();
-
-        //var result = await client.CheckHealthAsync();
-        await client.SaveStateAsync("amorphie-cache", "ugur","karatas2");
-
-
         if (domains.Count() > 0)
         {
-            return Results.Ok(domains.Select(domain =>
+
+            var response = domains.Select(domain =>
               new GetDomainResponse(
                 domain.Name,
                 domain.Description,
                 domain.Entities.Select(i => new GetDomainEntityResponse(i.Name, i.Description)).ToArray()
-                )
-            ).ToArray());
+            )).ToArray();
+
+            var metadata = new Dictionary<string, string> { { "ttlInSeconds", "15" } };
+            await client.SaveStateAsync("amorphie-cache", "GetAllDomains", response, metadata: metadata);
+
+            httpContext.Response.Headers.Add("X-Cache", "Miss");
+
+            return Results.Ok(response);
         }
         else
             return Results.NoContent();
@@ -59,7 +70,7 @@ public static class DomainModule
         [FromRoute(Name = "domain-name")] string domainName,
         [FromRoute(Name = "entity-name")] string tagName,
         [FromServices] TagDBContext context
-       
+
     )
     {
         var entity = context!.Entites!
