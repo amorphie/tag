@@ -36,6 +36,20 @@ app.MapGet("/tag/{tag-name}/execute", ExecuteTag)
 
 
 
+app.MapGet("/tag/{tag-name}/ugur", ()=>{})
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Ugurun methodu";
+    return operation;
+})
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status500InternalServerError)
+.Produces(StatusCodes.Status510NotExtended)
+.Produces(StatusCodes.Status400BadRequest)
+.Produces(StatusCodes.Status204NoContent);
+
+
+
 app.MapGet("/domain/{domain-name}/entity/{entity-name}/Execute", ExecuteEntity)
 .WithOpenApi(operation =>
 {
@@ -110,7 +124,7 @@ async Task<IResult> ExecuteTag(
 
     if (cachedResponse is not null)
     {
-        httpContext.Response.Headers.Add("X-Content-Source", "Cache");
+        httpContext.Response.Headers.Add("X-Cache", "Hit");
         return Results.Ok(cachedResponse);
     }
     else
@@ -122,7 +136,7 @@ async Task<IResult> ExecuteTag(
         var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
         await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
 
-        httpContext.Response.Headers.Add("X-Content-Source", "Original");
+        httpContext.Response.Headers.Add("X-Cache", "Miss");
 
 
         app.Logger.LogInformation($"ExecuteTag is responded with {response}");

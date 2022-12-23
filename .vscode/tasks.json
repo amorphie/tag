@@ -2,7 +2,32 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "install-ef",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "tool",
+                "install",
+                "dotnet-ef",
+                "-g"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "update-ef",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "tool",
+                "update",
+                "dotnet-ef",
+                "-g"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "update-database",
+            "dependsOn": "update-ef",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -11,7 +36,7 @@
                 "update",
                 "--project", "${workspaceFolder}/amorphie.tag.data/amorphie.tag.data.csproj"
             ],
-            "problemMatcher": "$tsc",
+            "problemMatcher": [],
             "runOptions": {
                 "runOn": "folderOpen"
             }
