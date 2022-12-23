@@ -8,6 +8,13 @@ https://dotnet.microsoft.com/en-us/download/dotnet/7.0
 ###  Install Dapr
 https://docs.dapr.io/getting-started/install-dapr-cli/
 
+### Test Tool
+https://mockoon.com
+
+### Automated Test 
+
+Postman Collections
+
 > **Warning**
 > Init dapr in slim mode. If any dapr component is running on docker, delete them.
 
