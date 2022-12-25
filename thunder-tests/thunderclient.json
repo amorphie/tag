@@ -19,5 +19,25 @@
         "value": "200"
       }
     ]
+  },
+  {
+    "_id": "7f31dd6a-2ad1-4605-a62a-20779ceacdcb",
+    "colId": "dce8eb86-650d-43af-80b9-afbdd1bc4c85",
+    "containerId": "",
+    "name": "execute",
+    "url": "http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/retail-customer/execute?reference=23342234",
+    "method": "GET",
+    "sortNum": 30000,
+    "created": "2022-12-24T12:18:16.390Z",
+    "modified": "2022-12-24T12:18:26.255Z",
+    "headers": [],
+    "params": [
+      {
+        "name": "reference",
+        "value": "23342234",
+        "isPath": false
+      }
+    ],
+    "tests": []
   }
 ]

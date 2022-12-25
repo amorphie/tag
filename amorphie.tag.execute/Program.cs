@@ -2,7 +2,7 @@ var client = new DaprClientBuilder().Build();
 
 var builder = WebApplication.CreateBuilder(args);
 
-var STATE_STORE = "tag-execute-cache";
+var STATE_STORE = "amorphie-cache";
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
@@ -26,20 +26,6 @@ app.MapGet("/tag/{tag-name}/execute", ExecuteTag)
 .WithOpenApi(operation =>
 {
     operation.Summary = "Executes given tag with using query parameters.";
-    return operation;
-})
-.Produces(StatusCodes.Status200OK)
-.Produces(StatusCodes.Status500InternalServerError)
-.Produces(StatusCodes.Status510NotExtended)
-.Produces(StatusCodes.Status400BadRequest)
-.Produces(StatusCodes.Status204NoContent);
-
-
-
-app.MapGet("/tag/{tag-name}/ugur", ()=>{})
-.WithOpenApi(operation =>
-{
-    operation.Summary = "Ugurun methodu";
     return operation;
 })
 .Produces(StatusCodes.Status200OK)

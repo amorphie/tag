@@ -53,16 +53,14 @@ services:
     restart: unless-stopped
     networks:
       - bbt-development
-
-  placement:
-    container_name: bbt-dapr
-    image: "daprio/dapr"
-    command: ["./placement", "--port", "50006"]
+      
+  zipkin:
+    container_name: bbt-zipkin
+    image: "openzipkin/zipkin"
     ports:
-      - "50006:50006"
+      - "9411:9411"
     networks:
       - bbt-development
-
 networks:
   bbt-development:
     external: true
@@ -72,3 +70,4 @@ volumes:
   redisinsight:
   postgres:
   pgadmin:
+  dapr:
