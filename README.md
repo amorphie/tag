@@ -1,11 +1,20 @@
 # Amorphie.tag
 
+Simple tag management service for developers.
+
+Some features are;
+* Tag definition repository with tag grouping functionality (Yes, tagging the tags :))
+* Tags can have enrichment url to enrich tagged entity item. 
+* Tags can generate views for tagged entity item.
+* Simple project wide repository for domain and entity records.
+
+
 ## Prerequisites
 
 ### Install Dotnet 7.0
 https://dotnet.microsoft.com/en-us/download/dotnet/7.0
 
-###  Install Dapr
+### Install Dapr
 https://docs.dapr.io/getting-started/install-dapr-cli/
 
 > **Warning**
@@ -24,7 +33,7 @@ To start docker pod just run the **(Mock) Start Mock Services from Docker** task
 
 ### Automated Test
 
-Project is focused to API testing for validating the functionalty.
+Project is focused to API testing for validating the functionality.
 
 Project uses https://www.thunderclient.com (vscode add-on) as a testing tool.
 
@@ -32,15 +41,15 @@ All test collections are stored in (thunder-tests)[https://github.com/amorphie/t
 
 
 > **Warning**
-> You have make reqqired configuration to use shared test collection in Thunder Client. 
+> Make required configuration to use shared test collection in Thunder Client. 
 > https://github.com/rangav/thunder-client-support#team
 
 
-### Setup Enviroment (Task)
+### Setup Environment (Task)
 
-A existing task make your development enviroment ready.
+A existing task make your development environment ready.
 
-Project includes [docker compose file](https://github.com/amorphie/tag/blob/main/docker-compose.yml) in root folder. The *Setup Enviroment* task just executes it.
+Project includes [docker compose file](https://github.com/amorphie/tag/blob/main/docker-compose.yml) in root folder. The *Setup Environment* task just executes it.
 
 ```
 docker-compose up -d
@@ -53,8 +62,8 @@ The compose file is installs
 * PG Admin for Posgres management
 * Dapr placement server
 
-Redis Insight : http://localhost:5501
-PGAdmin : http://localhost:5502
+Redis Insight: http://localhost:5501
+PGAdmin: http://localhost:5502
 
 ## Project
 
