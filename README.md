@@ -61,6 +61,7 @@ The compose file is installs
 * Postgres *(user:posgres, password:posgres)*
 * PG Admin for Posgres management
 * Dapr placement server
+* Prometheus as a metric server
 
 Redis Insight: http://localhost:5501
 PGAdmin: http://localhost:5502

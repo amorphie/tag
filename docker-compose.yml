@@ -61,6 +61,17 @@ services:
       - "9411:9411"
     networks:
       - bbt-development
+  prometheus:
+    container_name: bbt-prometheus
+    image: "prom/prometheus"
+    command:
+      - "--config.file=/etc/prometheus.yml"
+    volumes:
+      - ./prometheus/:/etc
+    ports:
+      - "9090:9090"
+    networks:
+      - bbt-development
 networks:
   bbt-development:
     external: true
