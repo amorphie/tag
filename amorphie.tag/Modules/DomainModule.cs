@@ -23,6 +23,13 @@ public static class DomainModule
         })
         .Produces<GetEntityResponse[]>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
+
+        app.MapPost("/domain", saveDomain).WithTopic("pubsub", "SaveDomain").WithOpenApi(operation =>
+        {
+            operation.Summary = "Saves or updates requested domain.";
+            return operation;
+        }).
+        Produces<GetDomainResponse>(StatusCodes.Status200OK);
     }
 
     public async static Task<IResult> getAllDomains(
@@ -64,6 +71,35 @@ public static class DomainModule
         }
         else
             return Results.NoContent();
+    }
+
+    static IResult saveDomain([FromServices] TagDBContext context, [FromBody] SaveDomainRequest request)
+    {
+        var existingRecord = context?.Domains?.FirstOrDefault(d => d.Name == request.Name);
+        if (existingRecord == null)
+        {
+            context!.Domains!.Add(new Domain { Name = request.Name, Description = request.Description });
+            context.SaveChanges();
+            return Results.Created($"/domain/{request.Name}", existingRecord);
+        }
+        else
+        {
+            var hasChanges = false;
+            if (request.Description != null && request.Description != existingRecord.Description)
+            {
+                existingRecord.Description = request.Description;
+                hasChanges = true;
+            }
+            if (hasChanges)
+            {
+                context!.SaveChanges();
+                return Results.Ok();
+            }
+            else
+            {
+                return Results.Problem("Not Modified.", null, 304);
+            }
+        }
     }
 
     public static IResult getEntity(
