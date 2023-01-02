@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "install-ef",
+            "label": "(EF) Install Entity Framework Cli",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -10,11 +10,10 @@
                 "install",
                 "dotnet-ef",
                 "-g"
-            ],
-            "problemMatcher": []
+            ]
         },
         {
-            "label": "update-ef",
+            "label": "(EF) Updata Entity Framework Cli",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -22,11 +21,10 @@
                 "update",
                 "dotnet-ef",
                 "-g"
-            ],
-            "problemMatcher": []
+            ]
         },
         {
-            "label": "update-database",
+            "label": "(EF) Apply Project Database Migrations",
             "dependsOn": "update-ef",
             "command": "dotnet",
             "type": "process",
@@ -36,24 +34,27 @@
                 "update",
                 "--project", "${workspaceFolder}/amorphie.tag.data/amorphie.tag.data.csproj"
             ],
-            "problemMatcher": [],
             "runOptions": {
                 "runOn": "folderOpen"
             }
         },
         {
-            "label": "init-mocks",
+            "label": "Setup Enviroment",
             "type": "shell",
-            "command": "docker run --name amorphie-tag-mocks -d -v ${workspaceFolder}/tests/mocks/mocks.json:/data  -p 3000:3000 mockoon/cli:latest -d data -p 3000"
+            "command": "docker-compose up -d"
         },
         {
-            "label": "stop-mocks",
+            "label": "(Mock) Start Mock Services from Docker",
+            "type": "shell",
+            "command": "docker run --restart=always --name amorphie-tag-mocks -d -v ${workspaceFolder}/mocks.json:/data  -p 3000:3000 mockoon/cli:latest -d data -p 3000"
+        },
+        {
+            "label": "(Mock) Remove Mock Services from Docker",
             "type": "shell",
             "command": "docker rm -f amorphie-tag-mocks"
         },
         {
             "label": "build-amorphie-tag",
-            "dependsOn": "init-mocks",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -82,9 +83,12 @@
             "httpPort": 41010,
             "grpcPort": 41011,
             "label": "dapr-debug-amorphie-tag",
-            "type": "dapr",
+            "type": "daprd",
             "dependsOn": "build-amorphie-tag",
-            "componentsPath": "amorphie.tag/Components"
+            "componentsPath": "dapr/components",
+            "config": "dapr/config.yaml",
+            "metricsPort": 41012
+         
         },
         {
             "appId": "amorphie-tag-execute",
@@ -92,9 +96,12 @@
             "httpPort": 41020,
             "grpcPort": 41021,
             "label": "dapr-debug-amorphie-tag-execute",
-            "type": "dapr",
+            "type": "daprd",
             "dependsOn": "build-amorphie-tag-execute",
-            "componentsPath": "amorphie.tag.execute/Components"
+            "componentsPath": "dapr/components",
+            "config": "dapr/config.yaml",
+            "metricsPort": 41022
+            
         },
         {
             "appId": "amorphie-tag",
@@ -104,8 +111,7 @@
         {
             "appId": "amorphie-tag-execute",
             "label": "daprd-down-amorphie-tag-execute",
-            "type": "daprd-down",
-            "dependsOn" :"stop-mocks"
+            "type": "daprd-down"
         }
     ]
 }
