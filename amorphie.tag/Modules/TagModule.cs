@@ -112,8 +112,7 @@ public static class TagModule
 
         var tag = context!.Tags!
             .Include(st => st.Tags)
-            .Where(t => t.Name == tagName)
-            .FirstOrDefault();
+            .FirstOrDefault(t => t.Name == tagName);
 
         if (tag == null)
             return Results.NotFound();
@@ -183,8 +182,7 @@ public static class TagModule
     {
         var tag = context!.Tags!
             .Include(t => t.Tags)
-            .Where(t => t.Name == tagName)
-            .FirstOrDefault();
+            .FirstOrDefault(t => t.Name == tagName);
 
         if (tag == null)
             return Results.NotFound("Tag is not found");
@@ -211,8 +209,7 @@ public static class TagModule
     {
         var tag = context!.Tags!
             .Include(t => t.Tags)
-            .Where(t => t.Name == tagName)
-            .FirstOrDefault();
+            .FirstOrDefault(t => t.Name == tagName);
 
         if (tag == null)
             return Results.NotFound("Tag is not found");

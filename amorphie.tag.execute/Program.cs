@@ -36,6 +36,19 @@ app.MapGet("/tag/{tag-name}/execute", ExecuteTag)
 
 
 
+
+app.MapGet("/tag/{tag-name}/ugur", () => { })
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Ugurun methodu";
+    return operation;
+})
+.Produces(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status500InternalServerError)
+.Produces(StatusCodes.Status510NotExtended)
+.Produces(StatusCodes.Status400BadRequest)
+.Produces(StatusCodes.Status204NoContent);
+
 app.MapGet("/domain/{domain-name}/entity/{entity-name}/Execute", ExecuteEntity)
 .WithOpenApi(operation =>
 {
@@ -72,6 +85,7 @@ async Task<IResult> ExecuteTag(
     try
     {
         tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
+
     }
     catch (Dapr.Client.InvocationException ex)
     {
@@ -94,9 +108,8 @@ async Task<IResult> ExecuteTag(
         return Results.BadRequest("This tag does not have URL");
     }
 
-    var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
+    var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=', }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
     var urlToConsume = tag.Url;
-
     foreach (var p in parameters)
     {
         if (!request.Query.ContainsKey(p.TrimStart('@')))
