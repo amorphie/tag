@@ -55,7 +55,7 @@ Project includes [docker compose file](https://github.com/amorphie/tag/blob/main
 1. Create a new external network
 
 ```
-docker create network "bbt-network"
+docker network create "bbt-network"
 ```
 
 2. Run the code below and let the magic happen
