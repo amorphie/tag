@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,9 +8,22 @@ namespace amorphie.tag.data;
 
 class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
 {
+    private readonly IConfiguration _configuration;
+    public TagDbContextFactory(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+    public TagDbContextFactory()
+    {
+
+    }
+
     public TagDBContext CreateDbContext(string[] args)
     {
         var builder = new DbContextOptionsBuilder<TagDBContext>();
+        var test = _configuration["STATE_STORE"];
+        System.Console.WriteLine("Test: " + test);
+
 
         var connStr = "Host=localhost:5432;Database=tags;Username=postgres;Password=postgres";
         builder.UseNpgsql(connStr);
@@ -45,12 +59,12 @@ public class TagDBContext : DbContext
 
         modelBuilder.Entity<Tag>().HasData(new { Name = "retail-loan" });
         modelBuilder.Entity<Tag>().HasData(new { Name = "idm" });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3000/cb.customers?reference=@reference", Ttl = 5 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "corporate-customer", Url = "http://localhost:3000/cb.customers?reference=@reference", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner", Url = "http://localhost:3000/cb.partner/@reference", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner-staff", Url = "http://localhost:3000/cb.partner/@partner/staff/@reference", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-staff", Url = "http://localhost:3000/cb.staff/@reference", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-bank-turkey", Url = "http://localhost:3000/cb.bankInfo", Ttl = 10 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 5 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "corporate-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 10 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner", Url = "http://localhost:3001/cb.partner/@reference", Ttl = 10 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner-staff", Url = "http://localhost:3001/cb.partner/@partner/staff/@reference", Ttl = 10 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-staff", Url = "http://localhost:3001/cb.staff/@reference", Ttl = 10 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-bank-turkey", Url = "http://localhost:3001/cb.bankInfo", Ttl = 10 });
 
         modelBuilder.Entity<TagRelation>().HasData(new { TagName = "corporate-customer", OwnerName = "idm" });
         modelBuilder.Entity<TagRelation>().HasData(new { TagName = "retail-customer", OwnerName = "idm" });

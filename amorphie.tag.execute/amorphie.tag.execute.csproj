@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Dapr.Client" Version="1.9.0" />
     <PackageReference Include="Dapr.AspNetCore" Version="1.9.0" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.0.0-pre-230102092516-2351266" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

@@ -1,0 +1,20 @@
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+WORKDIR /app
+
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+WORKDIR /src
+COPY ["./amorphie.tag.execute/amorphie.tag.execute.csproj", "."]
+RUN dotnet restore "./amorphie.tag.execute.csproj"
+COPY . .
+WORKDIR "/src/."
+RUN dotnet build "./amorphie.tag.execute/amorphie.tag.execute.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "./amorphie.tag.execute/amorphie.tag.execute.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+EXPOSE 4102
+ENV ASPNETCORE_URLS=http://+:4102
+ENTRYPOINT ["dotnet", "amorphie.tag.execute.dll"]

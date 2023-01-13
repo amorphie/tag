@@ -1,17 +1,17 @@
 version: "3.9"
 services:
-
   redis:
     container_name: bbt-redis
     image: redis:latest
     restart: always
     ports:
       - '6379:6379'
-    command: redis-server --save 20 1 --loglevel warning
-    volumes: 
-      - redis:/data
+    command: sh -c "/redis.sh redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes"
+    volumes:
+      - "./redis.sh:/redis.sh"
     networks:
       - bbt-development
+
 
   redisinsight:
     container_name: bbt-red-insight
@@ -38,7 +38,14 @@ services:
     restart: unless-stopped
     networks:
       - bbt-development
-
+    
+  placement:
+      image: "daprio/dapr:latest"
+      command: ["./placement", "-port", "50006", "-log-level", "debug", "-components-path", "dapr/Components","appId", "placement"]
+      ports:
+      - "50006:50006"
+      networks:
+      - bbt-development
   pgadmin:
     container_name: bbt-pgadmin
     image: dpage/pgadmin4
@@ -72,6 +79,19 @@ services:
       - "9090:9090"
     networks:
       - bbt-development
+  grafana:
+    container_name: bbt-grafana
+    image: "grafana/grafana"
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - grafana-data:/var/lib/grafana
+   
+    ports:
+      - "3000:3000"
+    networks:
+      - bbt-development
+    depends_on:
+      - prometheus
 networks:
   bbt-development:
     external: true
@@ -82,3 +102,5 @@ volumes:
   postgres:
   pgadmin:
   dapr:
+  grafana-data:
+  prometheus:

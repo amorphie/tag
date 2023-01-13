@@ -13,7 +13,7 @@
             ]
         },
         {
-            "label": "(EF) Updata Entity Framework Cli",
+            "label": "(EF) Update Entity Framework Cli",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -46,7 +46,7 @@
         {
             "label": "(Mock) Start Mock Services from Docker",
             "type": "shell",
-            "command": "docker run --restart=always --name amorphie-tag-mocks -d -v ${workspaceFolder}/mocks.json:/data  -p 3000:3000 mockoon/cli:latest -d data -p 3000"
+            "command": "docker run --restart=always --name amorphie-tag-mocks -d -v ${workspaceFolder}/mocks.json:/data  -p 3001:3001 mockoon/cli:latest -d data -p 3001"
         },
         {
             "label": "(Mock) Remove Mock Services from Docker",
@@ -85,7 +85,7 @@
             "label": "dapr-debug-amorphie-tag",
             "type": "daprd",
             "dependsOn": "build-amorphie-tag",
-            "componentsPath": "dapr/components",
+            "componentsPath": "dapr/Components",
             "config": "dapr/config.yaml",
             "metricsPort": 41012
          
@@ -98,7 +98,7 @@
             "label": "dapr-debug-amorphie-tag-execute",
             "type": "daprd",
             "dependsOn": "build-amorphie-tag-execute",
-            "componentsPath": "dapr/components",
+            "componentsPath": "dapr/Components",
             "config": "dapr/config.yaml",
             "metricsPort": 41022
             

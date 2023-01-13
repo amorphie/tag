@@ -1,4 +1,4 @@
-
+global using Prometheus;
 global using Microsoft.AspNetCore.Mvc;
 global using System.ComponentModel.DataAnnotations;
 global using Dapr.Client;

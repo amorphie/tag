@@ -1,9 +1,12 @@
-var client = new DaprClientBuilder().Build();
+
+
+using var client = new DaprClientBuilder().Build();
 
 var builder = WebApplication.CreateBuilder(args);
 
-var STATE_STORE = "amorphie-cache";
+//var test = await client.GetConfiguration("amorphie-config", new List<string>() { "STATE_STORE" });
 
+var STATE_STORE = builder.Configuration["STATE_STORE"];
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 
@@ -15,14 +18,15 @@ var app = builder.Build();
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
-
+app.UseHttpMetrics();
+app.MapMetrics();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.MapGet("/tag/{tag-name}/execute", ExecuteTag)
+app.MapGet("/tag/{tagName}/execute", ExecuteTag)
 .WithOpenApi(operation =>
 {
     operation.Summary = "Executes given tag with using query parameters.";
@@ -37,7 +41,7 @@ app.MapGet("/tag/{tag-name}/execute", ExecuteTag)
 
 
 
-app.MapGet("/tag/{tag-name}/ugur", () => { })
+app.MapGet("/tag/{tagName}/ugur", () => { })
 .WithOpenApi(operation =>
 {
     operation.Summary = "Ugurun methodu";
@@ -49,7 +53,7 @@ app.MapGet("/tag/{tag-name}/ugur", () => { })
 .Produces(StatusCodes.Status400BadRequest)
 .Produces(StatusCodes.Status204NoContent);
 
-app.MapGet("/domain/{domain-name}/entity/{entity-name}/Execute", ExecuteEntity)
+app.MapGet("/domain/{domainName}/entity/{entityName}/Execute", ExecuteEntity)
 .WithOpenApi(operation =>
 {
     operation.Summary = "Executes given entity with using tag-in query- parameters.";
@@ -73,7 +77,7 @@ catch (Exception ex)
 }
 
 async Task<IResult> ExecuteTag(
-    [FromRoute(Name = "tag-name")] string tagName,
+    [FromRoute(Name = "tagName")] string tagName,
     HttpRequest request,
     HttpContext httpContext
     )
@@ -108,15 +112,15 @@ async Task<IResult> ExecuteTag(
         return Results.BadRequest("This tag does not have URL");
     }
 
-    var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=', }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
+    var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
     var urlToConsume = tag.Url;
-    foreach (var p in parameters)
-    {
-        if (!request.Query.ContainsKey(p.TrimStart('@')))
-            return Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}");
+    // foreach (var p in parameters)
+    // {
+    //     if (!request.Query.ContainsKey(p.TrimStart('@')))
+    //         return Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}");
 
-        urlToConsume = urlToConsume.Replace(p, request.Query[p.TrimStart('@')].ToString());
-    }
+    //     urlToConsume = urlToConsume.Replace(p, request.Query[p].ToString());
+    // }
 
 
     var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, urlToConsume);
@@ -147,9 +151,9 @@ async Task<IResult> ExecuteTag(
 
 
 async Task<IResult> ExecuteEntity(
-    [FromRoute(Name = "domain-name")] string domainName,
-    [FromRoute(Name = "entity-name")] string entityName,
-    [FromQuery(Name = "tag")] string[] tags,
+    [FromRoute(Name = "domainName")] string domainName,
+    [FromRoute(Name = "entityName")] string entityName,
+    [FromQuery(Name = "tag")] string[] tag,
     HttpRequest request,
     HttpContext httpContext
     )

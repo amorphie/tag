@@ -14,7 +14,7 @@ public static class DomainModule
         .Produces<GetDomainResponse[]>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
 
-        app.MapGet("/domain/{domain-name}/Entity/{entity-name}", getEntity)
+        app.MapGet("/domain/{domainName}/Entity/{entityName}", getEntity)
         .WithOpenApi(operation =>
         {
             operation.Summary = "Returns requested entity";
@@ -103,8 +103,8 @@ public static class DomainModule
     }
 
     public static IResult getEntity(
-        [FromRoute(Name = "domain-name")] string domainName,
-        [FromRoute(Name = "entity-name")] string tagName,
+        [FromRoute(Name = "domainName")] string domainName,
+        [FromRoute(Name = "entityName")] string tagName,
         [FromServices] TagDBContext context
 
     )

@@ -15,7 +15,7 @@ public static class TagModule
         .Produces<GetTagResponse[]>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
 
-        app.MapGet("/tag/{tag-name}", getTag)
+        app.MapGet("/tag/{tagName}", getTag)
         .WithOpenApi(operation =>
         {
             operation.Summary = "Returns requested tag.";
@@ -25,7 +25,7 @@ public static class TagModule
         .Produces<GetTagResponse>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
 
-        app.MapPost("/tag/{tag-name}/tags", addTagToTag)
+        app.MapPost("/tag/{tagName}/tags", addTagToTag)
         .WithOpenApi(operation =>
         {
             operation.Summary = "Add tag to tag :)";
@@ -36,7 +36,7 @@ public static class TagModule
         .Produces(StatusCodes.Status304NotModified)
         .Produces(StatusCodes.Status404NotFound);
 
-        app.MapDelete("/tag/{tag-name}/tags/{tag-name-to-delete}", deleteTagFromTag)
+        app.MapDelete("/tag/{tagName}/tags/{tagNameToDelete}", deleteTagFromTag)
         .WithOpenApi(operation =>
         {
             operation.Summary = "Delete tag from tag ";
@@ -58,7 +58,7 @@ public static class TagModule
         })
         .Produces<GetTagResponse>(StatusCodes.Status200OK);
 
-        app.MapDelete("/tag/{tag-name}", deleteTag)
+        app.MapDelete("/tag/{tagName}", deleteTag)
         .WithOpenApi(operation =>
         {
             operation.Summary = "Deletes existing tag.";
@@ -105,7 +105,7 @@ public static class TagModule
     }
 
     static IResult getTag(
-        [FromRoute(Name = "tag-name")] string tagName,
+        [FromRoute(Name = "tagName")] string tagName,
         [FromServices] TagDBContext context
         )
     {
@@ -156,7 +156,7 @@ public static class TagModule
     }
 
     static IResult deleteTag(
-        [FromRoute(Name = "tag-name")] string tagName,
+        [FromRoute(Name = "tagName")] string tagName,
         [FromServices] TagDBContext context)
     {
 
@@ -175,7 +175,7 @@ public static class TagModule
     }
 
     static IResult addTagToTag(
-        [FromRoute(Name = "tag-name")] string tagName,
+        [FromRoute(Name = "tagName")] string tagName,
         [FromBody] string tagNameToAdd,
         [FromServices] TagDBContext context
         )
@@ -187,7 +187,7 @@ public static class TagModule
         if (tag == null)
             return Results.NotFound("Tag is not found");
 
-        var tagToAdd = context!.Tags!.FirstOrDefault(t => t.Name == tagNameToAdd);
+        var tagToAdd = context!.Tags!.FirstOrDefault(t => t.Name != tagNameToAdd);
 
         if (tagToAdd == null)
             return Results.NotFound("Tag to add is not found");
@@ -202,8 +202,8 @@ public static class TagModule
     }
 
     static IResult deleteTagFromTag(
-        [FromRoute(Name = "tag-name")] string tagName,
-        [FromRoute(Name = "tag-name-to-delete")] string tagNameToDelete,
+        [FromRoute(Name = "tagName")] string tagName,
+        [FromRoute(Name = "tagNameToDelete")] string tagNameToDelete,
         [FromServices] TagDBContext context
         )
     {

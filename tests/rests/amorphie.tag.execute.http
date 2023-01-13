@@ -6,3 +6,5 @@ GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/retail-cu
 GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/idm/execute HTTP/1.1
 ###
 GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/domain/idm/entity/user/execute?tag=retail-user&tag=loan-partner-staff&tag=burgan-staff&reference=32689 HTTP/1.1
+###
+GET http://localhost:4102/domain/idm/entity/user/Execute?tag=burgan-staff HTTP/1.1
