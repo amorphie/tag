@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using amorphie.tag.data;
@@ -11,9 +12,11 @@ using amorphie.tag.data;
 namespace amorphie.tag.data.Migrations
 {
     [DbContext(typeof(TagDBContext))]
-    partial class TagDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230113145336_seedupdate4")]
+    partial class seedupdate4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

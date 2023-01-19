@@ -140,7 +140,7 @@ public static class TagModule
         {
             var hasChanges = false;
             // Apply update to only changed fields.
-            if (data.Url != null && data.Url != existingRecord.Url) { existingRecord.Url = data.Url; hasChanges = true; }
+            if (data.Url != null && data.Url != existingRecord.Url) { existingRecord.Url = data.Url; hasChanges = true; existingRecord.LastModifiedDate = DateTime.Now.ToUniversalTime(); }
             if (data.Ttl != null && data.Ttl != existingRecord.Ttl) { existingRecord.Ttl = data.Ttl.Value; hasChanges = true; }
 
             if (hasChanges)
@@ -174,6 +174,7 @@ public static class TagModule
         }
     }
 
+    //Tag'e tag relation'ı eklemek için kullanılır. Method ismi,parametre isimleri ve açıklaması değiştirilebilir?
     static IResult addTagToTag(
         [FromRoute(Name = "tagName")] string tagName,
         [FromBody] string tagNameToAdd,

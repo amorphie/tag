@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace amorphie.tag.data;
 
@@ -21,8 +22,8 @@ class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
     public TagDBContext CreateDbContext(string[] args)
     {
         var builder = new DbContextOptionsBuilder<TagDBContext>();
-        var test = _configuration["STATE_STORE"];
-        System.Console.WriteLine("Test: " + test);
+        // var test = _configuration["STATE_STORE"];
+        // System.Console.WriteLine("Test: " + test);
 
 
         var connStr = "Host=localhost:5432;Database=tags;Username=postgres;Password=postgres";
@@ -37,7 +38,7 @@ public class TagDBContext : DbContext
     public DbSet<TagRelation>? TagRelations { get; set; }
     public DbSet<View>? Views { get; set; }
     public DbSet<Domain>? Domains { get; set; }
-    public DbSet<Entity>? Entites { get; set; }
+    public DbSet<Entity>? Entities { get; set; }
     public DbSet<EntityData>? EntityData { get; set; }
     public DbSet<EntityDataSource>? EntityDataSource { get; set; }
 
@@ -59,7 +60,7 @@ public class TagDBContext : DbContext
 
         modelBuilder.Entity<Tag>().HasData(new { Name = "retail-loan" });
         modelBuilder.Entity<Tag>().HasData(new { Name = "idm" });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 5 });
+        modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 5, CreatedDate = System.DateTime.Now.ToUniversalTime() });
         modelBuilder.Entity<Tag>().HasData(new { Name = "corporate-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 10 });
         modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner", Url = "http://localhost:3001/cb.partner/@reference", Ttl = 10 });
         modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner-staff", Url = "http://localhost:3001/cb.partner/@partner/staff/@reference", Ttl = 10 });
@@ -108,7 +109,9 @@ public class Tag
     public string Name { get; set; } = string.Empty;
     public string? Url { get; set; }
     public int? Ttl { get; set; }
-
+    public DateTime? CreatedDate { get; set; }
+    [JsonIgnore]
+    public DateTime? LastModifiedDate { get; set; }
     [InverseProperty("Owner")]
     public List<TagRelation> Tags { get; set; } = new List<TagRelation>();
     public List<View> Views { get; set; } = new List<View>();
@@ -163,6 +166,9 @@ public class Entity
     [Key]
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public DateTime? CreatedDate { get; set; }
+    [JsonIgnore]
+    public DateTime? LastModifiedDate { get; set; }
 
     [ForeignKey("Domain")]
     public string DomainName { get; set; } = string.Empty;
@@ -177,6 +183,10 @@ public class EntityData
     public Guid Id { get; set; }
 
     public Entity? Entity { get; set; }
+    public String EntityName { get; set; } = string.Empty;
+    public DateTime? CreatedDate { get; set; }
+    [JsonIgnore]
+    public DateTime? LastModifiedDate { get; set; }
     public string Field { get; set; } = string.Empty;
     public int? Ttl { get; set; }
     public List<EntityDataSource> Sources = new List<EntityDataSource>();
@@ -190,6 +200,7 @@ public class EntityDataSource
     public EntityData? EntityData { get; set; }
 
     public int Order { get; set; }
+    public string TagName { get; set; } = string.Empty;
     public Tag? Tag { get; set; }
     public string DataPath { get; set; } = string.Empty;
 }

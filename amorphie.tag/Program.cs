@@ -41,6 +41,7 @@ app.Logger.LogInformation("Registering Routes");
 
 app.MapDomainEndpoints();
 app.MapTagEndpoints();
+app.MapEntityEndpoints();
 app.UseHttpMetrics();
 app.MapMetrics();
 

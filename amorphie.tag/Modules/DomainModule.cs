@@ -24,7 +24,7 @@ public static class DomainModule
         .Produces<GetEntityResponse[]>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status204NoContent);
 
-        app.MapPost("/domain", saveDomain).WithTopic("pubsub", "SaveDomain").WithOpenApi(operation =>
+        app.MapPost("/addDomain", saveDomain).WithTopic("pubsub", "SaveDomain").WithOpenApi(operation =>
         {
             operation.Summary = "Saves or updates requested domain.";
             return operation;
@@ -109,7 +109,7 @@ public static class DomainModule
 
     )
     {
-        var entity = context!.Entites!
+        var entity = context!.Entities!
             .Include(e => e.Data)
             .ThenInclude(d => d.Sources)
             .ThenInclude(s => s.Tag)
