@@ -59,7 +59,7 @@ public static class DomainModule
               new GetDomainResponse(
                 domain.Name,
                 domain.Description,
-                domain.Entities.Select(i => new GetDomainEntityResponse(i.Name, i.Description)).ToArray()
+                domain.Entities.Select(i => new GetDomainEntityResponse(i.Name, i.Description!)).ToArray()
             )).ToArray();
 
             var metadata = new Dictionary<string, string> { { "ttlInSeconds", "15" } };
@@ -78,7 +78,7 @@ public static class DomainModule
         var existingRecord = context?.Domains?.FirstOrDefault(d => d.Name == request.Name);
         if (existingRecord == null)
         {
-            context!.Domains!.Add(new Domain { Name = request.Name, Description = request.Description });
+            context!.Domains!.Add(new Domain { Name = request.Name, Description = request.Description! });
             context.SaveChanges();
             return Results.Created($"/domain/{request.Name}", existingRecord);
         }
@@ -122,7 +122,7 @@ public static class DomainModule
             return Results.Ok(
                 new GetEntityResponse(
                     entity.Name,
-                    entity.Description,
+                    entity.Description!,
                     entity.Data.Select(d => new GetEntityDataResponse(d.Field, d.Ttl,
                         d.Sources.Select(s => new GetEntityDataSourcesResponse(s.Order, s.Tag!.Name, s.DataPath)).ToArray()
                     )).ToArray()

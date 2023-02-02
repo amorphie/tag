@@ -37,3 +37,7 @@ Content-Type: application/json
 ###
 DELETE http://localhost:41010/v1.0/invoke/amorphie-tag/method/tag/retail-customer/tags/idm HTTP/1.1
 Content-Type: application/json
+
+
+###Entity GetAllEntityData Verilen Entity'e ait EntityDataSource'ları getirir.
+GET  http://localhost:41010/v1.0/invoke/amorphie-tag/method/getAllEntityData/saveEntityThunder HTTP/1.1

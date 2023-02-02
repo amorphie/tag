@@ -1,4 +1,5 @@
 
+
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
 
@@ -42,8 +43,7 @@ app.Logger.LogInformation("Registering Routes");
 app.MapDomainEndpoints();
 app.MapTagEndpoints();
 app.MapEntityEndpoints();
-app.UseHttpMetrics();
-app.MapMetrics();
+
 
 try
 {

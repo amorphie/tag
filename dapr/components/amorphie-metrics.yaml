@@ -1,5 +1,5 @@
 apiVersion: dapr.io/v1alpha1
-kind: Configuration
+kind: component
 metadata:
   name: tracing
   namespace: amorphie-metrics

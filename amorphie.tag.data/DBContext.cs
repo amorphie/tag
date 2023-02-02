@@ -10,14 +10,15 @@ namespace amorphie.tag.data;
 class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
 {
     private readonly IConfiguration _configuration;
-    public TagDbContextFactory(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
     public TagDbContextFactory()
     {
 
     }
+    public TagDbContextFactory(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
 
     public TagDBContext CreateDbContext(string[] args)
     {
@@ -165,7 +166,7 @@ public class Entity
 {
     [Key]
     public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; } = string.Empty;
     public DateTime? CreatedDate { get; set; }
     [JsonIgnore]
     public DateTime? LastModifiedDate { get; set; }
@@ -205,3 +206,32 @@ public class EntityDataSource
     public string DataPath { get; set; } = string.Empty;
 }
 
+public class RenderRequestDefinition
+{
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [JsonPropertyNameAttribute("name")]
+    public string? Name { get; set; }
+
+    [JsonPropertyNameAttribute("render-id")]
+    public Guid RenderID { get; set; }
+
+    [JsonPropertyNameAttribute("render-data")]
+    public dynamic? RenderData { get; set; }
+
+    [JsonPropertyNameAttribute("render-data-for-log")]
+    public dynamic? RenderDataForLog { get; set; }
+    [JsonPropertyNameAttribute("semantic-version")]
+    public string? SemVer { get; set; }
+    [JsonPropertyNameAttribute("process-name")]
+    public string? ProcessName { get; set; }
+
+    [JsonPropertyNameAttribute("item-id")]
+    public string? ItemId { get; set; }
+
+    [JsonPropertyNameAttribute("action")]
+    public string? Action { get; set; }
+    [JsonPropertyNameAttribute("identity")]
+    public string? Identity { get; set; }
+    [JsonPropertyNameAttribute("customer")]
+    public string? Customer { get; set; }
+}

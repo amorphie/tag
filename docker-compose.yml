@@ -6,7 +6,7 @@ services:
     restart: always
     ports:
       - '6379:6379'
-    command: sh -c "/redis.sh redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes"
+    command: sh -c "/redis.sh redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes --daemonize yes"
     volumes:
       - "./redis.sh:/redis.sh"
     networks:
@@ -41,7 +41,7 @@ services:
     
   placement:
       image: "daprio/dapr:latest"
-      command: ["./placement", "-port", "50006", "-log-level", "debug", "-components-path", "dapr/Components","appId", "placement"]
+      command: ["./placement", "-port", "50006", "log-level", "debug", "--log-as-json"]
       ports:
       - "50006:50006"
       networks:

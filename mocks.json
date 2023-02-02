@@ -143,6 +143,68 @@
       "responseMode": null
     },
     {
+      "uuid": "98318249-2f9d-4e40-9f9a-7818af305d0e",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "cb.template",
+      "responses": [
+        {
+          "uuid": "527dc6f8-6175-4474-b55e-75d0d627a974",
+          "body": "{\n  \n<!DOCTYPE html>\n<html>\n<head>\n<title>test-html</title>\n</head>\n<body>\n\n<h1>\"test-html\"</h1>\n<p>This is a paragraph.</p>\n\n</body>\n</html>\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "templateName",
+              "value": "",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "68f75b54-b79c-4bc2-bda2-c0918cf51612",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "cb.template",
+      "responses": [
+        {
+          "uuid": "056591a1-9e84-4a31-af08-b9d8f2241b5d",
+          "body": "\n  \"template\" : \"{{ queryParam 'template' }}\",\n  <!DOCTYPE html>\r\n<html>\r\n<head>\r\n<title>Page Title</title>\r\n</head>\r\n<body>\r\n\r\n<h1>\"{{ faker 'name.firstName' }}\"</h1>\r\n<p>This is a paragraph.</p>\r\n\r\n</body>\r\n</html>",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "FILE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
       "uuid": "695d8c21-acbb-4683-94df-37c671e0ccec",
       "documentation": "Generate random body (JSON, text, CSV, etc) with templating",
       "method": "get",

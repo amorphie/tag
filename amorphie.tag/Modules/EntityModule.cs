@@ -188,7 +188,7 @@ public static class EntityModule
             return Results.Ok(
                 new GetEntityResponse(
                     entity.Name,
-                    entity.Description,
+                    entity.Description!,
                     entity.Data.Select(d => new GetEntityDataResponse(d.Field, d.Ttl,
                         d.Sources.Select(s => new GetEntityDataSourcesResponse(s.Order, s.Tag!.Name, s.DataPath)).ToArray()
                     )).ToArray()
