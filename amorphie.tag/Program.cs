@@ -15,7 +15,6 @@ builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 builder.Configuration.AddEnvironmentVariables();
 
 Console.WriteLine("Environment: " + builder.Environment.EnvironmentName);

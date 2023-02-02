@@ -1,12 +1,4 @@
 
-
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
-using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.Html;
-using Microsoft.Extensions.Primitives;
-using Newtonsoft.Json;
-
 using var client = new DaprClientBuilder().Build();
 
 var builder = WebApplication.CreateBuilder(args);
