@@ -18,14 +18,14 @@ builder.Services.AddSwaggerGen();
 builder.Configuration.AddEnvironmentVariables();
 
 Console.WriteLine("Environment: " + builder.Environment.EnvironmentName);
-Console.WriteLine("Test: " + builder.Configuration["STATE_STORE"]);
+Console.WriteLine("State Store: " + builder.Configuration["STATE_STORE"]);
+
 
 builder.Services.AddDbContext<TagDBContext>
     (options => options.UseNpgsql(builder.Configuration["PostgreDB"], b => b.MigrationsAssembly("amorphie.tag")));
 
 
 var app = builder.Build();
-
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();

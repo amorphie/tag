@@ -19,8 +19,6 @@ var app = builder.Build();
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
-app.UseHttpMetrics();
-app.MapMetrics();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
