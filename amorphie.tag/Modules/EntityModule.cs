@@ -108,7 +108,7 @@ public static class EntityModule
 
     #region saveEntityWithEntityDataAndEntitySource
     /// <summary> saveEntity Entity yoksa oluşturma, entity mevcut ve description değişmişse güncellemek için kullanılır. </summary>
-    async static Task<IResult> saveEntityWithData([FromServices] TagDBContext context, [FromBody] SaveEntityRequest request)
+    async static Task<IResult> saveEntityWithData([FromServices] TagDBContext context, [FromBody] Test request)
     {
         // Requestten gelen Entity name'e göre Tabloda aynı Entity name ve domaine ait kayıt var mı kontrol edilir.
         // var existingRecord = context?.Entities?.FirstOrDefault(d => d.Name == request.Name && d.DomainName == request.DomainName);
@@ -116,7 +116,7 @@ public static class EntityModule
         .ThenInclude(x => x.Sources)
         .Where(x => x.Name == request.Name && x.DomainName == request.DomainName).FirstOrDefault();
         // Eğer kayıt yoksa yeni kayıt oluşturulur. Kayıtla birlikte Data Response model ile Data ve DataSources kayıtları da oluşturulur.
-        if (addedData == null)
+        if (addedData == null && request.Data != null)
         {
             context!.Entities!.Add(new Entity
             {
@@ -128,7 +128,7 @@ public static class EntityModule
                 {
                     Field = x.Field,
                     Ttl = x.Ttl,
-                    Id = x.Id,
+                    Id = Guid.NewGuid(),
                     EntityName = x.EntityName,
                     CreatedDate = x.CreatedDate,
                     Sources = x!.Source!.Select(y => new EntityDataSource
@@ -138,6 +138,18 @@ public static class EntityModule
                         DataPath = y.DataPath
                     }).ToList()
                 }).ToList()
+            });
+            context.SaveChanges();
+            return Results.Ok();
+        }
+        if (addedData == null && request.Data == null)
+        {
+            context!.Entities!.Add(new Entity
+            {
+                Name = request.Name,
+                Description = request.Description,
+                DomainName = request.DomainName,
+                CreatedDate = DateTime.Now.ToUniversalTime(),
             });
             context.SaveChanges();
             return Results.Ok();
@@ -265,7 +277,7 @@ public static class EntityModule
                 Field = request.Field,
                 Ttl = request.Ttl,
                 CreatedDate = DateTime.Now.ToUniversalTime(),
-                Sources = request.Source.Select(s => new EntityDataSource
+                Sources = request!.Source!.Select(s => new EntityDataSource
                 {
                     Order = s.Order,
                     TagName = s.TagName,
@@ -275,23 +287,6 @@ public static class EntityModule
             context.SaveChanges();
             return Results.Created($"/entity/{request.EntityName}/{request.Field}", entityData);
         }
-        // if (updatedData != null && updatedData.Id == request.Id)
-        // {
-        //     updatedData.Field = request.Field;
-        //     updatedData.Ttl = request.Ttl;
-        //     updatedData.EntityName = request.EntityName;
-        //     updatedData.LastModifiedDate = DateTime.Now.ToUniversalTime();
-        //     updatedData.Sources = request.Source.Select(s => new EntityDataSource
-        //     {
-        //         Order = s.Order,
-        //         TagName = s.TagName,
-        //         DataPath = s.DataPath
-        //     }).ToList();
-        //     context!.EntityData!.Update(updatedData);
-        //     context.SaveChanges();
-        //     return Results.Ok("Updated");
-        // }
-
 
         //Sorgu sonucu kayıt varsa 409 Conflict döndürülür.
         else

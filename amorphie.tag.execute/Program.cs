@@ -1,9 +1,18 @@
 
+using SecretExtensions;
+
 using var client = new DaprClientBuilder().Build();
 
 var builder = WebApplication.CreateBuilder(args);
+// var secret = await client.GetSecretAsync("amorphie-secretstore", "amorphie-secretstore");
+// builder.Configuration.AddInMemoryCollection(secret);
+// var postgreSql = builder.Configuration["PostgreSql"];
+await builder.Configuration.AddVaultSecrets("amorphie-secretstore", "amorphie-secretstore");
+var postgreSql = builder.Configuration["PostgreSql"];
+
 
 //var test = await client.GetConfiguration("amorphie-config", new List<string>() { "STATE_STORE" });
+
 
 var STATE_STORE = builder.Configuration["STATE_STORE"];
 builder.Logging.ClearProviders();
@@ -12,7 +21,7 @@ builder.Logging.AddJsonConsole();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TagDBContext>
-    (options => options.UseNpgsql(builder.Configuration["PostgreDB"], b => b.MigrationsAssembly("amorphie.tag")));
+    (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
 
 var app = builder.Build();
 

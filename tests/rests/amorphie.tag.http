@@ -41,3 +41,6 @@ Content-Type: application/json
 
 ###Entity GetAllEntityData Verilen Entity'e ait EntityDataSource'ları getirir.
 GET  http://localhost:41010/v1.0/invoke/amorphie-tag/method/getAllEntityData/saveEntityThunder HTTP/1.1
+
+###
+GET http://localhost:41010/v1.0/secrets/amorphie-secretstore/amorphie-secretstore HTTP/1.1

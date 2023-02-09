@@ -1,7 +1,7 @@
-
-
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
+await builder.Configuration.AddVaultSecrets("amorphie-secretstore", "amorphie-secretstore");
+var postgreSql = builder.Configuration["PostgreSql"];
 
 //var client = new DaprClientBuilder().Build();
 #pragma warning disable 618
@@ -19,10 +19,11 @@ builder.Configuration.AddEnvironmentVariables();
 
 Console.WriteLine("Environment: " + builder.Environment.EnvironmentName);
 Console.WriteLine("State Store: " + builder.Configuration["STATE_STORE"]);
+Console.WriteLine("Vault PostgreSql: " + postgreSql);
 
 
 builder.Services.AddDbContext<TagDBContext>
-    (options => options.UseNpgsql(builder.Configuration["PostgreDB"], b => b.MigrationsAssembly("amorphie.tag")));
+    (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
 
 
 var app = builder.Build();

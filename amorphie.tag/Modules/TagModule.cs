@@ -146,7 +146,7 @@ public static class TagModule
             if (hasChanges)
             {
                 context!.SaveChanges();
-                return Results.Ok();
+                return Results.Ok($"Updated {existingRecord.Name}");
             }
             else
             {
@@ -164,13 +164,13 @@ public static class TagModule
 
         if (existingRecord == null)
         {
-            return Results.NotFound();
+            return Results.NotFound($"Tag is not found {tagName}");
         }
         else
         {
             context!.Remove(existingRecord);
             context.SaveChanges();
-            return Results.Ok();
+            return Results.Ok($"Deleted {existingRecord.Name}");
         }
     }
 

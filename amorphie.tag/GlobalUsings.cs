@@ -6,3 +6,4 @@ global using amorphie.tag.data;
 global using Microsoft.Extensions.Configuration;
 global using System;
 global using Microsoft.EntityFrameworkCore;
+global using SecretExtensions;
