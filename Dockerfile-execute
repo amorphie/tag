@@ -1,6 +1,10 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
 
+
+RUN adduser -u 5679 --disabled-password --gecos "" amorphie-executeuser && chown -R amorphie-executeuser:amorphie-executeuser /app
+USER amorphie-executeuser
+
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["./amorphie.tag.execute/amorphie.tag.execute.csproj", "."]
