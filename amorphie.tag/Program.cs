@@ -25,11 +25,10 @@ app.UseRouting();
 app.MapSubscribeHandler();
 
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.Logger.LogInformation("Registering Routes");
 
