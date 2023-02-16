@@ -18,8 +18,7 @@ builder.Services.AddDbContext<TagDBContext>
 //(options => options.UseNpgsql(configurations.Items["config-amorphie-tag-db"].Value, b => b.MigrationsAssembly("amorphie.tag")));
 
 var app = builder.Build();
-var db = app.Services.GetRequiredService<TagDBContext>();
-db.Database.Migrate();
+
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
