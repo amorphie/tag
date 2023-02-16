@@ -18,7 +18,7 @@ RUN dotnet publish "./amorphie.tag/amorphie.tag.csproj" -c Release -o /app/publi
 
 FROM base AS final
 WORKDIR /app
-COPY ["../amorphie.tag.data/Migrations", "."]
+COPY ["../amorphie.tag.data/Migrations", "./Migrations"]
 COPY --from=publish /app/publish .
 EXPOSE 5000
 ENV ASPNETCORE_URLS=http://+:5000
