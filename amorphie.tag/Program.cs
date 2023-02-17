@@ -23,7 +23,7 @@ Console.WriteLine("Vault PostgreSql: " + postgreSql);
 
 
 builder.Services.AddDbContext<TagDBContext>
-    (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
+    (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag.data")));
 
 
 var app = builder.Build();
