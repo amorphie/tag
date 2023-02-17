@@ -12,8 +12,8 @@ using amorphie.tag.data;
 namespace amorphie.tag.data.Migrations
 {
     [DbContext(typeof(TagDBContext))]
-    [Migration("20221122081256_seedup2")]
-    partial class seedup2
+    [Migration("20230217130713_Migration1")]
+    partial class Migration1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,19 +51,24 @@ namespace amorphie.tag.data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("DomainName")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Name");
 
                     b.HasIndex("DomainName");
 
-                    b.ToTable("Entites");
+                    b.ToTable("Entities");
 
                     b.HasData(
                         new
@@ -86,12 +91,19 @@ namespace amorphie.tag.data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("EntityName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Field")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("Ttl")
                         .HasColumnType("integer");
@@ -136,6 +148,7 @@ namespace amorphie.tag.data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TagName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("EntityDataId", "Order");
@@ -149,56 +162,56 @@ namespace amorphie.tag.data.Migrations
                         {
                             EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 1,
-                            DataPath = "$body.firstname",
+                            DataPath = "$.firstname",
                             TagName = "burgan-staff"
                         },
                         new
                         {
                             EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 2,
-                            DataPath = "$body.partner-staff.fullname",
+                            DataPath = "$.partner-staff.fullname",
                             TagName = "loan-partner-staff"
                         },
                         new
                         {
                             EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 3,
-                            DataPath = "$body.firstname",
+                            DataPath = "$.firstname",
                             TagName = "retail-customer"
                         },
                         new
                         {
                             EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 1,
-                            DataPath = "$body.lastname",
+                            DataPath = "$.lastname",
                             TagName = "burgan-staff"
                         },
                         new
                         {
                             EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 2,
-                            DataPath = "$body.partner-staff.fullname",
+                            DataPath = "$.partner-staff.fullname",
                             TagName = "loan-partner-staff"
                         },
                         new
                         {
                             EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 3,
-                            DataPath = "$body.lastname",
+                            DataPath = "$.lastname",
                             TagName = "retail-customer"
                         },
                         new
                         {
                             EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 1,
-                            DataPath = "$body.firstname",
+                            DataPath = "$.firstname",
                             TagName = "burgan-staff"
                         },
                         new
                         {
                             EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 2,
-                            DataPath = "$body.partner-staff.fullname",
+                            DataPath = "$.partner-staff.fullname",
                             TagName = "loan-partner-staff"
                         });
                 });
@@ -207,6 +220,12 @@ namespace amorphie.tag.data.Migrations
                 {
                     b.Property<string>("Name")
                         .HasColumnType("text");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("Ttl")
                         .HasColumnType("integer");
@@ -230,38 +249,39 @@ namespace amorphie.tag.data.Migrations
                         new
                         {
                             Name = "retail-customer",
+                            CreatedDate = new DateTime(2023, 2, 17, 13, 7, 12, 985, DateTimeKind.Utc).AddTicks(6456),
                             Ttl = 5,
-                            Url = "http://localhost:3000/cb.customers?reference=@reference"
+                            Url = "http://localhost:3001/cb.customers?reference=@reference"
                         },
                         new
                         {
                             Name = "corporate-customer",
                             Ttl = 10,
-                            Url = "http://localhost:3000/cb.customers?reference=@reference"
+                            Url = "http://localhost:3001/cb.customers?reference=@reference"
                         },
                         new
                         {
                             Name = "loan-partner",
                             Ttl = 10,
-                            Url = "http://localhost:3000/cb.partner/@reference"
+                            Url = "http://localhost:3001/cb.partner/@reference"
                         },
                         new
                         {
                             Name = "loan-partner-staff",
                             Ttl = 10,
-                            Url = "http://localhost:3000/cb.partner/@partner/staff/@reference"
+                            Url = "http://localhost:3001/cb.partner/@partner/staff/@reference"
                         },
                         new
                         {
                             Name = "burgan-staff",
                             Ttl = 10,
-                            Url = "http://localhost:3000/cb.staff/@reference"
+                            Url = "http://localhost:3001/cb.staff/@reference"
                         },
                         new
                         {
                             Name = "burgan-bank-turkey",
                             Ttl = 10,
-                            Url = "http://localhost:3000/cb.bankInfo"
+                            Url = "http://localhost:3001/cb.bankInfo"
                         });
                 });
 
@@ -367,7 +387,9 @@ namespace amorphie.tag.data.Migrations
                 {
                     b.HasOne("amorphie.tag.data.Entity", "Entity")
                         .WithMany("Data")
-                        .HasForeignKey("EntityName");
+                        .HasForeignKey("EntityName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Entity");
                 });
@@ -382,7 +404,9 @@ namespace amorphie.tag.data.Migrations
 
                     b.HasOne("amorphie.tag.data.Tag", "Tag")
                         .WithMany()
-                        .HasForeignKey("TagName");
+                        .HasForeignKey("TagName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("EntityData");
 

@@ -52,7 +52,6 @@ namespace amorphie.tag.data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("DomainName")
@@ -146,6 +145,7 @@ namespace amorphie.tag.data.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TagName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("EntityDataId", "Order");
@@ -246,7 +246,7 @@ namespace amorphie.tag.data.Migrations
                         new
                         {
                             Name = "retail-customer",
-                            CreatedDate = new DateTime(2023, 1, 13, 14, 53, 36, 110, DateTimeKind.Utc).AddTicks(7688),
+                            CreatedDate = new DateTime(2023, 2, 17, 13, 7, 12, 985, DateTimeKind.Utc).AddTicks(6456),
                             Ttl = 5,
                             Url = "http://localhost:3001/cb.customers?reference=@reference"
                         },
@@ -401,7 +401,9 @@ namespace amorphie.tag.data.Migrations
 
                     b.HasOne("amorphie.tag.data.Tag", "Tag")
                         .WithMany()
-                        .HasForeignKey("TagName");
+                        .HasForeignKey("TagName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("EntityData");
 

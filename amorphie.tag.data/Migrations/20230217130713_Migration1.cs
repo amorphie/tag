@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace amorphie.tag.data.Migrations
 {
     /// <inheritdoc />
-    public partial class reset : Migration
+    public partial class Migration1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,7 +31,9 @@ namespace amorphie.tag.data.Migrations
                 {
                     Name = table.Column<string>(type: "text", nullable: false),
                     Url = table.Column<string>(type: "text", nullable: true),
-                    Ttl = table.Column<int>(type: "integer", nullable: true)
+                    Ttl = table.Column<int>(type: "integer", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -39,18 +41,20 @@ namespace amorphie.tag.data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Entites",
+                name: "Entities",
                 columns: table => new
                 {
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     DomainName = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Entites", x => x.Name);
+                    table.PrimaryKey("PK_Entities", x => x.Name);
                     table.ForeignKey(
-                        name: "FK_Entites_Domains_DomainName",
+                        name: "FK_Entities_Domains_DomainName",
                         column: x => x.DomainName,
                         principalTable: "Domains",
                         principalColumn: "Name",
@@ -105,7 +109,9 @@ namespace amorphie.tag.data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    EntityName = table.Column<string>(type: "text", nullable: true),
+                    EntityName = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Field = table.Column<string>(type: "text", nullable: false),
                     Ttl = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -113,10 +119,11 @@ namespace amorphie.tag.data.Migrations
                 {
                     table.PrimaryKey("PK_EntityData", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_EntityData_Entites_EntityName",
+                        name: "FK_EntityData_Entities_EntityName",
                         column: x => x.EntityName,
-                        principalTable: "Entites",
-                        principalColumn: "Name");
+                        principalTable: "Entities",
+                        principalColumn: "Name",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -125,7 +132,7 @@ namespace amorphie.tag.data.Migrations
                 {
                     EntityDataId = table.Column<Guid>(type: "uuid", nullable: false),
                     Order = table.Column<int>(type: "integer", nullable: false),
-                    TagName = table.Column<string>(type: "text", nullable: true),
+                    TagName = table.Column<string>(type: "text", nullable: false),
                     DataPath = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -141,7 +148,8 @@ namespace amorphie.tag.data.Migrations
                         name: "FK_EntityDataSource_Tags_TagName",
                         column: x => x.TagName,
                         principalTable: "Tags",
-                        principalColumn: "Name");
+                        principalColumn: "Name",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -151,26 +159,26 @@ namespace amorphie.tag.data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Tags",
-                columns: new[] { "Name", "Ttl", "Url" },
+                columns: new[] { "Name", "CreatedDate", "LastModifiedDate", "Ttl", "Url" },
                 values: new object[,]
                 {
-                    { "burgan-bank-turkey", 10, "http://localhost:3000/cb.bankInfo" },
-                    { "burgan-staff", 10, "http://localhost:3000/cb.staff/@param1" },
-                    { "corporate-customer", 10, "http://localhost:3000/cb.customers/@param1" },
-                    { "idm", null, null },
-                    { "loan-partner", 10, "http://localhost:3000/cb.partner/@partner" },
-                    { "loan-partner-staff", 10, "http://localhost:3000/cb.partner/@partner/staff/@user" },
-                    { "retail-customer", 5, "http://localhost:3000/cb.customers/@param1" },
-                    { "retail-loan", null, null }
+                    { "burgan-bank-turkey", null, null, 10, "http://localhost:3001/cb.bankInfo" },
+                    { "burgan-staff", null, null, 10, "http://localhost:3001/cb.staff/@reference" },
+                    { "corporate-customer", null, null, 10, "http://localhost:3001/cb.customers?reference=@reference" },
+                    { "idm", null, null, null, null },
+                    { "loan-partner", null, null, 10, "http://localhost:3001/cb.partner/@reference" },
+                    { "loan-partner-staff", null, null, 10, "http://localhost:3001/cb.partner/@partner/staff/@reference" },
+                    { "retail-customer", new DateTime(2023, 2, 17, 13, 7, 12, 985, DateTimeKind.Utc).AddTicks(6456), null, 5, "http://localhost:3001/cb.customers?reference=@reference" },
+                    { "retail-loan", null, null, null, null }
                 });
 
             migrationBuilder.InsertData(
-                table: "Entites",
-                columns: new[] { "Name", "Description", "DomainName" },
+                table: "Entities",
+                columns: new[] { "Name", "CreatedDate", "Description", "DomainName", "LastModifiedDate" },
                 values: new object[,]
                 {
-                    { "scope", "Scope repository", "idm" },
-                    { "user", "User repository", "idm" }
+                    { "scope", null, "Scope repository", "idm", null },
+                    { "user", null, "User repository", "idm", null }
                 });
 
             migrationBuilder.InsertData(
@@ -199,12 +207,12 @@ namespace amorphie.tag.data.Migrations
 
             migrationBuilder.InsertData(
                 table: "EntityData",
-                columns: new[] { "Id", "EntityName", "Field", "Ttl" },
+                columns: new[] { "Id", "CreatedDate", "EntityName", "Field", "LastModifiedDate", "Ttl" },
                 values: new object[,]
                 {
-                    { new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), "user", "firstname", null },
-                    { new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), "user", "lastname", null },
-                    { new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), "scope", "title", null }
+                    { new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), null, "user", "firstname", null, null },
+                    { new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), null, "user", "lastname", null, null },
+                    { new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), null, "scope", "title", null, null }
                 });
 
             migrationBuilder.InsertData(
@@ -212,19 +220,19 @@ namespace amorphie.tag.data.Migrations
                 columns: new[] { "EntityDataId", "Order", "DataPath", "TagName" },
                 values: new object[,]
                 {
-                    { new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), 1, "$body.name", "burgan-staff" },
-                    { new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), 2, "$body.staf-name", "loan-partner-staff" },
-                    { new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), 3, "$body.firstname", "retail-customer" },
-                    { new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), 1, "$body.last", "burgan-staff" },
-                    { new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), 2, "$body.staf-last-name", "loan-partner-staff" },
-                    { new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), 3, "$body.lastname", "retail-customer" },
-                    { new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), 1, "$body.fullname", "burgan-staff" },
-                    { new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), 2, "$body.fullname", "loan-partner-staff" }
+                    { new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), 1, "$.firstname", "burgan-staff" },
+                    { new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), 2, "$.partner-staff.fullname", "loan-partner-staff" },
+                    { new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), 3, "$.firstname", "retail-customer" },
+                    { new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), 1, "$.lastname", "burgan-staff" },
+                    { new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), 2, "$.partner-staff.fullname", "loan-partner-staff" },
+                    { new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), 3, "$.lastname", "retail-customer" },
+                    { new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), 1, "$.firstname", "burgan-staff" },
+                    { new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), 2, "$.partner-staff.fullname", "loan-partner-staff" }
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Entites_DomainName",
-                table: "Entites",
+                name: "IX_Entities_DomainName",
+                table: "Entities",
                 column: "DomainName");
 
             migrationBuilder.CreateIndex(
@@ -262,7 +270,7 @@ namespace amorphie.tag.data.Migrations
                 name: "Tags");
 
             migrationBuilder.DropTable(
-                name: "Entites");
+                name: "Entities");
 
             migrationBuilder.DropTable(
                 name: "Domains");
