@@ -19,4 +19,4 @@ RUN dotnet publish "./amorphie.tag.migrate/amorphie.tag.migrate.csproj" -c Relea
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "amorphie.tag.migration.dll"]
+ENTRYPOINT ["dotnet", "amorphie.tag.migrate.dll"]
