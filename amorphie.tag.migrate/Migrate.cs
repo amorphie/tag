@@ -18,7 +18,6 @@ namespace amorphie.tag.migrate
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await _databaseContext.Database.MigrateAsync();
-            _host.StopApplication();
         }
     }
 }
