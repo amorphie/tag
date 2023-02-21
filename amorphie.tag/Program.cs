@@ -26,22 +26,24 @@ Console.WriteLine("Vault PostgreSql: " + postgreSql);
 
 
 builder.Services.AddDbContext<TagDBContext>
-    (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
-builder.Services.AddMvc()
-                .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+    (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag.data")));
+
+
 var app = builder.Build();
-// var db = app.Services.GetRequiredService<TagDBContext>();
-// db.Database.Migrate();
+
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<TagDBContext>();
+db.Database.Migrate();
+
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
 
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app.Logger.LogInformation("Registering Routes");
 

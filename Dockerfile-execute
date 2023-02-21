@@ -1,6 +1,10 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
 
+
+RUN adduser -u 5679 --disabled-password --gecos "" amorphie-executeuser && chown -R amorphie-executeuser:amorphie-executeuser /app
+USER amorphie-executeuser
+
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["./amorphie.tag.execute/amorphie.tag.execute.csproj", "."]
@@ -15,6 +19,6 @@ RUN dotnet publish "./amorphie.tag.execute/amorphie.tag.execute.csproj" -c Relea
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-EXPOSE 4102
-ENV ASPNETCORE_URLS=http://+:4102
+EXPOSE 5000
+ENV ASPNETCORE_URLS=http://+:5000
 ENTRYPOINT ["dotnet", "amorphie.tag.execute.dll"]

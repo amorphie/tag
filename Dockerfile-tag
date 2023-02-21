@@ -1,12 +1,16 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
 
+RUN adduser -u 5679 --disabled-password --gecos "" amorphie-taguser && chown -R amorphie-taguser:amorphie-taguser /app
+USER amorphie-taguser
+
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["./amorphie.tag/amorphie.tag.csproj", "."]
 RUN dotnet restore "./amorphie.tag.csproj"
 COPY . .
 WORKDIR "/src/."
+
 RUN dotnet build "./amorphie.tag/amorphie.tag.csproj" -c Release -o /app/build
 
 FROM build AS publish
@@ -14,7 +18,8 @@ RUN dotnet publish "./amorphie.tag/amorphie.tag.csproj" -c Release -o /app/publi
 
 FROM base AS final
 WORKDIR /app
+COPY ["../amorphie.tag.data/Migrations", "./Migrations"]
 COPY --from=publish /app/publish .
-EXPOSE 4101
-ENV ASPNETCORE_URLS=http://+:4101
+EXPOSE 5000
+ENV ASPNETCORE_URLS=http://+:5000
 ENTRYPOINT ["dotnet", "amorphie.tag.dll"]
