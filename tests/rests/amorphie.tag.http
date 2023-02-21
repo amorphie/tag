@@ -44,3 +44,9 @@ GET  http://localhost:41010/v1.0/invoke/amorphie-tag/method/getAllEntityData/sav
 
 ###
 GET http://localhost:41010/v1.0/secrets/amorphie-secretstore/amorphie-secretstore HTTP/1.1
+
+###
+GET http://localhost:41010/v1.0/healthz HTTP/1.1
+###
+GET http://localhost:41020/v1.0/healthz HTTP/1.1
+

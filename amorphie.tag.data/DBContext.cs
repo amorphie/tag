@@ -9,6 +9,9 @@ namespace amorphie.tag.data;
 
 class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
 {
+
+    //lazy loading true
+    //lazy loading false, eğer alt bileşenleri getirmek istiyorsak include kullanmamız lazım,eager loading
     private readonly IConfiguration _configuration;
     public TagDbContextFactory()
     {
@@ -59,27 +62,27 @@ public class TagDBContext : DbContext
             .HasMany(b => b.Sources)
             .WithOne(o => o.EntityData);
 
-        modelBuilder.Entity<Tag>().HasData(new { Name = "retail-loan" });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "idm" });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 5, CreatedDate = System.DateTime.Now.ToUniversalTime() });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "corporate-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner", Url = "http://localhost:3001/cb.partner/@reference", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner-staff", Url = "http://localhost:3001/cb.partner/@partner/staff/@reference", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-staff", Url = "http://localhost:3001/cb.staff/@reference", Ttl = 10 });
-        modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-bank-turkey", Url = "http://localhost:3001/cb.bankInfo", Ttl = 10 });
+        // modelBuilder.Entity<Tag>().HasData(new { Name = "retail-loan" });
+        // modelBuilder.Entity<Tag>().HasData(new { Name = "idm" });
+        // modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 5, CreatedDate = System.DateTime.Now.ToUniversalTime() });
+        // modelBuilder.Entity<Tag>().HasData(new { Name = "corporate-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 10 });
+        // modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner", Url = "http://localhost:3001/cb.partner/@reference", Ttl = 10 });
+        // modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner-staff", Url = "http://localhost:3001/cb.partner/@partner/staff/@reference", Ttl = 10 });
+        // modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-staff", Url = "http://localhost:3001/cb.staff/@reference", Ttl = 10 });
+        // modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-bank-turkey", Url = "http://localhost:3001/cb.bankInfo", Ttl = 10 });
 
-        modelBuilder.Entity<TagRelation>().HasData(new { TagName = "corporate-customer", OwnerName = "idm" });
-        modelBuilder.Entity<TagRelation>().HasData(new { TagName = "retail-customer", OwnerName = "idm" });
-        modelBuilder.Entity<TagRelation>().HasData(new { TagName = "loan-partner", OwnerName = "idm" });
-        modelBuilder.Entity<TagRelation>().HasData(new { TagName = "loan-partner-staff", OwnerName = "idm" });
-        modelBuilder.Entity<TagRelation>().HasData(new { TagName = "burgan-staff", OwnerName = "idm" });
-        modelBuilder.Entity<TagRelation>().HasData(new { TagName = "burgan-bank-turkey", OwnerName = "idm" });
+        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "corporate-customer", OwnerName = "idm" });
+        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "retail-customer", OwnerName = "idm" });
+        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "loan-partner", OwnerName = "idm" });
+        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "loan-partner-staff", OwnerName = "idm" });
+        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "burgan-staff", OwnerName = "idm" });
+        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "burgan-bank-turkey", OwnerName = "idm" });
 
-        modelBuilder.Entity<View>().HasData(new { TagName = "retail-customer", ViewTemplateName = "retail-customer-mini-html", Type = ViewType.Html });
-        modelBuilder.Entity<View>().HasData(new { TagName = "retail-customer", ViewTemplateName = "retail-customer-flutter", Type = ViewType.Flutter });
+        // modelBuilder.Entity<View>().HasData(new { TagName = "retail-customer", ViewTemplateName = "retail-customer-mini-html", Type = ViewType.Html });
+        // modelBuilder.Entity<View>().HasData(new { TagName = "retail-customer", ViewTemplateName = "retail-customer-flutter", Type = ViewType.Flutter });
 
-        modelBuilder.Entity<TagRelation>().HasData(new { TagName = "retail-customer", OwnerName = "retail-loan" });
-        modelBuilder.Entity<TagRelation>().HasData(new { TagName = "loan-partner", OwnerName = "retail-loan" });
+        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "retail-customer", OwnerName = "retail-loan" });
+        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "loan-partner", OwnerName = "retail-loan" });
 
         modelBuilder.Entity<Domain>().HasData(new { Name = "idm", Description = "Identity Management Platform" });
 
@@ -104,107 +107,103 @@ public class TagDBContext : DbContext
 
 }
 
-public class Tag
-{
-    [Key]
-    public string Name { get; set; } = string.Empty;
-    public string? Url { get; set; }
-    public int? Ttl { get; set; }
-    public DateTime? CreatedDate { get; set; }
-    [JsonIgnore]
-    public DateTime? LastModifiedDate { get; set; }
-    [InverseProperty("Owner")]
-    public List<TagRelation> Tags { get; set; } = new List<TagRelation>();
-    public List<View> Views { get; set; } = new List<View>();
+// public class Tag
+// {
+//     [Key]
+//     public string Name { get; set; } = string.Empty;
+//     public string? Url { get; set; }
+//     public int? Ttl { get; set; }
+//     public DateTime? CreatedDate { get; set; }
+//     [JsonIgnore]
+//     public DateTime? LastModifiedDate { get; set; }
+//     [InverseProperty("Owner")]
+//     public List<TagRelation> TagsRelations { get; set; } = new List<TagRelation>();
+//     public List<View> Views { get; set; } = new List<View>();
 
-}
+// }
 
-[PrimaryKey("OwnerName", "TagName")]
-public class TagRelation
-{
-    [ForeignKey("Owner")]
-    public string OwnerName { get; set; } = string.Empty;
-    public Tag? Owner { get; set; }
+// [PrimaryKey("OwnerName", "TagName")]
+// public class TagRelation
+// {
+//     [ForeignKey("Owner")]
+//     public string OwnerName { get; set; } = string.Empty;
+//     public Tag? Owner { get; set; }
 
-    [ForeignKey("Tag")]
-    public string TagName { get; set; } = string.Empty;
-    public Tag? Tag { get; set; }
-}
+//     [ForeignKey("Tag")]
+//     public string TagName { get; set; } = string.Empty;
+//     public Tag? Tag { get; set; }
+// }
 
-[PrimaryKey("TagName", "ViewTemplateName")]
-public class View
-{
-    [ForeignKey("Tag")]
-    public string TagName { get; set; } = string.Empty;
-    public Tag? Tag { get; set; }
+// [PrimaryKey("TagName", "ViewTemplateName")]
+// public class View
+// {
+//     [ForeignKey("Tag")]
+//     public string TagName { get; set; } = string.Empty;
+//     public Tag? Tag { get; set; }
 
-    public string ViewTemplateName { get; set; } = string.Empty;
-    public ViewType Type { get; set; }
-}
+//     public string ViewTemplateName { get; set; } = string.Empty;
+//     public ViewType Type { get; set; }
+// }
 
-public enum ViewType
-{
-    Html,
-    MobileHtml,
-    Flutter,
-    NativeIOS,
-    NativeAndroid,
-    Json
-}
+// public enum ViewType
+// {
+//     Html,
+//     MobileHtml,
+//     Flutter,
+//     NativeIOS,
+//     NativeAndroid,
+//     Json
+// }
 
-public class Domain
-{
-    [Key]
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
+// public class Domain
+// {
+//     [Key]
+//     public string Name { get; set; } = string.Empty;
+//     public string Description { get; set; } = string.Empty;
+//     public List<Entity> Entities = new List<Entity>();
+// }
 
+// public class Entity
+// {
+//     [Key]
+//     public string Name { get; set; } = string.Empty;
+//     public string? Description { get; set; } = string.Empty;
+//     public DateTime? CreatedDate { get; set; }
+//     [JsonIgnore]
+//     public DateTime? LastModifiedDate { get; set; }
+//     [ForeignKey("Domain")]
+//     public string DomainName { get; set; } = string.Empty;
+//     public Domain? Domain { get; set; }
+//     public List<EntityData> Data = new List<EntityData>();
+// }
 
-    public List<Entity> Entities = new List<Entity>();
-}
+// public class EntityData
+// {
+//     [Key]
+//     public Guid Id { get; set; }
 
-public class Entity
-{
-    [Key]
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; } = string.Empty;
-    public DateTime? CreatedDate { get; set; }
-    [JsonIgnore]
-    public DateTime? LastModifiedDate { get; set; }
+//     public Entity? Entity { get; set; }
+//     public String EntityName { get; set; } = string.Empty;
+//     public DateTime? CreatedDate { get; set; }
+//     [JsonIgnore]
+//     public DateTime? LastModifiedDate { get; set; }
+//     public string Field { get; set; } = string.Empty;
+//     public int? Ttl { get; set; }
+//     public List<EntityDataSource> Sources = new List<EntityDataSource>();
+// }
 
-    [ForeignKey("Domain")]
-    public string DomainName { get; set; } = string.Empty;
-    public Domain? Domain { get; set; }
+// [PrimaryKey("EntityDataId", "Order")]
+// public class EntityDataSource
+// {
+//     [ForeignKey("EntityData")]
+//     public Guid EntityDataId { get; set; }
+//     public EntityData? EntityData { get; set; }
 
-    public List<EntityData> Data = new List<EntityData>();
-}
-
-public class EntityData
-{
-    [Key]
-    public Guid Id { get; set; }
-
-    public Entity? Entity { get; set; }
-    public String EntityName { get; set; } = string.Empty;
-    public DateTime? CreatedDate { get; set; }
-    [JsonIgnore]
-    public DateTime? LastModifiedDate { get; set; }
-    public string Field { get; set; } = string.Empty;
-    public int? Ttl { get; set; }
-    public List<EntityDataSource> Sources = new List<EntityDataSource>();
-}
-
-[PrimaryKey("EntityDataId", "Order")]
-public class EntityDataSource
-{
-    [ForeignKey("EntityData")]
-    public Guid EntityDataId { get; set; }
-    public EntityData? EntityData { get; set; }
-
-    public int Order { get; set; }
-    public string TagName { get; set; } = string.Empty;
-    public Tag? Tag { get; set; }
-    public string DataPath { get; set; } = string.Empty;
-}
+//     public int Order { get; set; }
+//     public string TagName { get; set; } = string.Empty;
+//     public Tag? Tag { get; set; }
+//     public string DataPath { get; set; } = string.Empty;
+// }
 
 public class RenderRequestDefinition
 {

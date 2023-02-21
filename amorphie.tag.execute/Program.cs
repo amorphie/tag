@@ -1,4 +1,5 @@
 
+using Newtonsoft.Json;
 using SecretExtensions;
 
 using var client = new DaprClientBuilder().Build();
@@ -90,11 +91,15 @@ async Task<IResult> ExecuteTag(
 {
     app.Logger.LogInformation("ExecuteTag is calling");
 
-    GetTagResponse? tag;
+    DtoTag tag;
 
     try
     {
-        tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
+        //tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
+        var test = client.CreateInvokeMethodRequest(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
+        var result = client.InvokeMethodWithResponseAsync(test).Result.Content.ReadAsStringAsync().Result;
+        var json = (JObject)JsonConvert.DeserializeObject(result);
+        tag = json["data"].ToObject<DtoTag>();
 
     }
     catch (Dapr.Client.InvocationException ex)
@@ -159,6 +164,7 @@ async Task<IResult> ExecuteEntity(
     [FromRoute(Name = "domainName")] string domainName,
     [FromRoute(Name = "entityName")] string entityName,
     [FromQuery(Name = "tag")] string[] tag,
+    [FromQuery(Name = "reference")] string reference,
     HttpRequest request,
     HttpContext httpContext
     )
@@ -167,12 +173,15 @@ async Task<IResult> ExecuteEntity(
     {
         return Results.BadRequest("Any tag is not suplied. At least one tag must be suplied.");
     }
+    //Query'den tag aldık.
     var queryTags = request.Query["tag"].ToList();
 
     GetEntityResponse? entity;
 
     try
     {
+        //Route'dan gelen domain ve entity bilgisine göre
+        //Entity ve EntityData tablosunda ilgili Entity'e ait kaç tane field varsa birlikte getirdik.
         entity = await client.InvokeMethodAsync<GetEntityResponse>(HttpMethod.Get, "amorphie-tag", $"domain/{domainName}/entity/{entityName}");
     }
     catch (Dapr.Client.InvocationException ex)
@@ -191,7 +200,7 @@ async Task<IResult> ExecuteEntity(
     }
 
     var returnValue = new Dictionary<string, dynamic>();
-
+    //EntityData tablosunda entity' ait fieldlar foreach ile dönülür
     foreach (var field in entity.Data)
     {
         var sourceTags = field.Sources.OrderBy(f => f.Order).ToArray();
@@ -232,11 +241,15 @@ async Task<IResult> TemplateExecuter(
     //Bu template name queryden gelen template bilgisine göre template engineden template oluşturulup response olarak return edilecek. 
     app.Logger.LogInformation("ExecuteTag is calling");
 
-    GetTagResponse? tag;
+    DtoTag? tag;
 
     try
     {
-        tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
+        //tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
+        var test = client.CreateInvokeMethodRequest(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
+        var result = await client.InvokeMethodWithResponseAsync(test).Result.Content.ReadAsStringAsync();
+        var json = (JObject)JsonConvert.DeserializeObject(result);
+        tag = json["data"].ToObject<DtoTag>();
 
     }
     catch (Dapr.Client.InvocationException ex)

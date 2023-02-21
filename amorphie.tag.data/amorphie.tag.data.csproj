@@ -19,4 +19,7 @@
 
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.0" />
   </ItemGroup>
+ <ItemGroup>
+    <ProjectReference Include="..\amorphie.tag.core\amorphie.tag.core.csproj" />
+  </ItemGroup>
 </Project>

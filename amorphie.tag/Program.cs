@@ -1,7 +1,10 @@
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
 await builder.Configuration.AddVaultSecrets("amorphie-secretstore", "amorphie-secretstore");
 var postgreSql = builder.Configuration["PostgreSql"];
+var postgreDb = builder.Configuration["PostgreDB"];
 
 //var client = new DaprClientBuilder().Build();
 #pragma warning disable 618
@@ -24,9 +27,11 @@ Console.WriteLine("Vault PostgreSql: " + postgreSql);
 
 builder.Services.AddDbContext<TagDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
-
-
+builder.Services.AddMvc()
+                .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 var app = builder.Build();
+// var db = app.Services.GetRequiredService<TagDBContext>();
+// db.Database.Migrate();
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
