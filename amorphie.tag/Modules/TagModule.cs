@@ -1,7 +1,9 @@
 using amorphie.core.Base;
+using amorphie.core.Enums;
 using amorphie.core.IBase;
 using Core.Utilities.Results;
 using IResult = Core.Utilities.Results.IResult;
+using Result = amorphie.core.Base.Result;
 
 public static class TagModule
 {
@@ -192,7 +194,7 @@ public static class TagModule
             context!.Tags!.Add(tag);
             context.SaveChanges();
             //return new SuccessDataResult<DtoTag>(ObjectMapper.Mapper.Map<DtoTag>(tag), "Saved");
-            return new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(tag), Result = new Result(Status.Success, "Kaydedildi") };
+            return new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(tag), Result = new amorphie.core.Base.Result(Status.Success, "Kaydedildi") };
         }
         else
         {
@@ -201,7 +203,7 @@ public static class TagModule
             {
                 context!.SaveChanges();
                 //return new SuccessDataResult<DtoTag>(ObjectMapper.Mapper.Map<DtoTag>(existingRecord), "Updated");
-                return new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(existingRecord), Result = new Result(Status.Success, "Update Başarili") };
+                return new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(existingRecord), Result = new amorphie.core.Base.Result(Status.Success, "Update Başarili") };
 
             }
         }

@@ -1,5 +1,6 @@
 using AutoMapper;
 
+
 class TagMapper : Profile
 {
     public TagMapper()

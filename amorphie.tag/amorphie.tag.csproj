@@ -20,5 +20,12 @@
   <ItemGroup>
     <ProjectReference Include="..\amorphie.tag.data\amorphie.tag.data.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+<Reference Include="./bin/Debug/net7.0/amorphie.core.dll" />
+  </ItemGroup>
+    <ItemGroup>
+<Reference Include="./bin/Debug/net7.0/amorphie.core.security.dll" />
+  </ItemGroup>
 
 </Project>

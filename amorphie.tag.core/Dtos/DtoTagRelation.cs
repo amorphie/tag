@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using amorphie.core.Base;
 
-
-public class DtoTagRelation : DtoBase
+public class DtoTagRelation : DtoEntityBaseWithOutId
 {
     [ForeignKey("Owner")]
     public string OwnerName { get; set; } = string.Empty;

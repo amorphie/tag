@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using amorphie.core.Base;
 
-public class DtoSaveTagRequest : DtoBase
+public class DtoSaveTagRequest
 {
     [Key]
     public string Name { get; set; } = string.Empty;

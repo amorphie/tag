@@ -8,6 +8,7 @@ public class ObjectMapper
     var config = new MapperConfiguration(cfg =>
     {
         cfg.AddProfile<TagMapper>();
+
     });
 
     return config.CreateMapper();

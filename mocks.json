@@ -42,7 +42,7 @@
       "responses": [
         {
           "uuid": "ed4a289a-85c0-4c92-8b17-7455760aae72",
-          "body": "{\n  \"reference\" : \"{{ queryParam 'reference' }}\",\n  \"citizenship-number\": \"{{ faker 'datatype.number' min=10000000001 max=90000000001 }}\",\n  \"firstname\": \"{{ faker 'name.firstName' }}\",\n  \"lastname\": \"{{ faker 'name.lastName' }}\"\n}",
+          "body": "{\n  \"reference\" : \"{{ queryParam 'reference' }}\",\n  \"citizenship-number\": \"{{ faker 'datatype.number' min=10000000001 max=90000000001 }}\",\n  \"firstname\": \"{{ faker 'name.firstName' }}\",\n  \"lastname\": \"{{ faker 'name.lastName' }}\",\n  \"adress\":\"{{faker 'address.city'}}\"\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "Returns user info",
@@ -143,13 +143,13 @@
       "responseMode": null
     },
     {
-      "uuid": "98318249-2f9d-4e40-9f9a-7818af305d0e",
+      "uuid": "457f5407-1bb3-4d34-a305-e616eed84024",
       "documentation": "",
       "method": "get",
       "endpoint": "cb.template",
       "responses": [
         {
-          "uuid": "527dc6f8-6175-4474-b55e-75d0d627a974",
+          "uuid": "03fd6dbb-fcf8-4ace-b1b4-f879a13c0614",
           "body": "{\n  \n<!DOCTYPE html>\n<html>\n<head>\n<title>test-html</title>\n</head>\n<body>\n\n<h1>\"test-html\"</h1>\n<p>This is a paragraph.</p>\n\n</body>\n</html>\n}",
           "latency": 0,
           "statusCode": 200,
@@ -168,33 +168,6 @@
               "operator": "equals"
             }
           ],
-          "rulesOperator": "OR",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": true
-        }
-      ],
-      "enabled": true,
-      "responseMode": null
-    },
-    {
-      "uuid": "68f75b54-b79c-4bc2-bda2-c0918cf51612",
-      "documentation": "",
-      "method": "get",
-      "endpoint": "cb.template",
-      "responses": [
-        {
-          "uuid": "056591a1-9e84-4a31-af08-b9d8f2241b5d",
-          "body": "\n  \"template\" : \"{{ queryParam 'template' }}\",\n  <!DOCTYPE html>\r\n<html>\r\n<head>\r\n<title>Page Title</title>\r\n</head>\r\n<body>\r\n\r\n<h1>\"{{ faker 'name.firstName' }}\"</h1>\r\n<p>This is a paragraph.</p>\r\n\r\n</body>\r\n</html>",
-          "latency": 0,
-          "statusCode": 200,
-          "label": "",
-          "headers": [],
-          "bodyType": "FILE",
-          "filePath": "",
-          "databucketID": "",
-          "sendFileAsBody": false,
-          "rules": [],
           "rulesOperator": "OR",
           "disableTemplating": false,
           "fallbackTo404": false,

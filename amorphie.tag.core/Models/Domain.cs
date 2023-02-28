@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using amorphie.core.Base;
 
-public class Domain
+public class Domain : EntityBaseWithOutId
 {
     [Key]
     public string Name { get; set; } = string.Empty;

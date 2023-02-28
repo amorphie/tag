@@ -62,47 +62,363 @@ public class TagDBContext : DbContext
             .HasMany(b => b.Sources)
             .WithOne(o => o.EntityData);
 
-        // modelBuilder.Entity<Tag>().HasData(new { Name = "retail-loan" });
-        // modelBuilder.Entity<Tag>().HasData(new { Name = "idm" });
-        // modelBuilder.Entity<Tag>().HasData(new { Name = "retail-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 5, CreatedDate = System.DateTime.Now.ToUniversalTime() });
-        // modelBuilder.Entity<Tag>().HasData(new { Name = "corporate-customer", Url = "http://localhost:3001/cb.customers?reference=@reference", Ttl = 10 });
-        // modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner", Url = "http://localhost:3001/cb.partner/@reference", Ttl = 10 });
-        // modelBuilder.Entity<Tag>().HasData(new { Name = "loan-partner-staff", Url = "http://localhost:3001/cb.partner/@partner/staff/@reference", Ttl = 10 });
-        // modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-staff", Url = "http://localhost:3001/cb.staff/@reference", Ttl = 10 });
-        // modelBuilder.Entity<Tag>().HasData(new { Name = "burgan-bank-turkey", Url = "http://localhost:3001/cb.bankInfo", Ttl = 10 });
+        modelBuilder.Entity<Tag>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Name = "retail-loan"
+        });
+        modelBuilder.Entity<Tag>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Name = "idm"
+        });
+        modelBuilder.Entity<Tag>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Name = "retail-customer",
+            Url = "http://localhost:3001/cb.customers?reference=@reference",
+            Ttl = 5,
+            CreatedDate = System.DateTime.Now.ToUniversalTime()
+        });
+        modelBuilder.Entity<Tag>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Name = "corporate-customer",
+            Url = "http://localhost:3001/cb.customers?reference=@reference",
+            Ttl = 10
+        });
+        modelBuilder.Entity<Tag>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Name = "loan-partner",
+            Url = "http://localhost:3001/cb.partner/@reference",
+            Ttl = 10
+        });
+        modelBuilder.Entity<Tag>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Name = "loan-partner-staff",
+            Url = "http://localhost:3001/cb.partner/@partner/staff/@reference",
+            Ttl = 10
+        });
+        modelBuilder.Entity<Tag>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Name = "burgan-staff",
+            Url = "http://localhost:3001/cb.staff/@reference",
+            Ttl = 10
+        });
+        modelBuilder.Entity<Tag>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Name = "burgan-bank-turkey",
+            Url = "http://localhost:3001/cb.bankInfo",
+            Ttl = 10
+        });
 
-        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "corporate-customer", OwnerName = "idm" });
-        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "retail-customer", OwnerName = "idm" });
-        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "loan-partner", OwnerName = "idm" });
-        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "loan-partner-staff", OwnerName = "idm" });
-        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "burgan-staff", OwnerName = "idm" });
-        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "burgan-bank-turkey", OwnerName = "idm" });
+        modelBuilder.Entity<TagRelation>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            TagName = "corporate-customer",
+            OwnerName = "idm"
+        });
+        modelBuilder.Entity<TagRelation>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            TagName = "retail-customer",
+            OwnerName = "idm"
+        });
+        modelBuilder.Entity<TagRelation>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            TagName = "loan-partner",
+            OwnerName = "idm"
+        });
+        modelBuilder.Entity<TagRelation>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            TagName = "loan-partner-staff",
+            OwnerName = "idm"
+        });
+        modelBuilder.Entity<TagRelation>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            TagName = "burgan-staff",
+            OwnerName = "idm"
+        });
+        modelBuilder.Entity<TagRelation>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            TagName = "burgan-bank-turkey",
+            OwnerName = "idm"
+        });
 
-        // modelBuilder.Entity<View>().HasData(new { TagName = "retail-customer", ViewTemplateName = "retail-customer-mini-html", Type = ViewType.Html });
-        // modelBuilder.Entity<View>().HasData(new { TagName = "retail-customer", ViewTemplateName = "retail-customer-flutter", Type = ViewType.Flutter });
+        modelBuilder.Entity<View>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            TagName = "retail-customer",
+            ViewTemplateName = "retail-customer-mini-html",
+            Type = Enums.ViewType.Html
+        });
+        modelBuilder.Entity<View>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            TagName = "retail-customer",
+            ViewTemplateName = "retail-customer-flutter",
+            Type = Enums.ViewType.Flutter
+        });
 
-        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "retail-customer", OwnerName = "retail-loan" });
-        // modelBuilder.Entity<TagRelation>().HasData(new { TagName = "loan-partner", OwnerName = "retail-loan" });
+        modelBuilder.Entity<TagRelation>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            TagName = "retail-customer",
+            OwnerName = "retail-loan"
+        });
+        modelBuilder.Entity<TagRelation>().HasData(new
+        {
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            TagName = "loan-partner",
+            OwnerName = "retail-loan"
+        });
 
-        modelBuilder.Entity<Domain>().HasData(new { Name = "idm", Description = "Identity Management Platform" });
+        modelBuilder.Entity<Domain>().HasData(new
+        {
+            Name = "idm",
+            Description = "Identity Management Platform",
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+        });
 
-        modelBuilder.Entity<Entity>().HasData(new { Name = "user", Description = "User repository", DomainName = "idm" });
-        modelBuilder.Entity<Entity>().HasData(new { Name = "scope", Description = "Scope repository", DomainName = "idm" });
+        modelBuilder.Entity<Entity>().HasData(new
+        {
+            Name = "user",
+            Description = "User repository",
+            DomainName = "idm",
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+        });
+        modelBuilder.Entity<Entity>().HasData(new
+        {
+            Name = "scope",
+            Description = "Scope repository",
+            DomainName = "idm",
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+        });
 
-        modelBuilder.Entity<EntityData>().HasData(new { Id = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), EntityName = "user", Field = "firstname" });
-        modelBuilder.Entity<EntityData>().HasData(new { Id = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), EntityName = "user", Field = "lastname" });
-        modelBuilder.Entity<EntityData>().HasData(new { Id = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), EntityName = "scope", Field = "title" });
+        modelBuilder.Entity<EntityData>().HasData(new
+        {
+            Id = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
+            EntityName = "user",
+            Field = "firstname",
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+        });
+        modelBuilder.Entity<EntityData>().HasData(new
+        {
+            Id = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
+            EntityName = "user",
+            Field = "lastname",
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+        });
+        modelBuilder.Entity<EntityData>().HasData(new
+        {
+            Id = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"),
+            EntityName = "scope",
+            Field = "title",
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+        });
 
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), Order = 1, TagName = "burgan-staff", DataPath = "$.firstname" });
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), Order = 2, TagName = "loan-partner-staff", DataPath = "$.partner-staff.fullname" });
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"), Order = 3, TagName = "retail-customer", DataPath = "$.firstname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new
+        {
+            EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Order = 1,
+            TagName = "burgan-staff",
+            DataPath = "$.firstname"
+        });
+        modelBuilder.Entity<EntityDataSource>().HasData(new
+        {
+            EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Order = 2,
+            TagName = "loan-partner-staff",
+            DataPath = "$.partner-staff.fullname"
+        });
+        modelBuilder.Entity<EntityDataSource>().HasData(new
+        {
+            EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Order = 3,
+            TagName = "retail-customer",
+            DataPath = "$.firstname"
+        });
 
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), Order = 1, TagName = "burgan-staff", DataPath = "$.lastname" });
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), Order = 2, TagName = "loan-partner-staff", DataPath = "$.partner-staff.fullname" });
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"), Order = 3, TagName = "retail-customer", DataPath = "$.lastname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new
+        {
+            EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Order = 1,
+            TagName = "burgan-staff",
+            DataPath = "$.lastname"
+        });
+        modelBuilder.Entity<EntityDataSource>().HasData(new
+        {
+            EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Order = 2,
+            TagName = "loan-partner-staff",
+            DataPath = "$.partner-staff.fullname"
+        });
+        modelBuilder.Entity<EntityDataSource>().HasData(new
+        {
+            EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Order = 3,
+            TagName = "retail-customer",
+            DataPath = "$.lastname"
+        });
 
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), Order = 1, TagName = "burgan-staff", DataPath = "$.firstname" });
-        modelBuilder.Entity<EntityDataSource>().HasData(new { EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"), Order = 2, TagName = "loan-partner-staff", DataPath = "$.partner-staff.fullname" });
+        modelBuilder.Entity<EntityDataSource>().HasData(new
+        {
+            EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"),
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Order = 1,
+            TagName = "burgan-staff",
+            DataPath = "$.firstname"
+        });
+        modelBuilder.Entity<EntityDataSource>().HasData(new
+        {
+            EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"),
+            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+            CreatedBy = Guid.NewGuid(),
+            ModifiedAt = DateTime.UtcNow,
+            ModifiedBy = Guid.NewGuid(),
+            ModifiedByBehalfOf = Guid.NewGuid(),
+            Order = 2,
+            TagName = "loan-partner-staff",
+            DataPath = "$.partner-staff.fullname"
+        });
     }
 
 }

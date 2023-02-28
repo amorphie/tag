@@ -1,3 +1,6 @@
+using amorphie.core.Base;
+using amorphie.core.Enums;
+using amorphie.core.IBase;
 public static class EntityModule
 {
 
@@ -80,7 +83,7 @@ public static class EntityModule
                 Name = request.Name,
                 Description = request!.Description!,
                 DomainName = request.DomainName,
-                CreatedDate = DateTime.Now.ToUniversalTime()
+                CreatedAt = DateTime.Now.ToUniversalTime()
             });
             await context!.SaveChangesAsync();
             return Results.Ok();
@@ -90,7 +93,7 @@ public static class EntityModule
         {
             if (await context!.Entities!.Where(x => x.Description != request.Description && x.Name == request.Name && request.Description != null).ExecuteUpdateAsync
             (x => x.SetProperty(y => y.Description, request.Description)
-            .SetProperty(y => y.LastModifiedDate, DateTime.Now.ToUniversalTime())
+            .SetProperty(y => y.ModifiedAt, DateTime.Now.ToUniversalTime())
             ) == 1)
             {
                 await context!.SaveChangesAsync();
@@ -123,14 +126,14 @@ public static class EntityModule
                 Name = request.Name,
                 Description = request.Description,
                 DomainName = request.DomainName,
-                CreatedDate = DateTime.Now.ToUniversalTime(),
+                CreatedAt = DateTime.Now.ToUniversalTime(),
                 Data = request!.Data!.Select(x => new EntityData
                 {
                     Field = x.Field,
                     Ttl = x.Ttl,
                     Id = Guid.NewGuid(),
                     EntityName = x.EntityName,
-                    CreatedDate = x.CreatedDate,
+                    CreatedAt = (DateTime)x.CreatedAt,
                     Sources = x!.Source!.Select(y => new EntityDataSource
                     {
                         Order = y.Order,
@@ -149,7 +152,7 @@ public static class EntityModule
                 Name = request.Name,
                 Description = request.Description,
                 DomainName = request.DomainName,
-                CreatedDate = DateTime.Now.ToUniversalTime(),
+                CreatedAt = DateTime.Now.ToUniversalTime(),
             });
             context.SaveChanges();
             return Results.Ok();
@@ -159,7 +162,7 @@ public static class EntityModule
         {
             if (await context!.Entities!.Where(x => x.Description != request.Description && x.Name == request.Name && request.Description != null).ExecuteUpdateAsync
             (x => x.SetProperty(y => y.Description, request.Description)
-            .SetProperty(y => y.LastModifiedDate, DateTime.Now.ToUniversalTime())
+            .SetProperty(y => y.ModifiedAt, DateTime.Now.ToUniversalTime())
             ) == 1)
             {
                 context.SaveChanges();
@@ -276,7 +279,7 @@ public static class EntityModule
                 EntityName = request.EntityName,
                 Field = request.Field,
                 Ttl = request.Ttl,
-                CreatedDate = DateTime.Now.ToUniversalTime(),
+                CreatedAt = DateTime.Now.ToUniversalTime(),
                 Sources = request!.Source!.Select(s => new EntityDataSource
                 {
                     Order = s.Order,

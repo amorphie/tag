@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using amorphie.core.Base;
 using Microsoft.EntityFrameworkCore;
 
 [PrimaryKey("EntityDataId", "Order")]
-public class EntityDataSource
+public class EntityDataSource : EntityBaseWithOutId
 {
     [ForeignKey("EntityData")]
     public Guid EntityDataId { get; set; }

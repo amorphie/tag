@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using amorphie.core.Base;
 
-public class Tag : EntityBase
+public class Tag : EntityBaseWithOutId
 {
     [Key]
     public string Name { get; set; } = string.Empty;

@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using amorphie.core.Base;
 using Microsoft.EntityFrameworkCore;
 
 [PrimaryKey("OwnerName", "TagName")]
-public class TagRelation : EntityBase
+public class TagRelation : EntityBaseWithOutId
 {
     [ForeignKey("Owner")]
     public string OwnerName { get; set; } = string.Empty;

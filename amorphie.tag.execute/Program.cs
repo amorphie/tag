@@ -1,7 +1,3 @@
-
-using Newtonsoft.Json;
-using SecretExtensions;
-
 using var client = new DaprClientBuilder().Build();
 
 var builder = WebApplication.CreateBuilder(args);

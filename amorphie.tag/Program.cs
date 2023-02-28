@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 
+
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
 await builder.Configuration.AddVaultSecrets("amorphie-secretstore", "amorphie-secretstore");

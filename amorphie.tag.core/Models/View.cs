@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using amorphie.core.Base;
 using Microsoft.EntityFrameworkCore;
 
 [PrimaryKey("TagName", "ViewTemplateName")]
-public class View : EntityBase
+public class View : EntityBaseWithOutId
 {
     [ForeignKey("Tag")]
     public string TagName { get; set; } = string.Empty;

@@ -75,6 +75,7 @@ public static class DomainModule
 
     static IResult saveDomain([FromServices] TagDBContext context, [FromBody] SaveDomainRequest request)
     {
+        //Türkçe Karakter kabul etmiyor. Swagger hatası olabilir? 
         var existingRecord = context?.Domains?.FirstOrDefault(d => d.Name == request.Name);
         if (existingRecord == null)
         {
@@ -104,16 +105,17 @@ public static class DomainModule
 
     public static IResult getEntity(
         [FromRoute(Name = "domainName")] string domainName,
-        [FromRoute(Name = "entityName")] string tagName,
+        [FromRoute(Name = "entityName")] string entityName,
         [FromServices] TagDBContext context
 
     )
     {
+        //Entitye taşı
         var entity = context!.Entities!
             .Include(e => e.Data)
             .ThenInclude(d => d.Sources)
             .ThenInclude(s => s.Tag)
-            .Where(e => e.Name == tagName)
+            .Where(e => e.Name == entityName)
             .FirstOrDefault();
 
 
