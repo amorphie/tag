@@ -1,10 +1,12 @@
+using amorphie.core.security.Extensions;
+
 using var client = new DaprClientBuilder().Build();
 
 var builder = WebApplication.CreateBuilder(args);
 // var secret = await client.GetSecretAsync("amorphie-secretstore", "amorphie-secretstore");
 // builder.Configuration.AddInMemoryCollection(secret);
 // var postgreSql = builder.Configuration["PostgreSql"];
-await builder.Configuration.AddVaultSecrets("amorphie-secretstore", "amorphie-secretstore");
+await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
 var postgreSql = builder.Configuration["PostgreSql"];
 
 
@@ -25,7 +27,7 @@ var app = builder.Build();
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -284,14 +286,19 @@ async Task<IResult> TemplateExecuter(
 
     var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, urlToConsume);
 
-    if (cachedResponse is not null)
-    {
-        httpContext.Response.Headers.Add("X-Cache", "Hit");
-        return Results.Ok(cachedResponse);
-    }
-    else
+    // if (cachedResponse is not null)
+    // {
+    //     httpContext.Response.Headers.Add("X-Cache", "Hit");
+    //     return Results.Ok(cachedResponse);
+    // }
+    // else
     {
         HttpClient httpClient = new();
+        // post http client with body
+
+
+        //12113810636
+
         var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
 
         var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };

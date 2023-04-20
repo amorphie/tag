@@ -1,9 +1,9 @@
 using System.Text.Json.Serialization;
-
+using amorphie.core.security.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
-await builder.Configuration.AddVaultSecrets("amorphie-secretstore", "amorphie-secretstore");
+await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
 var postgreSql = builder.Configuration["PostgreSql"];
 var postgreDb = builder.Configuration["PostgreDB"];
 

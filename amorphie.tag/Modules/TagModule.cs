@@ -1,8 +1,6 @@
 using amorphie.core.Base;
 using amorphie.core.Enums;
 using amorphie.core.IBase;
-using Core.Utilities.Results;
-using IResult = Core.Utilities.Results.IResult;
 using Result = amorphie.core.Base.Result;
 
 public static class TagModule
@@ -76,7 +74,7 @@ public static class TagModule
 
     }
 
-    static IDataResult<List<GetTagResponse>> getAllTags(
+    static IResult getAllTags(
     [FromServices] TagDBContext context,
     [FromQuery] string? tagName,
     [FromQuery][Range(0, 100)] int page = 0,
@@ -105,9 +103,9 @@ public static class TagModule
             result.Add(new GetTagResponse(item.Name, item.Url, item.Ttl, item.TagsRelations.Select(i => i.TagName).ToArray()));
         }
         if (result.Count == 0)
-            return new ErrorDataResult<List<GetTagResponse>>(result, "No record found");
+            return Results.NotFound(new Response { Result = new Result(Status.Error, "Not Found") });
 
-        return new SuccessDataResult<List<GetTagResponse>>(result);
+        return Results.Ok(new Response { Result = new Result(Status.Success, "Tags Listed"), Data = result });
     }
 
     // static IDataResult<GetTagResponse> getTag(
@@ -126,7 +124,7 @@ public static class TagModule
 
     //     return new SuccessDataResult<GetTagResponse>(result, "Tag found");
     // }
-    static IDataResult<DtoTag> getTag(
+    static IResult getTag(
       [FromRoute(Name = "tagName")] string tagName,
       [FromServices] TagDBContext context
       )
@@ -139,8 +137,8 @@ public static class TagModule
         var tagDto = ObjectMapper.Mapper.Map<DtoTag>(tag);
 
         if (tag == null)
-            return new ErrorDataResult<DtoTag>("No Tag found");
-        return new SuccessDataResult<DtoTag>(tagDto);
+            return Results.NotFound(new Response<DtoTag> { Result = new Result(Status.Error, "Tag Not Found") });
+        return Results.Ok(new Response<DtoTag> { Data = tagDto, Result = new Result(Status.Success, "Record Found") });
     }
 
     // static IDataResult<Tag> saveTag(
@@ -178,7 +176,7 @@ public static class TagModule
     //     }
     // }
 
-    static IResponse<DtoTag> saveTag(
+    static IResult saveTag(
         [FromBody] DtoSaveTagRequest data,
         [FromServices] TagDBContext context
         )
@@ -194,23 +192,24 @@ public static class TagModule
             context!.Tags!.Add(tag);
             context.SaveChanges();
             //return new SuccessDataResult<DtoTag>(ObjectMapper.Mapper.Map<DtoTag>(tag), "Saved");
-            return new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(tag), Result = new amorphie.core.Base.Result(Status.Success, "Kaydedildi") };
+            // return new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(tag), Result = new amorphie.core.Base.Result(Status.Success, "Kaydedildi") };
+            return Results.Ok(new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(tag), Result = new Result(Status.Success, "Tag Saved") });
         }
         else
         {
             // Apply update to only changed fields.
-            if (SaveTagUpdate(data, existingRecord).Success)
+            if (SaveTagUpdate(data, existingRecord))
             {
                 context!.SaveChanges();
                 //return new SuccessDataResult<DtoTag>(ObjectMapper.Mapper.Map<DtoTag>(existingRecord), "Updated");
-                return new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(existingRecord), Result = new amorphie.core.Base.Result(Status.Success, "Update Başarili") };
+                return Results.Ok(new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(existingRecord), Result = new Result(Status.Success, "Update Başarili") });
 
             }
         }
-        return new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(existingRecord), Result = new Result(Status.Error, "Değişiklik yok") };
+        return Results.BadRequest(new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(existingRecord), Result = new Result(Status.Error, "Değişiklik yok") });
     }
 
-    static IResponse deleteTag(
+    static IResult deleteTag(
         [FromRoute(Name = "tagName")] string tagName,
         [FromServices] TagDBContext context)
     {
@@ -221,7 +220,9 @@ public static class TagModule
         {
             //return new ErrorDataResult<Tag>(existingRecord!, "No Tag found");
 
-            return new NoDataResponse { Result = new Result(Status.Error, "No Tag found") };
+            // return Results.NotFound( NoDataResponse { Result = new Result(Status.Error, "No Tag found") });
+            return Results.NotFound(new Response { Result = new Result(Status.Error, "No Tag Found") });
+
         }
 
         else
@@ -229,12 +230,12 @@ public static class TagModule
             context!.Remove(existingRecord);
             context.SaveChanges();
             //return new SuccessDataResult<Tag>(existingRecord, "Deleted");
-            return new NoDataResponse { Result = new Result(Status.Success, "Deleted") };
+            return Results.Ok(new Response { Result = new Result(Status.Success, "Tag Deleted"), Data = existingRecord });
         }
     }
 
     //Tag'e tag relation'ı eklemek için kullanılır. Method ismi,parametre isimleri ve açıklaması değiştirilebilir?
-    static IDataResult<DtoTag> addTagToTag(
+    static IResult addTagToTag(
         [FromRoute(Name = "ownerName")] string ownerName,
         [FromBody] string tagNameToAdd,
         [FromServices] TagDBContext context
@@ -246,20 +247,21 @@ public static class TagModule
 
 
         if (tag == null)
-            return new ErrorDataResult<DtoTag>("Tag is not found");
+            return Results.NotFound(new Response<DtoTag> { Result = new Result(Status.Error, "Tag Not Found") });
 
         var tagToAdd = context!.Tags!.FirstOrDefault(t => t.Name == tagNameToAdd);
         if (tagToAdd == null)
-            return new ErrorDataResult<DtoTag>("Tag to add is not found");
+            return Results.NotFound(new Response<DtoTag> { Result = new Result(Status.Error, "Tag To Add Is Not Found") });
 
         if (tag.TagsRelations.Any(t => t.TagName == tagNameToAdd))
-            return new ErrorDataResult<DtoTag>("Not Modified. Tag already assigned.");
+            return Results.BadRequest(new Response<DtoTag> { Result = new Result(Status.Error, "Not Modified Tag Already Assigned") });
         tag.TagsRelations.Add(new TagRelation { TagName = tagNameToAdd, OwnerName = ownerName });
         // var result = tag.TagsRelations.FirstOrDefault(t => t.TagName == tagNameToAdd && t.OwnerName == ownerName);
         context.SaveChanges();
         var result = context!.Tags!.Include(t => t.TagsRelations).FirstOrDefault(t => t.TagsRelations.Any(x => x.TagName == tagNameToAdd));
 
-        return new SuccessDataResult<DtoTag>(ObjectMapper.Mapper.Map<DtoTag>(result)!, "Added");
+        // return new SuccessDataResult<DtoTag>(ObjectMapper.Mapper.Map<DtoTag>(result)!, "Added");
+        return Results.Ok(new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(result), Result = new Result(Status.Success, "Tag To Add Saved") });
     }
 
     static IResult deleteTagFromTag(
@@ -273,23 +275,24 @@ public static class TagModule
             .FirstOrDefault(t => t.Name == tagName);
 
         if (tag == null)
-            return new ErrorResult("Tag is not found");
+            // return new ErrorResult("Tag is not found");
+            return Results.NotFound(new Response { Result = new Result(Status.Error, "Tag is not found") });
 
         var tagToDelete = context!.TagRelations!.FirstOrDefault(t => t.TagName == tagNameToDelete);
 
 
         if (tagToDelete == null)
-            return new ErrorResult("Tag to delete is not found");
+            return Results.NotFound(new Response { Result = new Result(Status.Error, "Tag to delete is not found") });
 
         context.Remove(tagToDelete);
         context.SaveChanges();
-        return new SuccessResult("Deleted");
+        return Results.Ok(new Response { Result = new Result(Status.Success, "Deleted") });
 
     }
 
 
 
-    static IResult SaveTagUpdate(DtoSaveTagRequest data, Tag existingRecord)
+    static bool SaveTagUpdate(DtoSaveTagRequest data, Tag existingRecord)
     {
         var hasChanges = false;
         // Apply update to only changed fields.
@@ -307,11 +310,11 @@ public static class TagModule
 
         if (hasChanges)
         {
-            return new SuccessResult("Updated");
+            return true;
         }
         else
         {
-            return new ErrorResult("No changes");
+            return false;
         }
     }
 
