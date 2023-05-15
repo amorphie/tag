@@ -32,6 +32,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+//async kullan. 
 
 app.MapGet("/tag/{tagName}/execute", ExecuteTag)
 .WithOpenApi(operation =>

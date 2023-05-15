@@ -1,30 +1,37 @@
 
-public static class DomainModule
+using amorphie.core.Module.minimal_api;
+
+public sealed class DomainModule : BaseRoute
 {
-
-    public static void MapDomainEndpoints(this WebApplication app)
+    public DomainModule(WebApplication app) : base(app)
     {
-        app.MapGet("/domain", getAllDomains)
-        .WithOpenApi(operation =>
-        {
-            operation.Summary = "Returns saved domain records with entities";
-            return operation;
+    }
 
-        })
-        .Produces<GetDomainResponse[]>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status204NoContent);
+    public override string? UrlFragment => "domain";
 
-        app.MapGet("/domain/{domainName}/Entity/{entityName}", getEntity)
-        .WithOpenApi(operation =>
-        {
-            operation.Summary = "Returns requested entity";
-            return operation;
+    public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
+    {
+        routeGroupBuilder.MapGet("/", getAllDomains)
+     .WithOpenApi(operation =>
+     {
+         operation.Summary = "Returns saved domain records with entities";
+         return operation;
 
-        })
-        .Produces<GetEntityResponse[]>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status204NoContent);
+     })
+     .Produces<GetDomainResponse[]>(StatusCodes.Status200OK)
+     .Produces(StatusCodes.Status204NoContent);
 
-        app.MapPost("/addDomain", saveDomain).WithTopic("pubsub", "SaveDomain").WithOpenApi(operation =>
+        routeGroupBuilder.MapGet("/{domainName}/Entity/{entityName}", getEntity)
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Returns requested entity";
+    return operation;
+
+})
+.Produces<GetEntityResponse[]>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status204NoContent);
+
+        routeGroupBuilder.MapPost("/saveDomain", saveDomain).WithOpenApi(operation =>
         {
             operation.Summary = "Saves or updates requested domain.";
             return operation;
@@ -32,11 +39,11 @@ public static class DomainModule
         Produces<GetDomainResponse>(StatusCodes.Status200OK);
     }
 
-    public async static Task<IResult> getAllDomains(
-        [FromServices] TagDBContext context,
-        [FromServices] DaprClient client,
-        HttpContext httpContext
-        )
+    async ValueTask<IResult> getAllDomains(
+           [FromServices] TagDBContext context,
+           [FromServices] DaprClient client,
+           HttpContext httpContext
+           )
     {
 
         var cacheData = await client.GetStateAsync<GetDomainResponse[]>("amorphie-cache", "GetAllDomains");
@@ -73,10 +80,10 @@ public static class DomainModule
             return Results.NoContent();
     }
 
-    static IResult saveDomain([FromServices] TagDBContext context, [FromBody] SaveDomainRequest request)
+    async ValueTask<IResult> saveDomain([FromServices] TagDBContext context, [FromBody] SaveDomainRequest request)
     {
         //Türkçe Karakter kabul etmiyor. Swagger hatası olabilir? 
-        var existingRecord = context?.Domains?.FirstOrDefault(d => d.Name == request.Name);
+        var existingRecord = await context!.Domains!.FirstOrDefaultAsync(d => d.Name == request.Name);
         if (existingRecord == null)
         {
             context!.Domains!.Add(new Domain { Name = request.Name, Description = request.Description! });
@@ -103,20 +110,20 @@ public static class DomainModule
         }
     }
 
-    public static IResult getEntity(
-        [FromRoute(Name = "domainName")] string domainName,
-        [FromRoute(Name = "entityName")] string entityName,
-        [FromServices] TagDBContext context
+    async ValueTask<IResult> getEntity(
+          [FromRoute(Name = "domainName")] string domainName,
+          [FromRoute(Name = "entityName")] string entityName,
+          [FromServices] TagDBContext context
 
-    )
+      )
     {
         //Entitye taşı
-        var entity = context!.Entities!
+        var entity = await context!.Entities!
             .Include(e => e.Data)
             .ThenInclude(d => d.Sources)
             .ThenInclude(s => s.Tag)
             .Where(e => e.Name == entityName)
-            .FirstOrDefault();
+            .FirstOrDefaultAsync();
 
 
         if (entity != null)
@@ -133,4 +140,6 @@ public static class DomainModule
         else
             return Results.NotFound();
     }
+
+
 }

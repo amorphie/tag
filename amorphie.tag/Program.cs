@@ -49,7 +49,6 @@ app.UseSwaggerUI();
 
 app.Logger.LogInformation("Registering Routes");
 
-app.MapDomainEndpoints();
 app.MapTagEndpoints();
 app.MapEntityEndpoints();
 
