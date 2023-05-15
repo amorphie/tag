@@ -6,20 +6,20 @@ using amorphie.tag.Validator;
 
 public sealed class TagFrameworkModule : BaseBBTRoute<DtoTag, Tag, TagValidator, DbContext>
 {
-        public TagFrameworkModule(WebApplication app) : base(app)
-        {
-        }
+    public TagFrameworkModule(WebApplication app) : base(app)
+    {
+    }
 
 
-        public override string? UrlFragment => "tag";
+    public override string? UrlFragment => "tag1";
 
-        public override string[]? PropertyCheckList => new string[] { "Url","Ttl" };
+    public override string[]? PropertyCheckList => new string[] { "Url", "Ttl" };
 
-        public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
-        {
-            base.AddRoutes(routeGroupBuilder);
+    public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
+    {
+        base.AddRoutes(routeGroupBuilder);
 
-            routeGroupBuilder.MapPost("custom", () => { });
-        }
+        routeGroupBuilder.MapPost("custom", () => { });
+    }
 }
 

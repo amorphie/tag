@@ -5,7 +5,6 @@ using amorphie.core.Base;
 
 public class Tag : EntityBase
 {
-    [Key]
     public string Name { get; set; } = string.Empty;
     public string? Url { get; set; }
     public int? Ttl { get; set; }

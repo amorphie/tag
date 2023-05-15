@@ -27,7 +27,7 @@ var app = builder.Build();
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -338,7 +338,7 @@ async Task<IResult> TemplateExecuter(
 
         // httpClient.BaseAddress = new Uri("https://test-template-engine.burgan.com.tr/");
         // var status = await httpClient.PostAsync("Template/Render", new StringContent(json, Encoding.UTF8, "application/json"));
-///////---------------------------
+        ///////---------------------------
         app.Logger.LogInformation($"ExecuteTag is responded with {responses}");
         return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
 

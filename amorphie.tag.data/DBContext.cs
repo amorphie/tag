@@ -68,6 +68,7 @@ public class TagDBContext : DbContext
             CreatedBy = Guid.NewGuid(),
             ModifiedAt = DateTime.UtcNow,
             ModifiedBy = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             ModifiedByBehalfOf = Guid.NewGuid(),
             Name = "retail-loan"
         });
@@ -77,6 +78,7 @@ public class TagDBContext : DbContext
             CreatedBy = Guid.NewGuid(),
             ModifiedAt = DateTime.UtcNow,
             ModifiedBy = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             ModifiedByBehalfOf = Guid.NewGuid(),
             Name = "idm"
         });
@@ -87,6 +89,7 @@ public class TagDBContext : DbContext
             ModifiedAt = DateTime.UtcNow,
             ModifiedBy = Guid.NewGuid(),
             ModifiedByBehalfOf = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "retail-customer",
             Url = "http://localhost:3001/cb.customers?reference=@reference",
             Ttl = 5,
@@ -98,6 +101,7 @@ public class TagDBContext : DbContext
             CreatedBy = Guid.NewGuid(),
             ModifiedAt = DateTime.UtcNow,
             ModifiedBy = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             ModifiedByBehalfOf = Guid.NewGuid(),
             Name = "corporate-customer",
             Url = "http://localhost:3001/cb.customers?reference=@reference",
@@ -110,6 +114,7 @@ public class TagDBContext : DbContext
             ModifiedAt = DateTime.UtcNow,
             ModifiedBy = Guid.NewGuid(),
             ModifiedByBehalfOf = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "loan-partner",
             Url = "http://localhost:3001/cb.partner/@reference",
             Ttl = 10
@@ -121,6 +126,7 @@ public class TagDBContext : DbContext
             ModifiedAt = DateTime.UtcNow,
             ModifiedBy = Guid.NewGuid(),
             ModifiedByBehalfOf = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "loan-partner-staff",
             Url = "http://localhost:3001/cb.partner/@partner/staff/@reference",
             Ttl = 10
@@ -132,6 +138,7 @@ public class TagDBContext : DbContext
             ModifiedAt = DateTime.UtcNow,
             ModifiedBy = Guid.NewGuid(),
             ModifiedByBehalfOf = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = "burgan-staff",
             Url = "http://localhost:3001/cb.staff/@reference",
             Ttl = 10
@@ -142,116 +149,134 @@ public class TagDBContext : DbContext
             CreatedBy = Guid.NewGuid(),
             ModifiedAt = DateTime.UtcNow,
             ModifiedBy = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             ModifiedByBehalfOf = Guid.NewGuid(),
             Name = "burgan-bank-turkey",
             Url = "http://localhost:3001/cb.bankInfo",
             Ttl = 10
         });
 
-        modelBuilder.Entity<TagRelation>().HasData(new
-        {
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            TagName = "corporate-customer",
-            OwnerName = "idm"
-        });
-        modelBuilder.Entity<TagRelation>().HasData(new
-        {
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            TagName = "retail-customer",
-            OwnerName = "idm"
-        });
-        modelBuilder.Entity<TagRelation>().HasData(new
-        {
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            TagName = "loan-partner",
-            OwnerName = "idm"
-        });
-        modelBuilder.Entity<TagRelation>().HasData(new
-        {
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            TagName = "loan-partner-staff",
-            OwnerName = "idm"
-        });
-        modelBuilder.Entity<TagRelation>().HasData(new
-        {
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            TagName = "burgan-staff",
-            OwnerName = "idm"
-        });
-        modelBuilder.Entity<TagRelation>().HasData(new
-        {
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            TagName = "burgan-bank-turkey",
-            OwnerName = "idm"
-        });
+        // modelBuilder.Entity<TagRelation>().HasData(new
+        // {
+        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedAt = DateTime.UtcNow,
+        //     ModifiedBy = Guid.NewGuid(),
+        //     ModifiedByBehalfOf = Guid.NewGuid(),
+        //     OwnerId = Guid.NewGuid(),
+        //     TagId = Guid.NewGuid(),
 
-        modelBuilder.Entity<View>().HasData(new
-        {
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            TagName = "retail-customer",
-            ViewTemplateName = "retail-customer-mini-html",
-            Type = Enums.ViewType.Html
-        });
-        modelBuilder.Entity<View>().HasData(new
-        {
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            TagName = "retail-customer",
-            ViewTemplateName = "retail-customer-flutter",
-            Type = Enums.ViewType.Flutter
-        });
+        //     TagName = "corporate-customer",
+        //     OwnerName = "idm"
+        // });
+        // modelBuilder.Entity<TagRelation>().HasData(new
+        // {
+        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedAt = DateTime.UtcNow,
+        //     ModifiedBy = Guid.NewGuid(),
+        //     ModifiedByBehalfOf = Guid.NewGuid(),
+        //     OwnerId = Guid.NewGuid(),
+        //     TagId = Guid.NewGuid(),
 
-        modelBuilder.Entity<TagRelation>().HasData(new
-        {
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            TagName = "retail-customer",
-            OwnerName = "retail-loan"
-        });
-        modelBuilder.Entity<TagRelation>().HasData(new
-        {
-            CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-            CreatedBy = Guid.NewGuid(),
-            ModifiedAt = DateTime.UtcNow,
-            ModifiedBy = Guid.NewGuid(),
-            ModifiedByBehalfOf = Guid.NewGuid(),
-            TagName = "loan-partner",
-            OwnerName = "retail-loan"
-        });
+        //     TagName = "retail-customer",
+        //     OwnerName = "idm"
+        // });
+        // modelBuilder.Entity<TagRelation>().HasData(new
+        // {
+        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedAt = DateTime.UtcNow,
+        //     ModifiedBy = Guid.NewGuid(),
+        //     ModifiedByBehalfOf = Guid.NewGuid(),
+        //     OwnerId = Guid.NewGuid(),
+        //     TagId = Guid.NewGuid(),
+
+        //     TagName = "loan-partner",
+        //     OwnerName = "idm"
+        // });
+        // modelBuilder.Entity<TagRelation>().HasData(new
+        // {
+        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedAt = DateTime.UtcNow,
+        //     ModifiedBy = Guid.NewGuid(),
+        //     ModifiedByBehalfOf = Guid.NewGuid(),
+        //     OwnerId = Guid.NewGuid(),
+        //     TagId = Guid.NewGuid(),
+
+        //     TagName = "loan-partner-staff",
+        //     OwnerName = "idm"
+        // });
+        // modelBuilder.Entity<TagRelation>().HasData(new
+        // {
+        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedAt = DateTime.UtcNow,
+        //     ModifiedBy = Guid.NewGuid(),
+        //     ModifiedByBehalfOf = Guid.NewGuid(),
+        //     OwnerId = Guid.NewGuid(),
+        //     TagId = Guid.NewGuid(),
+
+        //     TagName = "burgan-staff",
+        //     OwnerName = "idm"
+        // });
+        // modelBuilder.Entity<TagRelation>().HasData(new
+        // {
+        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedAt = DateTime.UtcNow,
+        //     ModifiedBy = Guid.NewGuid(),
+        //     ModifiedByBehalfOf = Guid.NewGuid(),
+        //     OwnerId = Guid.NewGuid(),
+        //     TagId = Guid.NewGuid(),
+        //     TagName = "burgan-bank-turkey",
+        //     OwnerName = "idm"
+        // });
+
+        // modelBuilder.Entity<View>().HasData(new
+        // {
+        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedAt = DateTime.UtcNow,
+        //     ModifiedBy = Guid.NewGuid(),
+        //     ModifiedByBehalfOf = Guid.NewGuid(),
+        //     TagName = "retail-customer",
+        //     ViewTemplateName = "retail-customer-mini-html",
+        //     Type = Enums.ViewType.Html
+        // });
+        // modelBuilder.Entity<View>().HasData(new
+        // {
+        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedAt = DateTime.UtcNow,
+        //     ModifiedBy = Guid.NewGuid(),
+        //     ModifiedByBehalfOf = Guid.NewGuid(),
+        //     TagName = "retail-customer",
+        //     ViewTemplateName = "retail-customer-flutter",
+        //     Type = Enums.ViewType.Flutter
+        // });
+
+        // modelBuilder.Entity<TagRelation>().HasData(new
+        // {
+        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedAt = DateTime.UtcNow,
+        //     ModifiedBy = Guid.NewGuid(),
+        //     ModifiedByBehalfOf = Guid.NewGuid(),
+        //     TagName = "retail-customer",
+        //     OwnerName = "retail-loan"
+        // });
+        // modelBuilder.Entity<TagRelation>().HasData(new
+        // {
+        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+        //     CreatedBy = Guid.NewGuid(),
+        //     ModifiedAt = DateTime.UtcNow,
+        //     ModifiedBy = Guid.NewGuid(),
+        //     ModifiedByBehalfOf = Guid.NewGuid(),
+        //     TagName = "loan-partner",
+        //     OwnerName = "retail-loan"
+        // });
 
         modelBuilder.Entity<Domain>().HasData(new
         {

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 public class View : EntityBaseWithOutId
 {
     [ForeignKey("Tag")]
+    public Guid TagId { get; set; }
     public string TagName { get; set; } = string.Empty;
     public Tag? Tag { get; set; }
 

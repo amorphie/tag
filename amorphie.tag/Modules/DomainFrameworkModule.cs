@@ -5,34 +5,34 @@ using amorphie.core.Module.minimal_api;
 
 public sealed class DomainFrameworkModule : BaseRoute
 {
-        public DomainFrameworkModule(WebApplication app) : base(app)
-        {
-        }
+    public DomainFrameworkModule(WebApplication app) : base(app)
+    {
+    }
 
-    public override string? UrlFragment => "domain";
+    public override string? UrlFragment => "domain1";
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
-           routeGroupBuilder.MapGet("/", getAllDomains)
-        .WithOpenApi(operation =>
-        {
-            operation.Summary = "Returns saved domain records with entities";
-            return operation;
+        routeGroupBuilder.MapGet("/", getAllDomains)
+     .WithOpenApi(operation =>
+     {
+         operation.Summary = "Returns saved domain records with entities";
+         return operation;
 
-        })
-        .Produces<GetDomainResponse[]>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status204NoContent);
+     })
+     .Produces<GetDomainResponse[]>(StatusCodes.Status200OK)
+     .Produces(StatusCodes.Status204NoContent);
 
-                routeGroupBuilder.MapGet("/{domainName}/Entity/{entityName}", getEntity)
-        .WithOpenApi(operation =>
-        {
-            operation.Summary = "Returns requested entity";
-            return operation;
+        routeGroupBuilder.MapGet("/{domainName}/Entity/{entityName}", getEntity)
+.WithOpenApi(operation =>
+{
+    operation.Summary = "Returns requested entity";
+    return operation;
 
-        })
-        .Produces<GetEntityResponse[]>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status204NoContent);
+})
+.Produces<GetEntityResponse[]>(StatusCodes.Status200OK)
+.Produces(StatusCodes.Status204NoContent);
 
-        routeGroupBuilder.MapPost("/addDomain", saveDomain).WithTopic("pubsub", "SaveDomain").WithOpenApi(operation =>
+        routeGroupBuilder.MapPost("/addDomain", saveDomain).WithOpenApi(operation =>
         {
             operation.Summary = "Saves or updates requested domain.";
             return operation;
@@ -40,11 +40,11 @@ public sealed class DomainFrameworkModule : BaseRoute
         Produces<GetDomainResponse>(StatusCodes.Status200OK);
     }
 
- async  ValueTask<IResult> getAllDomains(
-        [FromServices] TagDBContext context,
-        [FromServices] DaprClient client,
-        HttpContext httpContext
-        )
+    async ValueTask<IResult> getAllDomains(
+           [FromServices] TagDBContext context,
+           [FromServices] DaprClient client,
+           HttpContext httpContext
+           )
     {
 
         var cacheData = await client.GetStateAsync<GetDomainResponse[]>("amorphie-cache", "GetAllDomains");
