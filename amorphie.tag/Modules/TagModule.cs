@@ -74,7 +74,7 @@ public static class TagModule
 
     }
 
-    static IResult getAllTags(
+    static async ValueTask<IResult> getAllTags(
     [FromServices] TagDBContext context,
     [FromQuery] string? tagName,
     [FromQuery][Range(0, 100)] int page = 0,
@@ -86,19 +86,18 @@ public static class TagModule
         var query = context!.Tags!
             .Include(t => t.TagsRelations)
             .Skip(page * pageSize).Take(pageSize)
-            .AsQueryable().ToList();
+            .AsQueryable();
 
         if (!string.IsNullOrEmpty(tagName))
         {
-            queryAfterWhere = query.Where(t => t.TagsRelations.Any(c => c.TagName == tagName)).ToList();
+            queryAfterWhere = await query.Where(t => t.TagsRelations.Any(c => c.TagName == tagName)).ToListAsync();
         }
         else
         {
-            queryAfterWhere = query.ToList();
+            queryAfterWhere = await query.ToListAsync();
         }
 
-        var tags = queryAfterWhere.ToList();
-        foreach (var item in tags)
+        foreach (var item in queryAfterWhere)
         {
             result.Add(new GetTagResponse(item.Name, item.Url, item.Ttl, item.TagsRelations.Select(i => i.TagName).ToArray()));
         }

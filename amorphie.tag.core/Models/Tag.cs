@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using amorphie.core.Base;
 
-public class Tag : EntityBaseWithOutId
+public class Tag : EntityBase
 {
     [Key]
     public string Name { get; set; } = string.Empty;
