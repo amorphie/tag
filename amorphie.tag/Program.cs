@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using amorphie.core.security.Extensions;
+using amorphie.core.Extension;
 
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
@@ -52,6 +53,7 @@ app.MapDomainEndpoints();
 app.MapTagEndpoints();
 app.MapEntityEndpoints();
 
+app.AddRoutes();
 
 try
 {
