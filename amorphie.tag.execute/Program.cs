@@ -93,6 +93,7 @@ async Task<IResult> ExecuteTag(
 
     try
     {
+        //b TODO: dapr service call to long
         //tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
         var test = client.CreateInvokeMethodRequest(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
         var result = client.InvokeMethodWithResponseAsync(test).Result.Content.ReadAsStringAsync().Result;
@@ -323,6 +324,8 @@ async Task<IResult> TemplateExecuter(
             ProcessName = "test-mehmet1",
             RenderDataForLog = data,
         };
+
+        /// ----- TODO: minimize
         var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
 
         HttpRequestMessage yourmsg = new HttpRequestMessage
@@ -335,7 +338,7 @@ async Task<IResult> TemplateExecuter(
 
         // httpClient.BaseAddress = new Uri("https://test-template-engine.burgan.com.tr/");
         // var status = await httpClient.PostAsync("Template/Render", new StringContent(json, Encoding.UTF8, "application/json"));
-
+///////---------------------------
         app.Logger.LogInformation($"ExecuteTag is responded with {responses}");
         return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
 
