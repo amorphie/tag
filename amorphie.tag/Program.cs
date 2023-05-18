@@ -1,6 +1,8 @@
 using System.Text.Json.Serialization;
 using amorphie.core.security.Extensions;
 using amorphie.core.Extension;
+using amorphie.tag.Validator;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
@@ -13,6 +15,8 @@ var postgreDb = builder.Configuration["PostgreDB"];
 //var configurations = await client.GetConfiguration("amorphie-config", new List<string>() { "PostgreDB" });
 
 #pragma warning restore 618
+builder.Services.AddScoped<IValidator<Domain>, DomainValidator>();
+
 
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
