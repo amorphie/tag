@@ -17,15 +17,16 @@ namespace amorphie.tag.data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.0")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Domain", b =>
                 {
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -49,27 +50,33 @@ namespace amorphie.tag.data.Migrations
                     b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.HasKey("Name");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
 
                     b.ToTable("Domains");
 
                     b.HasData(
                         new
                         {
-                            Name = "idm",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8677),
-                            CreatedBy = new Guid("09cd784f-7977-439c-ac0a-73e4c1a95343"),
+                            Id = new Guid("9ef36432-7078-412c-bf5f-64d33a8f3fc8"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5647),
+                            CreatedBy = new Guid("f7ef6b9e-1737-433b-a3c4-308a8e419e15"),
                             Description = "Identity Management Platform",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8685),
-                            ModifiedBy = new Guid("866df866-89d2-4090-97ae-d95e9669dc41"),
-                            ModifiedByBehalfOf = new Guid("e8dd17b7-bb28-4f07-8345-d1013e81fd59")
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5648),
+                            ModifiedBy = new Guid("a9e753f1-fd0e-498a-bb84-d7b09fe06b46"),
+                            ModifiedByBehalfOf = new Guid("f0dfa559-eaa6-45a9-928a-0e904a961b40"),
+                            Name = "idm"
                         });
                 });
 
             modelBuilder.Entity("Entity", b =>
                 {
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -83,9 +90,8 @@ namespace amorphie.tag.data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<string>("DomainName")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("DomainId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp with time zone");
@@ -96,34 +102,40 @@ namespace amorphie.tag.data.Migrations
                     b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.HasKey("Name");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.HasIndex("DomainName");
+                    b.HasKey("Id");
+
+                    b.HasIndex("DomainId");
 
                     b.ToTable("Entities");
 
                     b.HasData(
                         new
                         {
-                            Name = "user",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8717),
-                            CreatedBy = new Guid("5e6bfe31-f2f4-46dd-bb31-9037a428a0b8"),
+                            Id = new Guid("9ef36432-7078-413c-bf5f-64d33a8f3fc8"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5664),
+                            CreatedBy = new Guid("1708b9bf-864d-4fda-9fb8-f02e627ba21c"),
                             Description = "User repository",
-                            DomainName = "idm",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8720),
-                            ModifiedBy = new Guid("a74fb812-0443-4921-bbdf-78038160aa02"),
-                            ModifiedByBehalfOf = new Guid("6b046bb8-4f9d-449e-a153-a38db1b9ffcc")
+                            DomainId = new Guid("9ef36432-7078-412c-bf5f-64d33a8f3fc8"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5665),
+                            ModifiedBy = new Guid("58c84141-7429-4c99-9ef4-62e3d470ad5e"),
+                            ModifiedByBehalfOf = new Guid("c7b59000-48bd-4a2f-ad15-fa0140dc1e96"),
+                            Name = "user"
                         },
                         new
                         {
-                            Name = "scope",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8747),
-                            CreatedBy = new Guid("e48d8120-fea8-4614-be50-3c214030443e"),
+                            Id = new Guid("9ef36433-7078-412c-bf5d-64d33a8f3fc8"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5678),
+                            CreatedBy = new Guid("274d59bb-3a60-4fa2-bc68-cc7a7cdc08dc"),
                             Description = "Scope repository",
-                            DomainName = "idm",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8749),
-                            ModifiedBy = new Guid("f922be6c-c618-44b5-9cb9-145d3871e402"),
-                            ModifiedByBehalfOf = new Guid("a7c12e56-ebaf-4d5f-8e04-5c2f94037126")
+                            DomainId = new Guid("9ef36433-7078-412c-bf5f-64d33a8f3fc8"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5682),
+                            ModifiedBy = new Guid("1045ff52-1183-405f-9a5f-1cefcd1d946a"),
+                            ModifiedByBehalfOf = new Guid("26d14e48-c18f-4058-8c61-4f5f155899bd"),
+                            Name = "scope"
                         });
                 });
 
@@ -140,6 +152,9 @@ namespace amorphie.tag.data.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("CreatedByBehalfOf")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EntityId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("EntityName")
@@ -164,7 +179,7 @@ namespace amorphie.tag.data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EntityName");
+                    b.HasIndex("EntityId");
 
                     b.ToTable("EntityData");
 
@@ -172,35 +187,38 @@ namespace amorphie.tag.data.Migrations
                         new
                         {
                             Id = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8806),
-                            CreatedBy = new Guid("b1a3577c-6631-4b93-b027-bb36ad4cf44e"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5695),
+                            CreatedBy = new Guid("efa05d89-a29c-4b7c-8602-49b8b2d147ae"),
+                            EntityId = new Guid("9ef36432-7078-413c-bf5f-64d33a8f3fc8"),
                             EntityName = "user",
                             Field = "firstname",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8810),
-                            ModifiedBy = new Guid("9e02a56e-d6d4-49e4-a7b6-fb64ee424abb"),
-                            ModifiedByBehalfOf = new Guid("81a7da14-768d-436e-a811-f5ccdd9af89b")
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5696),
+                            ModifiedBy = new Guid("fab3c308-c578-4b59-819a-be40b11c98fc"),
+                            ModifiedByBehalfOf = new Guid("71dccbb7-1666-473c-a1a8-fcae9e49ccc9")
                         },
                         new
                         {
                             Id = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8843),
-                            CreatedBy = new Guid("e9416656-b246-465d-a005-0079a2be9802"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5712),
+                            CreatedBy = new Guid("539c8bac-c0a6-468c-8442-43ddcf552c1d"),
+                            EntityId = new Guid("9ef36432-7078-413c-bf5f-64d33a8f3fc8"),
                             EntityName = "user",
                             Field = "lastname",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8846),
-                            ModifiedBy = new Guid("a7e59032-7e0a-4dfa-afc4-980c91940404"),
-                            ModifiedByBehalfOf = new Guid("5a71d4e9-8b35-4dba-93fc-ccdb30fe8bb9")
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5713),
+                            ModifiedBy = new Guid("8fef763b-76b1-4b00-a639-a15e9b4903cb"),
+                            ModifiedByBehalfOf = new Guid("c3ab9c62-e9f0-4400-836c-fb8a9ba51f9b")
                         },
                         new
                         {
                             Id = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"),
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8886),
-                            CreatedBy = new Guid("78b89203-56ba-435e-a930-c39093533372"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5727),
+                            CreatedBy = new Guid("3ff600c1-3e71-4bfc-ac35-2603952d2f41"),
+                            EntityId = new Guid("9ef36433-7078-412c-bf5d-64d33a8f3fc8"),
                             EntityName = "scope",
                             Field = "title",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8889),
-                            ModifiedBy = new Guid("ff7ca4d9-ecfa-464e-bc06-a8e3588197b6"),
-                            ModifiedByBehalfOf = new Guid("2785a214-09ba-40fa-b022-9cc11487af66")
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5728),
+                            ModifiedBy = new Guid("55d92d0a-264d-47b6-a99d-0fea4c46ca1e"),
+                            ModifiedByBehalfOf = new Guid("9f496250-b453-4c65-a0b9-10e505506c2b")
                         });
                 });
 
@@ -234,13 +252,12 @@ namespace amorphie.tag.data.Migrations
                     b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("TagName")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("EntityDataId", "Order");
 
-                    b.HasIndex("TagName");
+                    b.HasIndex("TagId");
 
                     b.ToTable("EntityDataSource");
 
@@ -249,104 +266,105 @@ namespace amorphie.tag.data.Migrations
                         {
                             EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 1,
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8923),
-                            CreatedBy = new Guid("e2a94982-0fe3-47bf-b1e7-58fce2c49023"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5742),
+                            CreatedBy = new Guid("8c11ed4b-b76b-476f-ae1f-448bc12ca2a5"),
                             DataPath = "$.firstname",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9124),
-                            ModifiedBy = new Guid("ab082004-2175-42a9-bd7b-f1dfdbc8039f"),
-                            ModifiedByBehalfOf = new Guid("42ded41a-eb56-4066-8d6a-2945bf7df743"),
-                            TagName = "burgan-staff"
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5744),
+                            ModifiedBy = new Guid("20c9b64a-d748-4356-8e64-3ccef2cae835"),
+                            ModifiedByBehalfOf = new Guid("0ae9429d-6854-46a4-9ed6-1a045d44761d"),
+                            TagId = new Guid("b3f9a3a0-0b1a-4b0e-8b0a-0b9b5b0a0b0b")
                         },
                         new
                         {
                             EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 2,
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9161),
-                            CreatedBy = new Guid("43ebd1fd-41ef-4a96-ba6d-def52f732ac8"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5759),
+                            CreatedBy = new Guid("ec6050aa-7325-440b-89e7-637f751cbf8d"),
                             DataPath = "$.partner-staff.fullname",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9164),
-                            ModifiedBy = new Guid("34692ddd-97c1-41e5-b2c2-0526557d1e36"),
-                            ModifiedByBehalfOf = new Guid("1e91dfb8-6d57-4752-ba2e-8cbfb2551a0a"),
-                            TagName = "loan-partner-staff"
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5760),
+                            ModifiedBy = new Guid("583c4730-c9b7-4d39-a960-e51245c82b6f"),
+                            ModifiedByBehalfOf = new Guid("1f77c61b-62e6-4ec5-a21b-7f74a88898e8"),
+                            TagId = new Guid("b3f9a3a0-0b1a-4b0e-8b0a-0b9b5b0a0b04")
                         },
                         new
                         {
                             EntityDataId = new Guid("107f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 3,
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9187),
-                            CreatedBy = new Guid("464fc1c2-177b-4851-a05f-ccd34d841b4d"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5776),
+                            CreatedBy = new Guid("2d001774-4dd8-4cbd-a6cd-5000c3fb0254"),
                             DataPath = "$.firstname",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9194),
-                            ModifiedBy = new Guid("321bd9f8-913a-4604-878a-48a69132bfae"),
-                            ModifiedByBehalfOf = new Guid("0c41917b-d9fe-4847-a48a-ef8a74dfea00"),
-                            TagName = "retail-customer"
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5777),
+                            ModifiedBy = new Guid("4185bb88-fde9-4ef5-8038-72779433fd19"),
+                            ModifiedByBehalfOf = new Guid("dec9856b-113a-4d2a-affe-1842cad860ef"),
+                            TagId = new Guid("b3f9a3a0-0b0a-4b0a-8b0a-0b0a0b0a0b5a")
                         },
                         new
                         {
                             EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 1,
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9215),
-                            CreatedBy = new Guid("eb18b9b6-14a8-447b-b6ec-dc89cec667ae"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5788),
+                            CreatedBy = new Guid("b5a7d3e2-b6c2-4e79-821d-04d995597957"),
                             DataPath = "$.lastname",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9218),
-                            ModifiedBy = new Guid("794cb834-c3ff-4450-8324-e4ba9fcfd0e4"),
-                            ModifiedByBehalfOf = new Guid("7adc42a3-fbe1-4388-b09d-feb466669f6c"),
-                            TagName = "burgan-staff"
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5789),
+                            ModifiedBy = new Guid("f2fae82e-ceaa-4cfb-94d8-2ae1e9b53360"),
+                            ModifiedByBehalfOf = new Guid("1fef06bd-30f7-48d2-8270-11c96d187bcd"),
+                            TagId = new Guid("b3f9a3a0-0b1a-4b0e-8b0a-0b9b5b0a0b0b")
                         },
                         new
                         {
                             EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 2,
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9239),
-                            CreatedBy = new Guid("545e15dd-b848-4049-a184-8ac7e30546fc"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5799),
+                            CreatedBy = new Guid("a5bee5d8-365d-49ef-b82b-cf432966375d"),
                             DataPath = "$.partner-staff.fullname",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9241),
-                            ModifiedBy = new Guid("cdecb868-4cac-4a7b-8778-9aba806059da"),
-                            ModifiedByBehalfOf = new Guid("970e3e71-5353-44af-a32d-8678ed069775"),
-                            TagName = "loan-partner-staff"
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5802),
+                            ModifiedBy = new Guid("f69e55bb-11e5-484a-92da-9ffd06f74d78"),
+                            ModifiedByBehalfOf = new Guid("ee6c90fd-360a-4ab1-9b0f-2b8270c4455a"),
+                            TagId = new Guid("b3f9a3a0-0b1a-4b0e-8b0a-0b9b5b0a0b04")
                         },
                         new
                         {
                             EntityDataId = new Guid("207f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 3,
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9269),
-                            CreatedBy = new Guid("43727ab2-e7ea-421c-80ca-1c36324b2c3e"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5815),
+                            CreatedBy = new Guid("08260ae1-7ee6-4b97-9d2d-0be9cdebc31b"),
                             DataPath = "$.lastname",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9271),
-                            ModifiedBy = new Guid("29822d47-637f-4c70-946f-846035a846f6"),
-                            ModifiedByBehalfOf = new Guid("854243bc-877a-4f98-9dd8-6b17fc982d00"),
-                            TagName = "retail-customer"
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5816),
+                            ModifiedBy = new Guid("f42bb957-4ccb-48b8-b683-64f514825d1b"),
+                            ModifiedByBehalfOf = new Guid("89ff05f1-d4a3-4708-8adc-15dcd47368dd"),
+                            TagId = new Guid("b3f9a3a0-0b0a-4b0a-8b0a-0b0a0b0a0b5a")
                         },
                         new
                         {
                             EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 1,
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9474),
-                            CreatedBy = new Guid("2085349a-f319-4e20-b6bb-3e8af51354f5"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5827),
+                            CreatedBy = new Guid("4c828fc5-958d-41ca-90a3-db58c68ba38d"),
                             DataPath = "$.firstname",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9476),
-                            ModifiedBy = new Guid("0836c81a-a8ba-4978-b2fa-d37f8428c41b"),
-                            ModifiedByBehalfOf = new Guid("a905fca1-2aa3-48a0-bfe0-3417411b0ff0"),
-                            TagName = "burgan-staff"
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5828),
+                            ModifiedBy = new Guid("0c15a7cc-9571-4bee-8f6c-10719a60b227"),
+                            ModifiedByBehalfOf = new Guid("3e566b6b-a2b6-4576-9052-22972d14b0cb"),
+                            TagId = new Guid("b3f9a3a0-0b1a-4b0e-8b0a-0b9b5b0a0b0b")
                         },
                         new
                         {
                             EntityDataId = new Guid("307f4644-57cd-46ff-80de-004c6cd44704"),
                             Order = 2,
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9494),
-                            CreatedBy = new Guid("e2ae8a10-634b-4cf7-a940-555e435a6726"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5840),
+                            CreatedBy = new Guid("92f59883-42fe-428a-bec8-2ca933b94273"),
                             DataPath = "$.partner-staff.fullname",
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(9496),
-                            ModifiedBy = new Guid("7c17bb31-fbbc-49bd-a759-ae4027c58422"),
-                            ModifiedByBehalfOf = new Guid("4e3c28df-6bc7-4766-9b81-0110ef30143b"),
-                            TagName = "loan-partner-staff"
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5841),
+                            ModifiedBy = new Guid("c8e2031d-86a4-41dd-84a1-944bc5d46319"),
+                            ModifiedByBehalfOf = new Guid("b2b1d5d5-be1e-4d00-93ef-8d89a6dfde1f"),
+                            TagId = new Guid("b3f9a3a0-0b1a-4b0e-8b0a-0b9b5b0a0b04")
                         });
                 });
 
             modelBuilder.Entity("Tag", b =>
                 {
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -372,99 +390,111 @@ namespace amorphie.tag.data.Migrations
                     b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int?>("Ttl")
                         .HasColumnType("integer");
 
                     b.Property<string>("Url")
                         .HasColumnType("text");
 
-                    b.HasKey("Name");
+                    b.HasKey("Id");
 
                     b.ToTable("Tags");
 
                     b.HasData(
                         new
                         {
-                            Name = "retail-loan",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(6969),
-                            CreatedBy = new Guid("078373c5-e501-455b-a258-1e95c8222a92"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7025),
-                            ModifiedBy = new Guid("b100f296-57aa-4d78-924f-3d0d174bbee7"),
-                            ModifiedByBehalfOf = new Guid("3686d977-b893-4ca5-bc87-0a79d727d28d")
+                            Id = new Guid("1fc814cf-8507-4f6f-877c-0d501f1a8c56"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5145),
+                            CreatedBy = new Guid("cc946d30-e0b3-42b4-9eee-bff12be2dc26"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5229),
+                            ModifiedBy = new Guid("35f6e902-70cd-4391-a7ba-a2aaa99d8b80"),
+                            ModifiedByBehalfOf = new Guid("ffe5cb6f-9843-4460-b7d8-67589c6aa1da"),
+                            Name = "retail-loan"
                         },
                         new
                         {
-                            Name = "idm",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7100),
-                            CreatedBy = new Guid("b37e1756-8bdf-4c97-9e3c-3e36fd35a16c"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7103),
-                            ModifiedBy = new Guid("44cef650-b1b2-433b-8f77-b24deec6848c"),
-                            ModifiedByBehalfOf = new Guid("ff890aec-a2ed-4d67-902c-bdc813d6de76")
+                            Id = new Guid("2e07c4af-9534-437d-89cf-4c33f5c9f55c"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5263),
+                            CreatedBy = new Guid("0c39b1ea-18f4-4037-82ef-50e455fb932d"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5265),
+                            ModifiedBy = new Guid("be55b382-fd2a-4b0d-8645-099805e0a6b9"),
+                            ModifiedByBehalfOf = new Guid("e83ece10-cc2a-4ce6-bc42-0e244508c18d"),
+                            Name = "idm"
                         },
                         new
                         {
+                            Id = new Guid("b3f9a3a0-0b0a-4b0a-8b0a-0b0a0b0a0b5a"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5277),
+                            CreatedBy = new Guid("6c8b49fe-c410-498c-bb79-ae05643a2dba"),
+                            CreatedDate = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5304),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5282),
+                            ModifiedBy = new Guid("52a9ae22-1342-47bf-af79-5d0d4d45c592"),
+                            ModifiedByBehalfOf = new Guid("ea39b374-caaf-4a23-be2e-2cdbcdcec834"),
                             Name = "retail-customer",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7129),
-                            CreatedBy = new Guid("aa2c9c10-7eaf-45cb-ab1b-253c059d0347"),
-                            CreatedDate = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7164),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7152),
-                            ModifiedBy = new Guid("89581a97-2968-475a-a27d-896c327c6762"),
-                            ModifiedByBehalfOf = new Guid("cb46b3b4-8e89-42da-a7fd-17bb1f584cfc"),
                             Ttl = 5,
                             Url = "http://localhost:3001/cb.customers?reference=@reference"
                         },
                         new
                         {
+                            Id = new Guid("3b95a203-20f0-432e-9190-5ee7e7a054ec"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5387),
+                            CreatedBy = new Guid("0c2ef1b3-80fc-4c39-a436-392c57533cd6"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5389),
+                            ModifiedBy = new Guid("5118d473-b74a-4867-94c1-41d687664aa7"),
+                            ModifiedByBehalfOf = new Guid("d937d788-26f5-48dd-b278-569b90776b95"),
                             Name = "corporate-customer",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7487),
-                            CreatedBy = new Guid("60c0f456-ca67-4683-a0ce-fc0034005910"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7491),
-                            ModifiedBy = new Guid("862001d5-fa24-43a5-a67e-92de55c356d6"),
-                            ModifiedByBehalfOf = new Guid("337c1687-f3fc-4ee4-8204-b99cb01f7eca"),
                             Ttl = 10,
                             Url = "http://localhost:3001/cb.customers?reference=@reference"
                         },
                         new
                         {
+                            Id = new Guid("8f002585-c505-4a16-9b10-3a6301d542be"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5402),
+                            CreatedBy = new Guid("b588e875-6ac8-4e5f-8551-3c101fdd7f40"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5403),
+                            ModifiedBy = new Guid("8a365de0-d55d-462a-b411-3d7edc046dac"),
+                            ModifiedByBehalfOf = new Guid("336557cb-dff6-42c5-bdf2-41a2fa361e8f"),
                             Name = "loan-partner",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7515),
-                            CreatedBy = new Guid("69449ed1-528e-443b-96f0-9719cb7bbaa9"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7518),
-                            ModifiedBy = new Guid("822df56c-abad-4139-966a-a0a14119b6cf"),
-                            ModifiedByBehalfOf = new Guid("2ac2ddd0-00a7-4c21-a3cd-3e338fdcdcd3"),
                             Ttl = 10,
                             Url = "http://localhost:3001/cb.partner/@reference"
                         },
                         new
                         {
+                            Id = new Guid("b3f9a3a0-0b1a-4b0e-8b0a-0b9b5b0a0b04"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5422),
+                            CreatedBy = new Guid("2c857314-a8ff-4a50-9ee8-15ffa8449901"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5423),
+                            ModifiedBy = new Guid("e74b24d7-c207-4fe8-ba25-4b31c6421afa"),
+                            ModifiedByBehalfOf = new Guid("8a8625a0-9483-44bb-a1af-b8ec31efde5a"),
                             Name = "loan-partner-staff",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7784),
-                            CreatedBy = new Guid("9f9141f5-ea09-4def-a595-245bc1609ca8"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7788),
-                            ModifiedBy = new Guid("7511c754-846a-43ef-ba92-75500e64620e"),
-                            ModifiedByBehalfOf = new Guid("809fdeda-ef3e-4aaf-8ee9-5a3ccec6a2a9"),
                             Ttl = 10,
                             Url = "http://localhost:3001/cb.partner/@partner/staff/@reference"
                         },
                         new
                         {
+                            Id = new Guid("b3f9a3a0-0b1a-4b0e-8b0a-0b9b5b0a0b0b"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5437),
+                            CreatedBy = new Guid("e2aa4a6f-8c9d-4495-9472-2552eb7b6a25"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5438),
+                            ModifiedBy = new Guid("f3714e9e-86ee-4ea3-9e30-d9bc8eb18714"),
+                            ModifiedByBehalfOf = new Guid("8e0cd2a4-7a53-463a-8b7a-585092869cb7"),
                             Name = "burgan-staff",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7813),
-                            CreatedBy = new Guid("6a4dd506-0e16-476d-9f61-f4fa947702f0"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7815),
-                            ModifiedBy = new Guid("2b0c77b3-1e6e-4f6a-b2ec-4d9e3d783347"),
-                            ModifiedByBehalfOf = new Guid("ddfc11b9-2d39-4212-80f6-9d77c5c103e3"),
                             Ttl = 10,
                             Url = "http://localhost:3001/cb.staff/@reference"
                         },
                         new
                         {
+                            Id = new Guid("3a0c746e-6d75-4be1-b2f2-5a7e34c042a3"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5455),
+                            CreatedBy = new Guid("e405f1e2-611f-4d37-a951-da9daa59240f"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5457),
+                            ModifiedBy = new Guid("d01e2459-5b91-4644-b644-74f546d50c16"),
+                            ModifiedByBehalfOf = new Guid("0ebc0596-bc92-4a05-adfa-81d11c0c298b"),
                             Name = "burgan-bank-turkey",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7838),
-                            CreatedBy = new Guid("82f64b26-951d-4a38-bc57-68369c33cf13"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7840),
-                            ModifiedBy = new Guid("6377e925-c9cd-48b6-b1ae-a705339aa9d5"),
-                            ModifiedByBehalfOf = new Guid("935c67b7-8f5a-4959-ac42-24f4d9e89cb7"),
                             Ttl = 10,
                             Url = "http://localhost:3001/cb.bankInfo"
                         });
@@ -472,11 +502,11 @@ namespace amorphie.tag.data.Migrations
 
             modelBuilder.Entity("TagRelation", b =>
                 {
-                    b.Property<string>("OwnerName")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("TagName")
-                        .HasColumnType("text");
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -496,92 +526,127 @@ namespace amorphie.tag.data.Migrations
                     b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
-                    b.HasKey("OwnerName", "TagName");
+                    b.Property<Guid?>("OwnerId")
+                        .HasColumnType("uuid");
 
-                    b.HasIndex("TagName");
+                    b.Property<string>("OwnerName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TagName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id", "TagId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("TagId");
 
                     b.ToTable("TagRelations");
 
                     b.HasData(
                         new
                         {
+                            Id = new Guid("baa9a0eb-74a6-4bb4-b649-f31cf11c554c"),
+                            TagId = new Guid("9f556126-c3a0-494d-a5d2-ca198e8c7035"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5469),
+                            CreatedBy = new Guid("3fcdedf6-c127-41d8-a7bf-930432fab84a"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5470),
+                            ModifiedBy = new Guid("4427bb28-3b6d-47be-84ad-ee64a224c17f"),
+                            ModifiedByBehalfOf = new Guid("4951ae7e-527b-4a03-84eb-f8ba68c272da"),
+                            OwnerId = new Guid("beaded4a-62b7-4803-907c-ed91ee4c538c"),
                             OwnerName = "idm",
-                            TagName = "corporate-customer",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7950),
-                            CreatedBy = new Guid("cb0cacdc-0127-4fb4-9e9d-b478ded9d6cd"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(7953),
-                            ModifiedBy = new Guid("7ef214cb-d730-447c-8b13-2cf41242aa18"),
-                            ModifiedByBehalfOf = new Guid("90f80811-f480-4e44-aa85-3c9b6454d579")
+                            TagName = "corporate-customer"
                         },
                         new
                         {
+                            Id = new Guid("09d2e728-deaf-4cd4-a442-20b439d351b0"),
+                            TagId = new Guid("05fa4141-8ecb-4346-afe0-27002cde6b68"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5488),
+                            CreatedBy = new Guid("369ffe38-2959-4700-a9a2-edada9114990"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5489),
+                            ModifiedBy = new Guid("6cffbc9c-4fd6-44a6-be91-811061e14b7f"),
+                            ModifiedByBehalfOf = new Guid("18603d59-9014-4ad9-9c21-358af09617d7"),
+                            OwnerId = new Guid("5fa71742-5dc9-4dfc-8af2-8660417a2fa5"),
                             OwnerName = "idm",
-                            TagName = "retail-customer",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8003),
-                            CreatedBy = new Guid("288d4982-0f4a-46b6-b40c-e6af5c75125b"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8006),
-                            ModifiedBy = new Guid("e20371d6-a87a-4189-8214-b247859862a2"),
-                            ModifiedByBehalfOf = new Guid("e50f21ff-3c55-4a10-b87e-903eac66ccba")
+                            TagName = "retail-customer"
                         },
                         new
                         {
+                            Id = new Guid("d91b9138-b2b2-448f-a145-3bdd4f915d45"),
+                            TagId = new Guid("a0f590af-ae2a-44a6-9bb1-88c6297a4766"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5503),
+                            CreatedBy = new Guid("52ce5099-d05c-484f-b03c-136560c73730"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5504),
+                            ModifiedBy = new Guid("c354d81a-948d-4763-a89d-566503ddf7e0"),
+                            ModifiedByBehalfOf = new Guid("ad4d685a-054c-46b6-b7eb-028253c0b824"),
+                            OwnerId = new Guid("81e6fe28-9d81-4475-befb-113caab29511"),
                             OwnerName = "idm",
-                            TagName = "loan-partner",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8028),
-                            CreatedBy = new Guid("bffe6012-ae82-4941-848a-989ae6b77494"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8036),
-                            ModifiedBy = new Guid("f25ec2ae-acfb-4116-ac80-fc452867afe3"),
-                            ModifiedByBehalfOf = new Guid("ebf519b7-b4ce-4afc-9b50-8a979a9c6cc5")
+                            TagName = "loan-partner"
                         },
                         new
                         {
+                            Id = new Guid("105f8e67-637a-45c9-9cb0-1f6ac5acdb7e"),
+                            TagId = new Guid("2530ff36-d1a7-4a02-8793-634ad6d60c02"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5517),
+                            CreatedBy = new Guid("3b138dea-3629-47e5-8dc5-259dc2f21200"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5518),
+                            ModifiedBy = new Guid("537550be-d68e-4ce0-9a27-71e38a384379"),
+                            ModifiedByBehalfOf = new Guid("2769b5db-d717-4715-839d-207b5e658ed5"),
+                            OwnerId = new Guid("546b72b1-f8d1-4bed-9bf2-f9260b9bd963"),
                             OwnerName = "idm",
-                            TagName = "loan-partner-staff",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8058),
-                            CreatedBy = new Guid("9539c527-b261-4fdf-964f-8eebbf1b803e"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8060),
-                            ModifiedBy = new Guid("f7c677ac-339f-400e-ad46-caa4412a2ea6"),
-                            ModifiedByBehalfOf = new Guid("19c8ee69-4ac8-419d-8b97-24ecaf85b9b0")
+                            TagName = "loan-partner-staff"
                         },
                         new
                         {
+                            Id = new Guid("1e5cae93-5537-4d33-8e49-30a6240df36f"),
+                            TagId = new Guid("ac107dbf-a6c8-48ad-991d-354ae77d5a34"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5532),
+                            CreatedBy = new Guid("909db6fc-2784-4140-b868-7018d277e2d1"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5534),
+                            ModifiedBy = new Guid("e69dfc90-cbac-4e37-a089-9ce5ec80eb44"),
+                            ModifiedByBehalfOf = new Guid("497a7e04-7d5e-45f5-b537-fad3d432ec4c"),
+                            OwnerId = new Guid("00000000-0000-0000-0000-000000000000"),
                             OwnerName = "idm",
-                            TagName = "burgan-staff",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8266),
-                            CreatedBy = new Guid("6a28afc0-6d81-427f-9428-831177f50ed4"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8269),
-                            ModifiedBy = new Guid("5e71aad6-2849-4692-ad30-4c1df132018e"),
-                            ModifiedByBehalfOf = new Guid("0a1c002f-8702-46c7-b38d-ee358dcf1a85")
+                            TagName = "burgan-staff"
                         },
                         new
                         {
+                            Id = new Guid("91486505-3b07-4d28-9e04-4fca99d96340"),
+                            TagId = new Guid("1cc45213-18be-4842-8822-f5c2cfc883dc"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5564),
+                            CreatedBy = new Guid("788d34ba-8f77-48a2-a9d0-4c8096c41c73"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5566),
+                            ModifiedBy = new Guid("fc5fa1ed-c420-4b3b-a7d4-fff48eca03d2"),
+                            ModifiedByBehalfOf = new Guid("0b2654cd-f8bf-45c2-8226-3a75e090519f"),
+                            OwnerId = new Guid("e09a68f6-a93c-41e2-a200-5f951f3fea8e"),
                             OwnerName = "idm",
-                            TagName = "burgan-bank-turkey",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8300),
-                            CreatedBy = new Guid("4e45b261-5c0e-452f-a88b-ac0f689294c5"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8302),
-                            ModifiedBy = new Guid("cdeb9b95-fc8b-46d8-b6ab-9fd84b693d6f"),
-                            ModifiedByBehalfOf = new Guid("8bf516a2-d877-4d97-82db-121a3ffc9f19")
+                            TagName = "burgan-bank-turkey"
                         },
                         new
                         {
+                            Id = new Guid("435ad876-1077-4e0d-82ed-b51760b744cd"),
+                            TagId = new Guid("547e829e-2bbf-4190-b748-eedd2705eee4"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5613),
+                            CreatedBy = new Guid("c609304b-f536-452d-8a61-7c67960be218"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5617),
+                            ModifiedBy = new Guid("c49a60cc-b773-4c0e-9888-343034403608"),
+                            ModifiedByBehalfOf = new Guid("905525d0-6327-4045-9185-b75205c0016b"),
                             OwnerName = "retail-loan",
-                            TagName = "retail-customer",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8620),
-                            CreatedBy = new Guid("0e5ead29-de34-468c-8035-ac80a069ed9e"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8623),
-                            ModifiedBy = new Guid("231e590f-ec92-4fc2-ae02-89b53a9e7ede"),
-                            ModifiedByBehalfOf = new Guid("a9e67f5b-b6a0-41ae-885a-608c29bdb7c0")
+                            TagName = "retail-customer"
                         },
                         new
                         {
+                            Id = new Guid("8cc3292c-ea69-4eca-8029-7227d38a4dda"),
+                            TagId = new Guid("8b5a3bd0-ed19-43de-b468-591e0ba08157"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5630),
+                            CreatedBy = new Guid("aeb6d789-2912-4255-9442-04a17f28e71d"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5631),
+                            ModifiedBy = new Guid("dd653b88-2bac-45ab-9f02-ff14b2be8d2f"),
+                            ModifiedByBehalfOf = new Guid("88235dc7-ea22-4ad4-8ddf-6d86768852e2"),
                             OwnerName = "retail-loan",
-                            TagName = "loan-partner",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8643),
-                            CreatedBy = new Guid("59409a9e-13bc-4f38-8803-780b7652118b"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8646),
-                            ModifiedBy = new Guid("51b674d3-60b0-4b7a-afe4-a0200bb7986c"),
-                            ModifiedByBehalfOf = new Guid("3ee8bd67-bd8f-4bf9-b8c2-c67969e87436")
+                            TagName = "loan-partner"
                         });
                 });
 
@@ -611,10 +676,15 @@ namespace amorphie.tag.data.Migrations
                     b.Property<Guid?>("ModifiedByBehalfOf")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.HasKey("TagName", "ViewTemplateName");
+
+                    b.HasIndex("TagId");
 
                     b.ToTable("Views");
 
@@ -623,22 +693,24 @@ namespace amorphie.tag.data.Migrations
                         {
                             TagName = "retail-customer",
                             ViewTemplateName = "retail-customer-mini-html",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8330),
-                            CreatedBy = new Guid("5ff46d80-d5db-4881-ba5d-6c285ed0becb"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8332),
-                            ModifiedBy = new Guid("1762169e-e044-46af-9472-a9c9cdb34123"),
-                            ModifiedByBehalfOf = new Guid("966e3a77-fc48-4a72-a190-fd65a1a482f5"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5583),
+                            CreatedBy = new Guid("d6a86102-515f-4ffe-a502-8a3a07608ed0"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5587),
+                            ModifiedBy = new Guid("94441e8d-6fdf-4789-95b9-65d2b8ba52f6"),
+                            ModifiedByBehalfOf = new Guid("6ad33b5d-fc38-4159-b4e6-4f95b2db17ad"),
+                            TagId = new Guid("509b8ce8-f8ae-4ce1-9251-224bdf1ab393"),
                             Type = 0
                         },
                         new
                         {
                             TagName = "retail-customer",
                             ViewTemplateName = "retail-customer-flutter",
-                            CreatedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8587),
-                            CreatedBy = new Guid("c150facf-8db8-4607-be30-05624ebbee7f"),
-                            ModifiedAt = new DateTime(2023, 2, 21, 13, 7, 21, 578, DateTimeKind.Utc).AddTicks(8590),
-                            ModifiedBy = new Guid("c2773572-824f-4d50-89c7-d41ddc723eae"),
-                            ModifiedByBehalfOf = new Guid("97ac4c25-d91e-4dd2-be6f-c6b4c6ca6d77"),
+                            CreatedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5601),
+                            CreatedBy = new Guid("587945d2-b65a-4ff6-bcc0-67eae8836d97"),
+                            ModifiedAt = new DateTime(2023, 5, 30, 7, 34, 21, 820, DateTimeKind.Utc).AddTicks(5602),
+                            ModifiedBy = new Guid("f3115646-038a-433f-8c6e-7e710e818352"),
+                            ModifiedByBehalfOf = new Guid("ea0f0067-755f-47a1-9f99-120f8fbe1f34"),
+                            TagId = new Guid("48d3534f-43a4-4b31-8a8c-baf85dbfbadf"),
                             Type = 2
                         });
                 });
@@ -647,7 +719,7 @@ namespace amorphie.tag.data.Migrations
                 {
                     b.HasOne("Domain", "Domain")
                         .WithMany("Entities")
-                        .HasForeignKey("DomainName")
+                        .HasForeignKey("DomainId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -658,7 +730,7 @@ namespace amorphie.tag.data.Migrations
                 {
                     b.HasOne("Entity", "Entity")
                         .WithMany("Data")
-                        .HasForeignKey("EntityName")
+                        .HasForeignKey("EntityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -675,7 +747,7 @@ namespace amorphie.tag.data.Migrations
 
                     b.HasOne("Tag", "Tag")
                         .WithMany()
-                        .HasForeignKey("TagName")
+                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -688,13 +760,11 @@ namespace amorphie.tag.data.Migrations
                 {
                     b.HasOne("Tag", "Owner")
                         .WithMany("TagsRelations")
-                        .HasForeignKey("OwnerName")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OwnerId");
 
                     b.HasOne("Tag", "Tag")
                         .WithMany()
-                        .HasForeignKey("TagName")
+                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -707,7 +777,7 @@ namespace amorphie.tag.data.Migrations
                 {
                     b.HasOne("Tag", "Tag")
                         .WithMany("Views")
-                        .HasForeignKey("TagName")
+                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
