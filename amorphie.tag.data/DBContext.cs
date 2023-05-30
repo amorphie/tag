@@ -32,7 +32,7 @@ class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
 
         var connStr = "Host=localhost:5432;Database=tags;Username=postgres;Password=postgres";
         builder.UseNpgsql(connStr);
-
+        builder.EnableSensitiveDataLogging();
         return new TagDBContext(builder.Options);
     }
 }
@@ -51,35 +51,66 @@ public class TagDBContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
 
-        // modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        // base.OnModelCreating(modelBuilder);
-        SeedDataGenerator.GenerateSeedData(modelBuilder);
-        // modelBuilder.Entity<Domain>()
-        //     .HasMany(b => b.Entities)
-        //     .WithOne(o => o.Domain);
+        var domains = new List<Domain>
+        {
+            new Domain { Id = Guid.NewGuid(), Name = "Domain 1", Description = "Domain 1 Description" },
+            new Domain { Id = Guid.NewGuid(), Name = "Domain 2", Description = "Domain 2 Description" }
+        };
+        modelBuilder.Entity<Domain>().HasData(domains);
 
-        // modelBuilder.Entity<Entity>()
-        //    .HasMany(b => b.Data)
-        //    .WithOne(o => o.Entity);
+        // Entity verileri
+        var entities = new List<Entity>
+        {
+            new Entity { Id = Guid.NewGuid(), Name = "Entity 1", Description = "Entity 1 Description",DomainId=domains[0].Id },
+            new Entity { Id = Guid.NewGuid(), Name = "Entity 2", Description = "Entity 2 Description",DomainId=domains[1].Id }
+        };
+        modelBuilder.Entity<Entity>().HasData(entities);
 
-        // modelBuilder.Entity<EntityData>()
-        //     .HasMany(b => b.Sources)
-        //     .WithOne(o => o.EntityData);
-        // modelBuilder.Entity<Tag>().HasData(new
-        // {
-        //     CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-        //     CreatedBy = Guid.NewGuid(),
-        //     ModifiedAt = DateTime.UtcNow,
-        //     ModifiedBy = Guid.NewGuid(),
-        //     Id = Guid.NewGuid(),
-        //     ModifiedByBehalfOf = Guid.NewGuid(),
-        //     Name = "retail-loan",
+        // EntityData verileri
+        var entityData = new List<EntityData>
+        {
+            new EntityData { Id = Guid.NewGuid(), EntityId = entities[0].Id, EntityName = entities[0].Name, Field = "Field 1", Ttl = 10},
+            new EntityData { Id = Guid.NewGuid(), EntityId = entities[1].Id, EntityName = entities[1].Name, Field = "Field 2", Ttl = 20 }
+        };
+        modelBuilder.Entity<EntityData>().HasData(entityData);
 
-        // });
+        // EntityDataSource verileri
+        var entityDataSources = new List<EntityDataSource>
+        {
+            new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityData[0].Id, Order = 1, TagId = Guid.NewGuid(), Tag = new Tag { Id = Guid.NewGuid(), Name = "Tag 1", Url = "URL 1" }, DataPath = "Path 1" },
+            new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityData[1].Id, Order = 2, TagId = Guid.NewGuid(), Tag = new Tag { Id = Guid.NewGuid(), Name = "Tag 2", Url = "URL 2" }, DataPath = "Path 2" }
+        };
+        modelBuilder.Entity<EntityData>().HasData(entityDataSources);
+
+        // Tag verileri
+        var tags = new List<Tag>
+        {
+            new Tag { Id = Guid.NewGuid(), Name = "Tag 1", Url = "URL 1", Ttl = 30, CreatedDate = DateTime.Now},
+            new Tag { Id = Guid.NewGuid(), Name = "Tag 2", Url = "URL 2", Ttl = 40, CreatedDate = DateTime.Now}
+        };
+        modelBuilder.Entity<Tag>().HasData(tags);
+
+        // TagRelation verileri
+        var tagRelations = new List<TagRelation>
+        {
+            new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 1", TagId = tags[0].Id, Tag = tags[0] },
+            new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 2", TagId = tags[1].Id, Tag = tags[1] }
+        };
+        modelBuilder.Entity<TagRelation>().HasData(tagRelations);
+
+        // View verileri
+        var views = new List<View>
+        {
+            new View { Id = Guid.NewGuid(), TagId = tags[0].Id, Tag = tags[0], ViewTemplateName = "View 1", Type = Enums.ViewType.Html },
+            new View { Id = Guid.NewGuid(), TagId = tags[1].Id, Tag = tags[1], ViewTemplateName = "View 2", Type = Enums.ViewType.Json }
+        };
+        modelBuilder.Entity<View>().HasData(views);
 
     }
 }
+
 
 public static class SeedDataGenerator
 {
@@ -97,53 +128,55 @@ public static class SeedDataGenerator
         // Entity verileri
         var entities = new List<Entity>
         {
-            new Entity { Id = Guid.NewGuid(), Name = "Entity 1", Description = "Entity 1 Description", Domain = domains[0] },
-            new Entity { Id = Guid.NewGuid(), Name = "Entity 2", Description = "Entity 2 Description", Domain = domains[1] }
+            new Entity { Id = Guid.NewGuid(), Name = "Entity 1", Description = "Entity 1 Description",DomainId=domains[0].Id, Domain = domains[0] },
+            new Entity { Id = Guid.NewGuid(), Name = "Entity 2", Description = "Entity 2 Description",DomainId=domains[1].Id, Domain = domains[1] }
         };
         modelBuilder.Entity<Entity>().HasData(entities);
 
-        // // EntityData verileri
-        // var entityData = new List<EntityData>
-        // {
-        //     new EntityData { Id = Guid.NewGuid(), EntityId = entities[0].Id, Entity = entities[0], EntityName = entities[0].Name, Field = "Field 1", Ttl = 10 },
-        //     new EntityData { Id = Guid.NewGuid(), EntityId = entities[1].Id, Entity = entities[1], EntityName = entities[1].Name, Field = "Field 2", Ttl = 20 }
-        // };
-        // context.Set<EntityData>().AddRange(entityData);
+        // EntityData verileri
+        var entityData = new List<EntityData>
+        {
+            new EntityData { Id = Guid.NewGuid(), EntityId = entities[0].Id, Entity = entities[0], EntityName = entities[0].Name, Field = "Field 1", Ttl = 10 },
+            new EntityData { Id = Guid.NewGuid(), EntityId = entities[1].Id, Entity = entities[1], EntityName = entities[1].Name, Field = "Field 2", Ttl = 20 }
+        };
+        modelBuilder.Entity<EntityData>().HasData(entityData);
 
-        // // EntityDataSource verileri
-        // var entityDataSources = new List<EntityDataSource>
-        // {
-        //     new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityData[0].Id, EntityData = entityData[0], Order = 1, TagId = Guid.NewGuid(), Tag = new Tag { Id = Guid.NewGuid(), Name = "Tag 1", Url = "URL 1" }, DataPath = "Path 1" },
-        //     new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityData[1].Id, EntityData = entityData[1], Order = 2, TagId = Guid.NewGuid(), Tag = new Tag { Id = Guid.NewGuid(), Name = "Tag 2", Url = "URL 2" }, DataPath = "Path 2" }
-        // };
-        // context.Set<EntityDataSource>().AddRange(entityDataSources);
+        // EntityDataSource verileri
+        var entityDataSources = new List<EntityDataSource>
+        {
+            new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityData[0].Id, EntityData = entityData[0], Order = 1, TagId = Guid.NewGuid(), Tag = new Tag { Id = Guid.NewGuid(), Name = "Tag 1", Url = "URL 1" }, DataPath = "Path 1" },
+            new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityData[1].Id, EntityData = entityData[1], Order = 2, TagId = Guid.NewGuid(), Tag = new Tag { Id = Guid.NewGuid(), Name = "Tag 2", Url = "URL 2" }, DataPath = "Path 2" }
+        };
+        modelBuilder.Entity<EntityData>().HasData(entityDataSources);
 
-        // // Tag verileri
-        // var tags = new List<Tag>
-        // {
-        //     new Tag { Id = Guid.NewGuid(), Name = "Tag 1", Url = "URL 1", Ttl = 30, CreatedDate = DateTime.Now },
-        //     new Tag { Id = Guid.NewGuid(), Name = "Tag 2", Url = "URL 2", Ttl = 40, CreatedDate = DateTime.Now }
-        // };
-        // context.Set<Tag>().AddRange(tags);
+        // Tag verileri
+        var tags = new List<Tag>
+        {
+            new Tag { Id = Guid.NewGuid(), Name = "Tag 1", Url = "URL 1", Ttl = 30, CreatedDate = DateTime.Now },
+            new Tag { Id = Guid.NewGuid(), Name = "Tag 2", Url = "URL 2", Ttl = 40, CreatedDate = DateTime.Now }
+        };
+        modelBuilder.Entity<Tag>().HasData(tags);
 
-        // // TagRelation verileri
-        // var tagRelations = new List<TagRelation>
-        // {
-        //     new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 1", TagId = tags[0].Id, Tag = tags[0] },
-        //     new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 2", TagId = tags[1].Id, Tag = tags[1] }
-        // };
-        // context.Set<TagRelation>().AddRange(tagRelations);
+        // TagRelation verileri
+        var tagRelations = new List<TagRelation>
+        {
+            new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 1", TagId = tags[0].Id, Tag = tags[0] },
+            new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 2", TagId = tags[1].Id, Tag = tags[1] }
+        };
+        modelBuilder.Entity<TagRelation>().HasData(tagRelations);
 
-        // // View verileri
-        // var views = new List<View>
-        // {
-        //     new View { Id = Guid.NewGuid(), TagId = tags[0].Id, Tag = tags[0], ViewTemplateName = "View 1", Type = Enums.ViewType.Html },
-        //     new View { Id = Guid.NewGuid(), TagId = tags[1].Id, Tag = tags[1], ViewTemplateName = "View 2", Type = Enums.ViewType.Json }
-        // };
-        // context.Set<View>().AddRange(views);
+        // View verileri
+        var views = new List<View>
+        {
+            new View { Id = Guid.NewGuid(), TagId = tags[0].Id, Tag = tags[0], ViewTemplateName = "View 1", Type = Enums.ViewType.Html },
+            new View { Id = Guid.NewGuid(), TagId = tags[1].Id, Tag = tags[1], ViewTemplateName = "View 2", Type = Enums.ViewType.Json }
+        };
+        modelBuilder.Entity<View>().HasData(views);
 
     }
+
 }
+
 //         modelBuilder.Entity<Tag>().HasData(new
 //         {
 //             CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
