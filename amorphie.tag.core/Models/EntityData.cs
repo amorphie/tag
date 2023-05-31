@@ -4,9 +4,9 @@ using amorphie.core.Base;
 
 public class EntityData : EntityBase
 {
+    public Guid EntityId { get; set; }
     public Entity? Entity { get; set; }
-    public String EntityName { get; set; } = string.Empty;
     public string Field { get; set; } = string.Empty;
     public int? Ttl { get; set; }
-    public List<EntityDataSource> Sources = new List<EntityDataSource>();
+   // public List<EntityDataSource> Sources = new List<EntityDataSource>();
 }

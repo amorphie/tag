@@ -39,19 +39,34 @@ class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
 
 public class TagDBContext : DbContext
 {
+    /*
     public DbSet<Tag>? Tags { get; set; }
     public DbSet<TagRelation>? TagRelations { get; set; }
     public DbSet<View>? Views { get; set; }
+        public DbSet<EntityDataSource>? EntityDataSource { get; set; }
+    */
     public DbSet<Domain>? Domains { get; set; }
     public DbSet<Entity>? Entities { get; set; }
     public DbSet<EntityData>? EntityData { get; set; }
-    public DbSet<EntityDataSource>? EntityDataSource { get; set; }
+
 
     public TagDBContext(DbContextOptions options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+    modelBuilder.Entity<Domain>()
+        .HasMany(e => e.Entities)
+        .WithOne(e => e.Domain)
+        .HasForeignKey(e => e.DomainId)
+        .HasPrincipalKey(e => e.Id);
+
+    modelBuilder.Entity<Entity>()
+        .HasMany(e => e.Data)
+        .WithOne(e => e.Entity)
+        .HasForeignKey(e => e.EntityId)
+        .HasPrincipalKey(e => e.Id);
 
         var domains = new List<Domain>
         {
@@ -71,11 +86,12 @@ public class TagDBContext : DbContext
         // EntityData verileri
         var entityData = new List<EntityData>
         {
-            new EntityData { Id = Guid.NewGuid(), EntityId = entities[0].Id, EntityName = entities[0].Name, Field = "Field 1", Ttl = 10},
-            new EntityData { Id = Guid.NewGuid(), EntityId = entities[1].Id, EntityName = entities[1].Name, Field = "Field 2", Ttl = 20 }
+            new EntityData { Id = Guid.NewGuid(), EntityId = entities[0].Id,Field = "Field 1", Ttl = 10},
+            new EntityData { Id = Guid.NewGuid(), EntityId = entities[1].Id, Field = "Field 2", Ttl = 20 }
         };
         modelBuilder.Entity<EntityData>().HasData(entityData);
 
+/*
         // EntityDataSource verileri
         var entityDataSources = new List<EntityDataSource>
         {
@@ -107,11 +123,11 @@ public class TagDBContext : DbContext
             new View { Id = Guid.NewGuid(), TagId = tags[1].Id, Tag = tags[1], ViewTemplateName = "View 2", Type = Enums.ViewType.Json }
         };
         modelBuilder.Entity<View>().HasData(views);
-
+*/
     }
 }
 
-
+/*
 public static class SeedDataGenerator
 {
 
@@ -702,3 +718,4 @@ public static class SeedDataGenerator
 //     [JsonPropertyNameAttribute("customer")]
 //     public string? Customer { get; set; }
 // }
+*/
