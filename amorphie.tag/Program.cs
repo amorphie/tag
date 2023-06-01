@@ -3,6 +3,7 @@ using amorphie.core.security.Extensions;
 using amorphie.core.Extension;
 using amorphie.tag.Validator;
 using FluentValidation;
+using static amorphie.tag.data.TagDBContext;
 
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
@@ -39,6 +40,12 @@ var app = builder.Build();
 
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<TagDBContext>();
+
+
+
+
+DbInitializer.Initialize(db);
+
 db.Database.Migrate();
 
 app.UseCloudEvents();
