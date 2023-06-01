@@ -6,7 +6,7 @@ public record SaveTagRequest(string Name, string? Url, int? Ttl);
 public record SaveDomainRequest(string Name, string? Description);
 public record SaveEntityRequest(string Name, string? Description, Guid DomainId);
 public record SaveEntiyWithDataAndSource(string Name, string? Description, string DomainName, SaveEntityDataRequest[]? Data);
-public record SaveEntityDataRequest(string Field, int? Ttl, Guid Id, string EntityName, DateTime? CreatedAt, DateTime? LastModifiedDate, SaveEntityDataSourcesRequest[]? Source);
+public record SaveEntityDataRequest(string Field, int? Ttl, Guid Id, Guid EntityId, string EntityName, DateTime? CreatedAt, DateTime? LastModifiedDate, SaveEntityDataSourcesRequest[]? Source);
 public record SaveEntityDataSourcesRequest(int Order, string TagName, string DataPath)
 {
     public Guid TagId { get; set; }

@@ -39,12 +39,12 @@ class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
 
 public class TagDBContext : DbContext
 {
-    /*
+
     public DbSet<Tag>? Tags { get; set; }
     public DbSet<TagRelation>? TagRelations { get; set; }
     public DbSet<View>? Views { get; set; }
-        public DbSet<EntityDataSource>? EntityDataSource { get; set; }
-    */
+    public DbSet<EntityDataSource>? EntityDataSource { get; set; }
+
     public DbSet<Domain>? Domains { get; set; }
     public DbSet<Entity>? Entities { get; set; }
     public DbSet<EntityData>? EntityData { get; set; }
@@ -56,18 +56,40 @@ public class TagDBContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-    modelBuilder.Entity<Domain>()
-        .HasMany(e => e.Entities)
-        .WithOne(e => e.Domain)
-        .HasForeignKey(e => e.DomainId)
-        .HasPrincipalKey(e => e.Id);
+        modelBuilder.Entity<Domain>()
+            .HasMany(e => e.Entities)
+            .WithOne(e => e.Domain)
+            .HasForeignKey(e => e.DomainId)
+            .HasPrincipalKey(e => e.Id);
 
-    modelBuilder.Entity<Entity>()
-        .HasMany(e => e.Data)
-        .WithOne(e => e.Entity)
-        .HasForeignKey(e => e.EntityId)
-        .HasPrincipalKey(e => e.Id);
+        modelBuilder.Entity<Entity>()
+            .HasMany(e => e.Data)
+            .WithOne(e => e.Entity)
+            .HasForeignKey(e => e.EntityId)
+            .HasPrincipalKey(e => e.Id);
 
+        modelBuilder.Entity<EntityData>()
+            .HasMany(e => e.Sources)
+            .WithOne(e => e.EntityData)
+            .HasForeignKey(e => e.EntityDataId)
+            .HasPrincipalKey(e => e.Id);
+
+
+        modelBuilder.Entity<Tag>()
+            .HasMany(e => e.TagsRelations)
+            .WithOne(e => e.Tag)
+            .HasForeignKey(e => e.TagId)
+            .HasPrincipalKey(e => e.Id);
+
+        modelBuilder.Entity<EntityDataSource>()
+            .HasOne(e => e.EntityData)
+            .WithMany(e => e.Sources)
+            .HasPrincipalKey(e => e.Id);
+
+        modelBuilder.Entity<TagRelation>()
+            .HasOne(e => e.Tag)
+            .WithMany(e => e.TagsRelations)
+            .HasPrincipalKey(e => e.Id);
         var domains = new List<Domain>
         {
             new Domain { Id = Guid.NewGuid(), Name = "Domain 1", Description = "Domain 1 Description" },
@@ -91,39 +113,39 @@ public class TagDBContext : DbContext
         };
         modelBuilder.Entity<EntityData>().HasData(entityData);
 
-/*
+
         // EntityDataSource verileri
         var entityDataSources = new List<EntityDataSource>
-        {
-            new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityData[0].Id, Order = 1, TagId = Guid.NewGuid(), Tag = new Tag { Id = Guid.NewGuid(), Name = "Tag 1", Url = "URL 1" }, DataPath = "Path 1" },
-            new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityData[1].Id, Order = 2, TagId = Guid.NewGuid(), Tag = new Tag { Id = Guid.NewGuid(), Name = "Tag 2", Url = "URL 2" }, DataPath = "Path 2" }
-        };
-        modelBuilder.Entity<EntityData>().HasData(entityDataSources);
+                {
+                    new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityData[0].Id, Order = 1, DataPath = "Path 1" },
+                    new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityData[1].Id, Order = 2, DataPath = "Path 2" }
+                };
+        modelBuilder.Entity<EntityDataSource>().HasData(entityDataSources);
 
-        // Tag verileri
+        //Tag verileri
         var tags = new List<Tag>
-        {
-            new Tag { Id = Guid.NewGuid(), Name = "Tag 1", Url = "URL 1", Ttl = 30, CreatedDate = DateTime.Now},
-            new Tag { Id = Guid.NewGuid(), Name = "Tag 2", Url = "URL 2", Ttl = 40, CreatedDate = DateTime.Now}
-        };
+                {
+                    new Tag { Id = Guid.NewGuid(), Name = "Tag 1", Url = "URL 1", Ttl = 30, CreatedDate = DateTime.UtcNow},
+                    new Tag { Id = Guid.NewGuid(), Name = "Tag 2", Url = "URL 2", Ttl = 40, CreatedDate = DateTime.UtcNow}
+                };
         modelBuilder.Entity<Tag>().HasData(tags);
 
         // TagRelation verileri
         var tagRelations = new List<TagRelation>
-        {
-            new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 1", TagId = tags[0].Id, Tag = tags[0] },
-            new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 2", TagId = tags[1].Id, Tag = tags[1] }
-        };
+{
+    new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 1", TagId = tags[0].Id },
+    new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 2", TagId = tags[1].Id }
+};
         modelBuilder.Entity<TagRelation>().HasData(tagRelations);
 
         // View verileri
         var views = new List<View>
-        {
-            new View { Id = Guid.NewGuid(), TagId = tags[0].Id, Tag = tags[0], ViewTemplateName = "View 1", Type = Enums.ViewType.Html },
-            new View { Id = Guid.NewGuid(), TagId = tags[1].Id, Tag = tags[1], ViewTemplateName = "View 2", Type = Enums.ViewType.Json }
-        };
+                {
+                    new View { Id = Guid.NewGuid(), TagId = tags[0].Id, ViewTemplateName = "View 1", Type = Enums.ViewType.Html },
+                    new View { Id = Guid.NewGuid(), TagId = tags[1].Id, ViewTemplateName = "View 2", Type = Enums.ViewType.Json }
+                };
         modelBuilder.Entity<View>().HasData(views);
-*/
+
     }
 }
 
