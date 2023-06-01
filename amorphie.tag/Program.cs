@@ -4,6 +4,10 @@ using amorphie.core.Extension;
 using amorphie.tag.Validator;
 using FluentValidation;
 using static amorphie.tag.data.TagDBContext;
+using amorphie.core.Identity;
+using amorphie.core.Repository;
+using System.Reflection;
+
 
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
@@ -16,9 +20,13 @@ var postgreDb = builder.Configuration["PostgreDB"];
 //var configurations = await client.GetConfiguration("amorphie-config", new List<string>() { "PostgreDB" });
 
 #pragma warning restore 618
+var assemblies = new Assembly[] { typeof(DomainValidator).Assembly, typeof(DomainMapper).Assembly };
 builder.Services.AddScoped<IValidator<Domain>, DomainValidator>();
 
-
+builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
+builder.Services.AddScoped(typeof(IBBTRepository<,>), typeof(BBTRepository<,>));
+builder.Services.AddValidatorsFromAssemblies(assemblies);
+builder.Services.AddAutoMapper(assemblies);
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 builder.Services.AddDaprClient();

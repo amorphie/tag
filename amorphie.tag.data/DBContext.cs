@@ -154,12 +154,17 @@ public class TagDBContext : DbContext
         public static void Initialize(TagDBContext context)
         {
             context.Database.EnsureCreated();
-
+            if (context.Domains!.Any())
+            {
+                return;
+            }
 
             var domains = new List<Domain>
         {
-            new Domain { Name = "Domain 1", Description = "Description 1" },
-            new Domain { Name = "Domain 2", Description = "Description 2" }
+
+            new Domain { Id = Guid.NewGuid(), Name = "Domain 1", Description = "Domain 1 Description" },
+            new Domain { Id = Guid.NewGuid(), Name = "Domain 2", Description = "Domain 2 Description" }
+
         };
 
             foreach (var domain in domains)
@@ -171,8 +176,8 @@ public class TagDBContext : DbContext
 
             var tags = new List<Tag>
         {
-            new Tag { Name = "Tag 1", Url = "URL 1", Ttl = 10, CreatedDate = DateTime.UtcNow },
-            new Tag { Name = "Tag 2", Url = "URL 2", Ttl = 20, CreatedDate = DateTime.UtcNow }
+        new Tag { Id = Guid.NewGuid(), Name = "Tag 1", Url = "URL 1", Ttl = 30, CreatedDate = DateTime.UtcNow},
+        new Tag { Id = Guid.NewGuid(), Name = "Tag 2", Url = "URL 2", Ttl = 40, CreatedDate = DateTime.UtcNow}
         };
 
             foreach (var tag in tags)
@@ -182,36 +187,12 @@ public class TagDBContext : DbContext
 
             context.SaveChanges();
 
-            var entityDataSources = new List<EntityDataSource>
-        {
-            new EntityDataSource { Order = 1, Tag = tags[0], DataPath = "Data Path 1" },
-            new EntityDataSource { Order = 2, Tag = tags[1], DataPath = "Data Path 2" }
-        };
 
-            foreach (var entityDataSource in entityDataSources)
-            {
-                context.EntityDataSource.Add(entityDataSource);
-            }
-
-            context.SaveChanges();
-
-            var entityDataList = new List<EntityData>
-        {
-            new EntityData { Field = "Field 1", Ttl = 5, Sources = new List<EntityDataSource> { entityDataSources[0] } },
-            new EntityData { Field = "Field 2", Ttl = 10, Sources = new List<EntityDataSource> { entityDataSources[1] } }
-        };
-
-            foreach (var entityData in entityDataList)
-            {
-                context.EntityData.Add(entityData);
-            }
-
-            context.SaveChanges();
 
             var entities = new List<Entity>
         {
-            new Entity { Name = "Entity 1", Description = "Description 1", Domain = domains[0], Data = new List<EntityData> { entityDataList[0] } },
-            new Entity { Name = "Entity 2", Description = "Description 2", Domain = domains[1], Data = new List<EntityData> { entityDataList[1] } }
+            new Entity { Id = Guid.NewGuid(), Name = "Entity 1", Description = "Entity 1 Description",DomainId=domains[0].Id },
+            new Entity { Id = Guid.NewGuid(), Name = "Entity 2", Description = "Entity 2 Description",DomainId=domains[1].Id }
         };
 
             foreach (var entity in entities)
@@ -221,10 +202,36 @@ public class TagDBContext : DbContext
 
             context.SaveChanges();
 
+            var entityDataList = new List<EntityData>
+        {
+            new EntityData { Id = Guid.NewGuid(), EntityId = entities[0].Id,Field = "Field 1", Ttl = 10},
+            new EntityData { Id = Guid.NewGuid(), EntityId = entities[1].Id, Field = "Field 2", Ttl = 20 }
+        };
+
+            foreach (var entityData in entityDataList)
+            {
+                context.EntityData.Add(entityData);
+            }
+
+            context.SaveChanges();
+
+            var entityDataSources = new List<EntityDataSource>
+        {
+        new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityDataList[0].Id, Order = 1, DataPath = "Path 1" },
+        new EntityDataSource { Id = Guid.NewGuid(), EntityDataId = entityDataList[1].Id, Order = 2, DataPath = "Path 2" }
+        };
+
+            foreach (var entityDataSource in entityDataSources)
+            {
+                context.EntityDataSource.Add(entityDataSource);
+            }
+
+            context.SaveChanges();
+
             var tagRelations = new List<TagRelation>
         {
-            new TagRelation { OwnerName = "Owner 1", Tag = tags[0], TagName = "Tag 1" },
-            new TagRelation { OwnerName = "Owner 2", Tag = tags[1], TagName = "Tag 2" }
+             new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 1", TagId = tags[0].Id },
+             new TagRelation { Id = Guid.NewGuid(), OwnerName = "Owner 2", TagId = tags[1].Id }
         };
 
             foreach (var tagRelation in tagRelations)
@@ -236,8 +243,8 @@ public class TagDBContext : DbContext
 
             var views = new List<View>
         {
-            new View { TagId = tags[0].Id, TagName = "Tag 1", ViewTemplateName = "Template 1", Type = Enums.ViewType.Json },
-            new View { TagId = tags[1].Id, TagName = "Tag 2", ViewTemplateName = "Template 2", Type = Enums.ViewType.Html }
+            new View { Id = Guid.NewGuid(), TagId = tags[0].Id, ViewTemplateName = "View 1", Type = Enums.ViewType.Html },
+            new View { Id = Guid.NewGuid(), TagId = tags[1].Id, ViewTemplateName = "View 2", Type = Enums.ViewType.Json }
         };
 
             foreach (var view in views)
