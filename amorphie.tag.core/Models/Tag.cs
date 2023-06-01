@@ -5,13 +5,14 @@ using amorphie.core.Base;
 
 public class Tag : EntityBase
 {
+
     public string Name { get; set; } = string.Empty;
     public string? Url { get; set; }
     public int? Ttl { get; set; }
     public DateTime? CreatedDate { get; set; }
     [JsonIgnore]
     public DateTime? LastModifiedDate { get; set; }
-    [InverseProperty("Owner")]
+    [InverseProperty("Tag")]
     public List<TagRelation> TagsRelations { get; set; } = new List<TagRelation>();
     public List<View> Views { get; set; } = new List<View>();
 
