@@ -1,11 +1,11 @@
 {
   "uuid": "d63f60ec-ab86-47d5-a21f-7d86f9db2f6c",
-  "lastMigration": 24,
+  "lastMigration": 27,
   "name": "tag",
   "endpointPrefix": "",
   "latency": 0,
-  "port": 3001,
-  "hostname": "0.0.0.0",
+  "port": 3000,
+  "hostname": "",
   "routes": [
     {
       "uuid": "e0514197-ac3f-4a8c-af13-f633d72d3e31",
@@ -32,7 +32,8 @@
         }
       ],
       "enabled": true,
-      "responseMode": null
+      "responseMode": null,
+      "type": "http"
     },
     {
       "uuid": "8807aa88-f2dd-45bb-b71f-652b64976383",
@@ -59,7 +60,8 @@
         }
       ],
       "enabled": true,
-      "responseMode": null
+      "responseMode": null,
+      "type": "http"
     },
     {
       "uuid": "2e18bfc5-37bf-4ac9-b967-bea1e28039bc",
@@ -86,7 +88,8 @@
         }
       ],
       "enabled": true,
-      "responseMode": null
+      "responseMode": null,
+      "type": "http"
     },
     {
       "uuid": "a904f99b-6bfb-4f16-8ca1-61fd774a9b16",
@@ -113,7 +116,8 @@
         }
       ],
       "enabled": true,
-      "responseMode": null
+      "responseMode": null,
+      "type": "http"
     },
     {
       "uuid": "fc2b93cb-8c10-457a-9890-5d3cf05f538e",
@@ -140,7 +144,8 @@
         }
       ],
       "enabled": true,
-      "responseMode": null
+      "responseMode": null,
+      "type": "http"
     },
     {
       "uuid": "457f5407-1bb3-4d34-a305-e616eed84024",
@@ -175,7 +180,8 @@
         }
       ],
       "enabled": true,
-      "responseMode": null
+      "responseMode": null,
+      "type": "http"
     },
     {
       "uuid": "695d8c21-acbb-4683-94df-37c671e0ccec",
@@ -202,7 +208,8 @@
         }
       ],
       "enabled": true,
-      "responseMode": null
+      "responseMode": null,
+      "type": "http"
     }
   ],
   "proxyMode": false,
@@ -236,5 +243,36 @@
       "value": ""
     }
   ],
-  "data": []
+  "data": [],
+  "folders": [],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "e0514197-ac3f-4a8c-af13-f633d72d3e31"
+    },
+    {
+      "type": "route",
+      "uuid": "8807aa88-f2dd-45bb-b71f-652b64976383"
+    },
+    {
+      "type": "route",
+      "uuid": "2e18bfc5-37bf-4ac9-b967-bea1e28039bc"
+    },
+    {
+      "type": "route",
+      "uuid": "a904f99b-6bfb-4f16-8ca1-61fd774a9b16"
+    },
+    {
+      "type": "route",
+      "uuid": "fc2b93cb-8c10-457a-9890-5d3cf05f538e"
+    },
+    {
+      "type": "route",
+      "uuid": "457f5407-1bb3-4d34-a305-e616eed84024"
+    },
+    {
+      "type": "route",
+      "uuid": "695d8c21-acbb-4683-94df-37c671e0ccec"
+    }
+  ]
 }

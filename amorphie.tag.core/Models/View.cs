@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using amorphie.core.Base;
 using Microsoft.EntityFrameworkCore;
+using static Enums;
 
 public class View : EntityBase
 {
@@ -9,5 +10,15 @@ public class View : EntityBase
     public Tag? Tag { get; set; }
 
     public string ViewTemplateName { get; set; } = string.Empty;
-    public Enums.ViewType Type { get; set; }
+    public ViewType Type { get; set; }
+}
+
+public enum ViewType
+{
+    Html,
+    MobileHtml,
+    Flutter,
+    NativeIOS,
+    NativeAndroid,
+    Json
 }

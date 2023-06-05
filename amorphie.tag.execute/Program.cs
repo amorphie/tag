@@ -84,6 +84,7 @@ catch (Exception ex)
 
 async Task<IResult> ExecuteTag(
     [FromRoute(Name = "tagName")] string tagName,
+    [FromQuery(Name = "reference")] string reference,
     HttpRequest request,
     HttpContext httpContext
     )
@@ -96,10 +97,11 @@ async Task<IResult> ExecuteTag(
     {
         //b TODO: dapr service call to long
         //tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
-        var test = client.CreateInvokeMethodRequest(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
-        var result = client.InvokeMethodWithResponseAsync(test).Result.Content.ReadAsStringAsync().Result;
-        var json = (JObject)JsonConvert.DeserializeObject(result);
-        tag = json["data"].ToObject<DtoTag>();
+        //var test = client.CreateInvokeMethodRequest(HttpMethod.Get, "amorphie-tag", $"tag/{tagId}");
+        // var result = client.InvokeMethodWithResponseAsync(test).Result.Content.ReadAsStringAsync().Result;
+        // var json = (JObject)JsonConvert.DeserializeObject(result);
+        // tag = json["data"].ToObject<DtoTag>();
+        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, "amorphie-tag", $"Tag/getTag/{tagName}");
 
     }
     catch (Dapr.Client.InvocationException ex)
@@ -175,6 +177,7 @@ async Task<IResult> ExecuteEntity(
     }
     //Query'den tag aldık.
     var queryTags = request.Query["tag"].ToList();
+    var queryReference = request.Query["reference"].ToString().Split('&').ToList();
 
     GetEntityResponse? entity;
 
@@ -182,7 +185,7 @@ async Task<IResult> ExecuteEntity(
     {
         //Route'dan gelen domain ve entity bilgisine göre
         //Entity ve EntityData tablosunda ilgili Entity'e ait kaç tane field varsa birlikte getirdik.
-        entity = await client.InvokeMethodAsync<GetEntityResponse>(HttpMethod.Get, "amorphie-tag", $"domain/{domainName}/entity/{entityName}");
+        entity = await client.InvokeMethodAsync<GetEntityResponse>(HttpMethod.Get, "amorphie-tag", $"entityData/getEntity/{domainName}/{entityName}");
     }
     catch (Dapr.Client.InvocationException ex)
     {
@@ -209,7 +212,8 @@ async Task<IResult> ExecuteEntity(
         {
             if (queryTags.Contains(targetTag.Tag))
             {
-                var data = await client.InvokeMethodAsync<dynamic>(HttpMethod.Get, "amorphie-tag-execute", $"tag/{targetTag.Tag}/execute{request.QueryString.Value}");
+                //??
+                var data = await client.InvokeMethodAsync<dynamic>(HttpMethod.Get, "amorphie-tag-execute", $"tag/{targetTag.Tag}/execute?reference={queryReference.FirstOrDefault()}");
                 JToken dataAsJson = JToken.Parse(data.ToString());
 
                 if (dataAsJson.SelectToken(targetTag.Path) != null)
@@ -245,11 +249,8 @@ async Task<IResult> TemplateExecuter(
 
     try
     {
-        //tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
-        var test = client.CreateInvokeMethodRequest(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
-        var result = await client.InvokeMethodWithResponseAsync(test).Result.Content.ReadAsStringAsync();
-        var json = (JObject)JsonConvert.DeserializeObject(result);
-        tag = json["data"].ToObject<DtoTag>();
+
+        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, "amorphie-tag", $"Tag/getTag/{tagName}");
 
     }
     catch (Dapr.Client.InvocationException ex)

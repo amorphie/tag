@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using amorphie.core.Base;
 
-public class DtoTag
+public class DtoTag : DtoBase
 {
     [Key]
     public string? Name { get; set; }

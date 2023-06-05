@@ -52,7 +52,6 @@ var db = scope.ServiceProvider.GetRequiredService<TagDBContext>();
 
 
 
-DbInitializer.Initialize(db);
 
 db.Database.Migrate();
 
@@ -68,8 +67,8 @@ app.UseSwaggerUI();
 
 app.Logger.LogInformation("Registering Routes");
 
-app.MapTagEndpoints();
-app.MapEntityEndpoints();
+//app.MapTagEndpoints();
+//app.MapEntityEndpoints();
 
 app.AddRoutes();
 
