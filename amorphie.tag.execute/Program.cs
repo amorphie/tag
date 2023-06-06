@@ -165,70 +165,77 @@ async Task<IResult> ExecuteTag(
 async Task<IResult> ExecuteEntity(
     [FromRoute(Name = "domainName")] string domainName,
     [FromRoute(Name = "entityName")] string entityName,
-    [FromQuery(Name = "tag")] string[] tag,
+    [FromQuery(Name = "tag")] string[] tags,
     [FromQuery(Name = "reference")] string reference,
     HttpRequest request,
     HttpContext httpContext
-    )
+)
 {
-    if (!request.Query.ContainsKey("tag"))
+    if (tags == null || tags.Length == 0)
     {
-        return Results.BadRequest("Any tag is not suplied. At least one tag must be suplied.");
+        return Results.BadRequest("At least one tag must be supplied.");
     }
-    //Query'den tag aldık.
+
+    var queryReference = reference?.Split('&').ToList();
     var queryTags = request.Query["tag"].ToList();
-    var queryReference = request.Query["reference"].ToString().Split('&').ToList();
-
-    GetEntityResponse? entity;
-
     try
     {
-        //Route'dan gelen domain ve entity bilgisine göre
-        //Entity ve EntityData tablosunda ilgili Entity'e ait kaç tane field varsa birlikte getirdik.
-        entity = await client.InvokeMethodAsync<GetEntityResponse>(HttpMethod.Get, "amorphie-tag", $"entityData/getEntity/{domainName}/{entityName}");
+        var entity = await client.InvokeMethodAsync<GetEntityResponse>(
+            HttpMethod.Get,
+            "amorphie-tag",
+            $"entityData/getEntity/{domainName}/{entityName}"
+        );
+
+        var returnValue = new Dictionary<string, dynamic>();
+
+        foreach (var field in entity.Data)
+        {
+            var sourceTags = field.Sources.OrderBy(f => f.Order).ToArray();
+
+            foreach (var targetTag in sourceTags)
+            {
+                if (queryTags.Contains(targetTag.Tag))
+                {
+                    var data = await client.InvokeMethodAsync<dynamic>(
+                                        HttpMethod.Get,
+                                        "amorphie-tag-execute",
+                                        $"tag/{targetTag.Tag}/execute?reference={queryReference?.FirstOrDefault()}");
+                    JToken dataAsJson = JToken.Parse(data.ToString());
+
+                    if (dataAsJson.SelectToken(targetTag.Path) != null)
+                    {
+                        returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path)!.Value<string>()!);
+                    }
+
+                    break;
+                }
+
+            }
+        }
+
+
+        return Results.Ok(returnValue);
     }
     catch (Dapr.Client.InvocationException ex)
     {
         if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+        {
             return Results.NotFound("Entity is not found.");
+        }
 
         if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
+        {
             return Results.Problem("Entity query service is unavailable", null, 510);
+        }
 
-        return Results.Problem($"Entity query service error : {ex.Response.StatusCode}", null, 510);
+        return Results.Problem($"Entity query service error: {ex.Response.StatusCode}", null, 510);
     }
     catch (Exception ex)
     {
-        return Results.Problem($"Unhandled Entity query service error : {ex.Message}", null, 510);
+        return Results.Problem($"Unhandled Entity query service error: {ex.Message}", null, 510);
     }
-
-    var returnValue = new Dictionary<string, dynamic>();
-    //EntityData tablosunda entity' ait fieldlar foreach ile dönülür
-    foreach (var field in entity.Data)
-    {
-        var sourceTags = field.Sources.OrderBy(f => f.Order).ToArray();
-
-        foreach (var targetTag in sourceTags)
-        {
-            if (queryTags.Contains(targetTag.Tag))
-            {
-                //??
-                var data = await client.InvokeMethodAsync<dynamic>(HttpMethod.Get, "amorphie-tag-execute", $"tag/{targetTag.Tag}/execute?reference={queryReference.FirstOrDefault()}");
-                JToken dataAsJson = JToken.Parse(data.ToString());
-
-                if (dataAsJson.SelectToken(targetTag.Path) != null)
-                {
-                    returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path)!.Value<string>()!);
-                }
-
-                break;
-            }
-
-        }
-    }
-
-    return Results.Ok(returnValue);
 }
+
 
 async Task<IResult> TemplateExecuter(
     [FromRoute(Name = "tagName")] string tagName,
@@ -296,53 +303,58 @@ async Task<IResult> TemplateExecuter(
     // }
     // else
     {
-        HttpClient httpClient = new();
+        using (HttpClient httpClient = new HttpClient())
+        {
+            var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
+
+            var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
+            await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
+
+            httpContext.Response.Headers.Add("X-Cache", "Miss");
+
+
+            app.Logger.LogInformation($"ExecuteTag is responded with {response}");
+            var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(response);
+            var machineName = Environment.MachineName;
+            var payload = new RenderRequestDefinition
+            {
+                Name = ViewTemplateName ?? "test-mehmet4",
+                RenderData = data,
+                RenderID = Guid.NewGuid(),
+                SemVer = "1.0.0",
+                Action = "amorphie-template-executer",
+                Customer = "test-mehmet1",
+                Identity = machineName ?? "amorphie-tag",
+                ItemId = "test-mehmet1",
+                ProcessName = "test-mehmet1",
+                RenderDataForLog = data,
+            };
+
+            /// ----- TODO: minimize
+            var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
+
+            HttpRequestMessage yourmsg = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri("https://test-template-engine.burgan.com.tr/Template/Render"),
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+            var responses = await httpClient.SendAsync(yourmsg);
+
+            // httpClient.BaseAddress = new Uri("https://test-template-engine.burgan.com.tr/");
+            // var status = await httpClient.PostAsync("Template/Render", new StringContent(json, Encoding.UTF8, "application/json"));
+            ///////---------------------------
+            app.Logger.LogInformation($"ExecuteTag is responded with {responses}");
+            return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
+
+        }
+
         // post http client with body
 
 
         //12113810636
 
-        var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
 
-        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
-        await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
-
-        httpContext.Response.Headers.Add("X-Cache", "Miss");
-
-
-        app.Logger.LogInformation($"ExecuteTag is responded with {response}");
-        var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(response);
-        var machineName = Environment.MachineName;
-        var payload = new RenderRequestDefinition
-        {
-            Name = ViewTemplateName ?? "test-mehmet4",
-            RenderData = data,
-            RenderID = Guid.NewGuid(),
-            SemVer = "1.0.0",
-            Action = "amorphie-template-executer",
-            Customer = "test-mehmet1",
-            Identity = machineName ?? "amorphie-tag",
-            ItemId = "test-mehmet1",
-            ProcessName = "test-mehmet1",
-            RenderDataForLog = data,
-        };
-
-        /// ----- TODO: minimize
-        var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
-
-        HttpRequestMessage yourmsg = new HttpRequestMessage
-        {
-            Method = HttpMethod.Post,
-            RequestUri = new Uri("https://test-template-engine.burgan.com.tr/Template/Render"),
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
-        };
-        var responses = await httpClient.SendAsync(yourmsg);
-
-        // httpClient.BaseAddress = new Uri("https://test-template-engine.burgan.com.tr/");
-        // var status = await httpClient.PostAsync("Template/Render", new StringContent(json, Encoding.UTF8, "application/json"));
-        ///////---------------------------
-        app.Logger.LogInformation($"ExecuteTag is responded with {responses}");
-        return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
 
         //swagger-adresi: https://test-template-engine.burgan.com.tr/swagger/index.html
     }
