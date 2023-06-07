@@ -52,7 +52,7 @@ var db = scope.ServiceProvider.GetRequiredService<TagDBContext>();
 
 
 
-
+db.Database.EnsureCreated();
 db.Database.Migrate();
 
 app.UseCloudEvents();
