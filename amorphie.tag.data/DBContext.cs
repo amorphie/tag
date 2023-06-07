@@ -19,22 +19,31 @@ class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
     }
     public TagDbContextFactory(IConfiguration configuration)
     {
-        _configuration = configuration;
-    }
 
+        _configuration = configuration;
+        var con = _configuration["PostgreSql"];
+        System.Console.WriteLine("con: " + con);
+        var connStr = _configuration.GetValue<string>("PostgreSql");
+          var builder = new DbContextOptionsBuilder<TagDBContext>();
+        // var test = _configuration["STATE_STORE"];
+        // System.Console.WriteLine("Test: " + test);
+    
+  
+
+      
+        builder.EnableSensitiveDataLogging();
+        builder.UseNpgsql(connStr);
+        new TagDBContext(builder.Options);
+
+    }
 
     public TagDBContext CreateDbContext(string[] args)
     {
-        var builder = new DbContextOptionsBuilder<TagDBContext>();
-        // var test = _configuration["STATE_STORE"];
-        // System.Console.WriteLine("Test: " + test);
-
-
-        var connStr = "Host=localhost:5432;Database=tags;Username=postgres;Password=postgres";
-        builder.UseNpgsql(connStr);
-        builder.EnableSensitiveDataLogging();
-        return new TagDBContext(builder.Options);
+        throw new NotImplementedException();
     }
+
+
+ 
 }
 
 public class TagDBContext : DbContext

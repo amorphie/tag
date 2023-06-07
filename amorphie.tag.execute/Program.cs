@@ -1,4 +1,5 @@
 using amorphie.core.security.Extensions;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 using var client = new DaprClientBuilder().Build();
 
@@ -311,6 +312,21 @@ async Task<IResult> TemplateExecuter(
             await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
 
             httpContext.Response.Headers.Add("X-Cache", "Miss");
+        //         var requestData = new
+        //     {
+        //         page = 1,
+        //         size = 1,
+        //         identityNumber = "44671321132"
+        //     };
+
+        //     HttpContent content = new StringContent(JsonSerializer.Serialize<dynamic>(requestData), Encoding.UTF8, "application/json");
+
+        //     var customerApi=httpClient.PostAsync("https://test-entegrasyon-customerapi.burgan.com.tr/Customer",content);
+        // var responseContent = customerApi.Result.Content.ReadAsStringAsync().Result;
+        //     dynamic customerApiResponse = JsonConvert.DeserializeObject(responseContent);
+
+        //     app.Logger.LogInformation($"ExecuteTag is responded with {customerApiResponse}");
+            
 
 
             app.Logger.LogInformation($"ExecuteTag is responded with {response}");
@@ -358,4 +374,5 @@ async Task<IResult> TemplateExecuter(
 
         //swagger-adresi: https://test-template-engine.burgan.com.tr/swagger/index.html
     }
+    
 };
