@@ -8,43 +8,25 @@ using System.Text.Json.Serialization;
 
 namespace amorphie.tag.data;
 
-class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
-{
-
-    //lazy loading true
-    //lazy loading false, eğer alt bileşenleri getirmek istiyorsak include kullanmamız lazım,eager loading
-    private readonly IConfiguration _configuration;
-    public TagDbContextFactory()
+ class TagDbContextFactory : IDesignTimeDbContextFactory<TagDBContext>
     {
+        private readonly IConfiguration _configuration;
+        
+        public TagDbContextFactory(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+        public TagDBContext CreateDbContext(string[] args)
+        {
+            var connStr = _configuration.GetValue<string>("PostgreSql");
+            var builder = new DbContextOptionsBuilder<TagDBContext>()
+                .EnableSensitiveDataLogging()
+                .UseNpgsql(connStr);
+
+            return new TagDBContext(builder.Options);
+        }
     }
-    public TagDbContextFactory(IConfiguration configuration)
-    {
-
-        _configuration = configuration;
-        var con = _configuration["PostgreSql"];
-        System.Console.WriteLine("con: " + con);
-        var connStr = _configuration.GetValue<string>("PostgreSql");
-          var builder = new DbContextOptionsBuilder<TagDBContext>();
-        // var test = _configuration["STATE_STORE"];
-        // System.Console.WriteLine("Test: " + test);
-    
-  
-
-      
-        builder.EnableSensitiveDataLogging();
-        builder.UseNpgsql(connStr);
-        new TagDBContext(builder.Options);
-
-    }
-
-    public TagDBContext CreateDbContext(string[] args)
-    {
-        throw new NotImplementedException();
-    }
-
-
- 
-}
 
 public class TagDBContext : DbContext
 {

@@ -35,9 +35,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Configuration.AddEnvironmentVariables();
 
-Console.WriteLine("Environment: " + builder.Environment.EnvironmentName);
-Console.WriteLine("State Store: " + builder.Configuration["STATE_STORE"]);
-Console.WriteLine("Vault PostgreSql: " + postgreSql);
+// Console.WriteLine("Environment: " + builder.Environment.EnvironmentName);
+// Console.WriteLine("State Store: " + builder.Configuration["STATE_STORE"]);
+// Console.WriteLine("Vault PostgreSql: " + postgreSql);
 
 
 builder.Services.AddDbContext<TagDBContext>
