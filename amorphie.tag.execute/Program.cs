@@ -31,11 +31,7 @@ var db = scope.ServiceProvider.GetRequiredService<TagDBContext>();
 
 
 
-if(db.Database.EnsureCreated()==true){
-    Console.WriteLine("Database is connected");
-}else{
 db.Database.Migrate();
-}
 
 app.UseCloudEvents();
 app.UseRouting();
