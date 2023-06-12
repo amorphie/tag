@@ -24,5 +24,6 @@
         "**/vendor/**",
         "**/work/**",
         "/c:/Users/HpElite/Desktop/tagNew/tag/.vscode/tasks.json"
-    ]
+    ],
+    "dotnet.defaultSolution": "amorphie.tag.sln"
 }

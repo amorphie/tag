@@ -16,10 +16,15 @@ namespace amorphie.tag.data;
         {
             _configuration = configuration;
         }
+        public TagDbContextFactory()
+        {
 
+        }
         public TagDBContext CreateDbContext(string[] args)
         {
-            var connStr = _configuration.GetValue<string>("PostgreSql");
+            
+            var connStr = "Host=localhost:5432;Database=tags;Username=postgres;Password=postgres";
+
             var builder = new DbContextOptionsBuilder<TagDBContext>()
                 .EnableSensitiveDataLogging()
                 .UseNpgsql(connStr);
@@ -57,6 +62,13 @@ public class TagDBContext : DbContext
             .WithOne(o => o.EntityData);
 
         SeedDataGenerator.GenerateSeedData(modelBuilder);
+    }
+    public static class EnsureCreate
+    {
+        public static void EnsureCreatedAndSeed(TagDBContext context)
+        {
+            context.Database.EnsureCreated();
+        }
     }
     public static class SeedDataGenerator
     {
