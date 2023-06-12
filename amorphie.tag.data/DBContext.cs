@@ -63,13 +63,6 @@ public class TagDBContext : DbContext
 
         SeedDataGenerator.GenerateSeedData(modelBuilder);
     }
-    public static class EnsureCreate
-    {
-        public static void EnsureCreatedAndSeed(TagDBContext context)
-        {
-            context.Database.EnsureCreated();
-        }
-    }
     public static class SeedDataGenerator
     {
         public static void GenerateSeedData(ModelBuilder modelBuilder)
