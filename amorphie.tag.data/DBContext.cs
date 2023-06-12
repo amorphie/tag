@@ -24,7 +24,6 @@ namespace amorphie.tag.data;
         {
             
             var connStr = "Host=localhost:5432;Database=tags;Username=postgres;Password=postgres";
-
             var builder = new DbContextOptionsBuilder<TagDBContext>()
                 .EnableSensitiveDataLogging()
                 .UseNpgsql(connStr);
@@ -61,7 +60,9 @@ public class TagDBContext : DbContext
             .HasMany(b => b.Sources)
             .WithOne(o => o.EntityData);
 
+
         SeedDataGenerator.GenerateSeedData(modelBuilder);
+
     }
     public static class SeedDataGenerator
     {
