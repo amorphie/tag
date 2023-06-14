@@ -1,4 +1,5 @@
 using amorphie.core.security.Extensions;
+using Npgsql.Replication.TestDecoding;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 using var client = new DaprClientBuilder().Build();
@@ -28,14 +29,14 @@ var app = builder.Build();
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 //async kullan. 
 
-app.MapGet("/tag/{tagName}/execute", ExecuteTag)
+app.MapGet("/tag/{domainName}/{entityName}/{tagName}/execute", ExecuteTag)
 .WithOpenApi(operation =>
 {
     operation.Summary = "Executes given tag with using query parameters.";
@@ -85,7 +86,8 @@ catch (Exception ex)
 
 async Task<IResult> ExecuteTag(
     [FromRoute(Name = "tagName")] string tagName,
-    [FromQuery(Name = "reference")] string reference,
+    [FromRoute(Name = "domainName")] string domainName,
+    [FromRoute(Name = "entityName")] string entityName,
     HttpRequest request,
     HttpContext httpContext
     )
@@ -148,16 +150,72 @@ async Task<IResult> ExecuteTag(
     else
     {
         HttpClient httpClient = new();
-        var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
+      var result= await httpClient.GetAsync(urlToConsume);
+      string test=await result.Content.ReadAsStringAsync();
+    
+
+      try
+    {
+        var entity = await client.InvokeMethodAsync<GetEntityResponse>(
+            HttpMethod.Get,
+            "amorphie-tag",
+            $"entityData/getEntity/{domainName}/{entityName}"
+        );
+
+        var returnValue = new Dictionary<string, dynamic>();
+
+        foreach (var field in entity.Data)
+        {
+            var sourceTags = field.Sources.OrderBy(f => f.Order).ToArray();
+
+            foreach (var targetTag in sourceTags)
+            {
+                if (tagName.Contains(targetTag.Tag))
+                {
+                   
+                    JToken dataAsJson = JToken.Parse(test);
+
+                    if (dataAsJson.SelectToken(targetTag.Path) != null)
+                    {
+                        returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path)!.Value<string>()!);
+                    }
+
+                    break;
+                }
+
+            }
+        }
 
         var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
-        await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
+        await client.SaveStateAsync(STATE_STORE, urlToConsume, test, metadata: metadata);
 
         httpContext.Response.Headers.Add("X-Cache", "Miss");
 
 
-        app.Logger.LogInformation($"ExecuteTag is responded with {response}");
-        return Results.Ok(response);
+        app.Logger.LogInformation($"ExecuteTag is responded with {test}");
+        // return Results.Ok(test);
+
+        return Results.Ok(returnValue);
+    }
+    catch (Dapr.Client.InvocationException ex)
+    {
+        if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return Results.NotFound("Entity is not found.");
+        }
+
+        if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            return Results.Problem("Entity query service is unavailable", null, 510);
+        }
+
+        return Results.Problem($"Entity query service error: {ex.Response.StatusCode}", null, 510);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Unhandled Entity query service error: {ex.Message}", null, 510);
+    }
+
     }
 };
 
@@ -202,6 +260,8 @@ async Task<IResult> ExecuteEntity(
                                         "amorphie-tag-execute",
                                         $"tag/{targetTag.Tag}/execute?reference={queryReference?.FirstOrDefault()}");
                     JToken dataAsJson = JToken.Parse(data.ToString());
+                    JToken test=dataAsJson.SelectToken("name.firstname");
+                    JToken nameToken=dataAsJson.SelectToken(targetTag.Path);
 
                     if (dataAsJson.SelectToken(targetTag.Path) != null)
                     {

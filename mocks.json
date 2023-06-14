@@ -43,35 +43,7 @@
       "responses": [
         {
           "uuid": "ed4a289a-85c0-4c92-8b17-7455760aae72",
-          "body": "{\n  \"reference\" : \"{{ queryParam 'reference' }}\",\n  \"citizenship-number\": \"{{ faker 'datatype.number' min=10000000001 max=90000000001 }}\",\n  \"firstname\": \"{{ faker 'name.firstName' }}\",\n  \"lastname\": \"{{ faker 'name.lastName' }}\",\n  \"adress\":\"{{faker 'address.city'}}\"\n}",
-          "latency": 0,
-          "statusCode": 200,
-          "label": "Returns user info",
-          "headers": [],
-          "bodyType": "INLINE",
-          "filePath": "",
-          "databucketID": "",
-          "sendFileAsBody": false,
-          "rules": [],
-          "rulesOperator": "OR",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": true
-        }
-      ],
-      "enabled": true,
-      "responseMode": null,
-      "type": "http"
-    },
-    {
-      "uuid": "2e18bfc5-37bf-4ac9-b967-bea1e28039bc",
-      "documentation": "Generate random body (JSON, text, CSV, etc) with templating",
-      "method": "get",
-      "endpoint": "cb.partners/:reference",
-      "responses": [
-        {
-          "uuid": "b2be3e5e-0b5c-4e09-b2cd-f2b090fef874",
-          "body": "{\n  \"partner\": {\n    \"reference\": \"{{urlParam 'reference'}}\",\n    \"name\": \"{{ faker 'company.name' }}\"\n  }\n}",
+          "body": "{\n  \"reference\": \"{{ queryParam 'reference' }}\",\n  \"citizenship-number\": \"{{ faker 'datatype.number' min=10000000001 max=90000000001 }}\",\n  \"adress\": \"{{faker 'address.city'}}\",\n  \"customerList\": [\n    {\n  \"name\": {\n    \"firstname\": \"{{ faker 'name.firstName' }}\",\n    \"lastname\": \"{{ faker 'name.lastName' }}\"\n  },\n    }\n  ]\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "Returns user info",
@@ -103,7 +75,12 @@
           "latency": 0,
           "statusCode": 200,
           "label": "Returns user info",
-          "headers": [],
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
           "bodyType": "INLINE",
           "filePath": "",
           "databucketID": "",
@@ -210,6 +187,62 @@
       "enabled": true,
       "responseMode": null,
       "type": "http"
+    },
+    {
+      "uuid": "0b5d8e82-4152-40ab-8aea-12268ca31fb6",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "cb.customers/:userId",
+      "responses": [
+        {
+          "uuid": "21c5085b-ec59-4796-aa1a-2ee7e07726c5",
+          "body": "{\n  \"reference\" : \"{{ queryParam 'reference' }}\",\n  \"citizenship-number\": \"{{ faker 'datatype.number' min=10000000001 max=90000000001 }}\",\n  \"firstname\": \"{{ faker 'name.firstName' }}\",\n  \"lastname\": \"{{ faker 'name.lastName' }}\",\n  \"adress\":\"{{faker 'address.city'}}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
+    },
+    {
+      "uuid": "af5df26a-63b4-47a3-8034-841cf7202060",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "cb.customers/:userId/detail",
+      "responses": [
+        {
+          "uuid": "93d6ef07-a2ae-4ae8-bcf9-5fb6b6914342",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true
+        }
+      ],
+      "enabled": true,
+      "responseMode": null
     }
   ],
   "proxyMode": false,
@@ -256,10 +289,6 @@
     },
     {
       "type": "route",
-      "uuid": "2e18bfc5-37bf-4ac9-b967-bea1e28039bc"
-    },
-    {
-      "type": "route",
       "uuid": "a904f99b-6bfb-4f16-8ca1-61fd774a9b16"
     },
     {
@@ -273,6 +302,14 @@
     {
       "type": "route",
       "uuid": "695d8c21-acbb-4683-94df-37c671e0ccec"
+    },
+    {
+      "type": "route",
+      "uuid": "0b5d8e82-4152-40ab-8aea-12268ca31fb6"
+    },
+    {
+      "type": "route",
+      "uuid": "af5df26a-63b4-47a3-8034-841cf7202060"
     }
   ]
 }
