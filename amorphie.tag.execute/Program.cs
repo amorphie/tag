@@ -157,7 +157,7 @@ async Task<IResult> ExecuteTag(
     {
         var entity = await client.InvokeMethodAsync<GetEntityResponse>(
             HttpMethod.Get,
-            "test-amorphie-tag.amorphie-tag",
+            "amorphie-tag.test-amorphie-tag",
             $"entityData/getEntity/{domainName}/{entityName}"
         );
 
@@ -241,7 +241,7 @@ async Task<IResult> ExecuteEntity(
     {
         var entity = await client.InvokeMethodAsync<GetEntityResponse>(
             HttpMethod.Get,
-            "test-amorphie-tag.amorphie-tag",
+            "amorphie-tag.test-amorphie-tag",
             $"entityData/getEntity/{domainName}/{entityName}"
         );
 
@@ -318,7 +318,7 @@ async Task<IResult> TemplateExecuter(
     try
     {
 
-        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, "test-amorphie-tag.amorphie-tag", $"Tag/getTag/{tagName}");
+        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, "amorphie-tag.test-amorphie-tag", $"Tag/getTag/{tagName}");
 
     }
     catch (Dapr.Client.InvocationException ex)
