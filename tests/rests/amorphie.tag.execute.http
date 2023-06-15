@@ -1,6 +1,9 @@
 
 GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/idm/user/retail-customer/execute?reference=21359199436&email=werwerw&tel=32453453  HTTP/1.1
--
+
+###
+GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/idm/client/client-customer/execute?reference=21359199436&email=werwerw&tel=32453453  HTTP/1.1
+
 ###
 GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/loan-partner-staff/execute?partner=sfsdf&reference=214234 HTTP/1.1
 ###http://localhost:3000/cb.partner/@partner/staff/@reference

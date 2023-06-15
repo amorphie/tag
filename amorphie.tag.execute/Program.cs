@@ -29,11 +29,10 @@ var app = builder.Build();
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+
 //async kullan. 
 
 app.MapGet("/tag/{domainName}/{entityName}/{tagName}/execute", ExecuteTag)
