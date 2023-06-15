@@ -112,7 +112,7 @@ async Task<IResult> ExecuteTag(
             return Results.NotFound("Tag is not found.");
 
         if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
-            return Results.Problem("Tag query service is unavailable", null, 510);
+            return Results.Problem($"Tag query service is unavailable {ex.Message}", null, 510);
 
         return Results.Problem($"Tag query service error : {ex.Response.StatusCode}", null, 510);
     }
