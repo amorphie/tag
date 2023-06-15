@@ -185,13 +185,14 @@ async Task<IResult> ExecuteTag(
             }
         }
 
-        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
-        await client.SaveStateAsync(STATE_STORE, urlToConsume, test, metadata: metadata);
+        // var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
+        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{3}" } };
+        await client.SaveStateAsync(STATE_STORE, urlToConsume, returnValue, metadata: metadata);
 
         httpContext.Response.Headers.Add("X-Cache", "Miss");
 
 
-        app.Logger.LogInformation($"ExecuteTag is responded with {test}");
+        app.Logger.LogInformation($"ExecuteTag is responded with {returnValue}");
         // return Results.Ok(test);
 
         return Results.Ok(returnValue);
