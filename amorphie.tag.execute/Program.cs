@@ -148,10 +148,11 @@ async Task<IResult> ExecuteTag(
     }
     else
     {
-        HttpClient httpClient = new();
+    HttpClient httpClient = new();
       var result= await httpClient.GetAsync(urlToConsume);
       string test=await result.Content.ReadAsStringAsync();
-    
+    app.Logger.LogInformation($"ExecuteTag is responded with {test}");
+
 
       try
     {
