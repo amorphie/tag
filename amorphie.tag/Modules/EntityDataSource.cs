@@ -6,13 +6,11 @@ using amorphie.tag.Validator;
 using AutoMapper;
 using FluentValidation;
 
-public sealed class EntityDataSourceModuleFrameWorkModule : BaseEntityModule<DtoEntityDataSource, EntityDataSource, EntityDataSourceValidator>
+public sealed class EntityDataSourceModuleFrameWorkModule : BaseEntityDataSourceModule<DtoEntityDataSource, EntityDataSource, EntityDataSourceValidator>
 {
     public EntityDataSourceModuleFrameWorkModule(WebApplication app) : base(app)
     {
     }
-
-    public override string? UrlFragment => "entityDataSource";
 
 
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)

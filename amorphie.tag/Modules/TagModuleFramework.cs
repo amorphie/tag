@@ -13,7 +13,7 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
     {
     }
 
-    public override string? UrlFragment => "Tag";
+   
 
 
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)

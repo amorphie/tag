@@ -15,8 +15,8 @@ public abstract class BaseEntityDataSourceModule<TDTOModel, TDBModel, TValidator
     {
     }
 
-    public override string[]? PropertyCheckList => throw new NotImplementedException();
+    public override string[]? PropertyCheckList => new string [] { "Order", "EntityDataId", "TagId","TagName","DataPath" };
 
-    public override string? UrlFragment => throw new NotImplementedException();
+    public override string? UrlFragment => "entityDataSource";
 
 }

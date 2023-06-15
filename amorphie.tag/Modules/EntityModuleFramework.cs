@@ -12,8 +12,6 @@ public sealed class EntityModuleFrameWorkModule : BaseEntityModule<DtoEntity, En
     {
     }
 
-    public override string? UrlFragment => "entity";
-
 
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {

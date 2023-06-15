@@ -6,5 +6,5 @@ public class DtoEntityData : DtoBase
     public string Field { get; set; } = string.Empty;
     public string EntityName { get; set; } = string.Empty;
     public int? Ttl { get; set; }
-    public List<EntityDataSource> Sources = new List<EntityDataSource>();
+    public List<EntityDataSource>? Sources = new List<EntityDataSource>();
 }

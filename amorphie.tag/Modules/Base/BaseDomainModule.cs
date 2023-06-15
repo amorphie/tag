@@ -15,7 +15,7 @@ public abstract class BaseDomainModule<TDTOModel, TDBModel, TValidator>
     {
     }
 
-    public override string[]? PropertyCheckList => throw new NotImplementedException();
+    public override string[]? PropertyCheckList => new string [] { "Name", "Description"};
 
     public override string? UrlFragment => throw new NotImplementedException();
 

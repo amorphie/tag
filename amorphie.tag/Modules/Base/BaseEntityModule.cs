@@ -15,8 +15,9 @@ public abstract class BaseEntityModule<TDTOModel, TDBModel, TValidator>
     {
     }
 
-    public override string[]? PropertyCheckList => throw new NotImplementedException();
+    public override string[]? PropertyCheckList => new string[] { "Name", "Description", "DomainId" };
 
-    public override string? UrlFragment => throw new NotImplementedException();
+    public override string? UrlFragment => "entity";
+
 
 }
