@@ -45,7 +45,8 @@
                 "DAPR_HTTP_PORT": "41020",
                 "DAPR_GRPC_PORT": "41021",
                 "STATE_STORE":"amorphie-cache",
-                "PostgreDB":"Host=localhost:5432;Database=tags;Username=postgres;Password=postgres"
+                "PostgreDB":"Host=localhost:5432;Database=tags;Username=postgres;Password=postgres",
+                "amorphie-tag":"amorphie-tag"
             },
             "postDebugTask": "daprd-down-amorphie-tag-execute"
         }

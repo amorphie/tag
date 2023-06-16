@@ -16,6 +16,7 @@ var postgreSql = builder.Configuration["PostgreSql"];
 
 
 var STATE_STORE = builder.Configuration["STATE_STORE"];
+var amorphie_tag = builder.Configuration["amorphie-tag"];
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 
@@ -30,8 +31,8 @@ app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
 
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 //async kullan. 
 
@@ -46,7 +47,7 @@ app.MapGet("/tag/{domainName}/{entityName}/{tagName}/execute", ExecuteTag)
 .Produces(StatusCodes.Status510NotExtended)
 .Produces(StatusCodes.Status400BadRequest)
 .Produces(StatusCodes.Status204NoContent);
-app.MapGet("/template/{tagName}/execute", TemplateExecuter);
+app.MapGet("/template/{domainName}/{entityName}/{tagName}/execute", TemplateExecuteTag);
 // app.MapGet("/template/{tagName}/execute", ExecuteTemplate);
 app.MapGet("/tag/{tagName}/ugur", () => { })
 .WithOpenApi(operation =>
@@ -103,7 +104,7 @@ async Task<IResult> ExecuteTag(
         // var result = client.InvokeMethodWithResponseAsync(test).Result.Content.ReadAsStringAsync().Result;
         // var json = (JObject)JsonConvert.DeserializeObject(result);
         // tag = json["data"].ToObject<DtoTag>();
-        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, "amorphie-tag.test-amorphie-tag", $"Tag/getTag/{tagName}");
+        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
 
     }
     catch (Dapr.Client.InvocationException ex)
@@ -148,74 +149,74 @@ async Task<IResult> ExecuteTag(
     }
     else
     {
-    HttpClient httpClient = new();
-      var result= await httpClient.GetAsync(urlToConsume);
-      string test=await result.Content.ReadAsStringAsync();
-    app.Logger.LogInformation($"ExecuteTag is responded with {test}");
+        HttpClient httpClient = new();
+        var result = await httpClient.GetAsync(urlToConsume);
+        string test = await result.Content.ReadAsStringAsync();
+        app.Logger.LogInformation($"ExecuteTag is responded with {test}");
 
 
-      try
-    {
-        var entity = await client.InvokeMethodAsync<GetEntityResponse>(
-            HttpMethod.Get,
-            "amorphie-tag.test-amorphie-tag",
-            $"entityData/getEntity/{domainName}/{entityName}"
-        );
-
-        var returnValue = new Dictionary<string, dynamic>();
-
-        foreach (var field in entity.Data)
+        try
         {
-            var sourceTags = field.Sources.OrderBy(f => f.Order).ToArray();
+            var entity = await client.InvokeMethodAsync<GetEntityResponse>(
+                HttpMethod.Get,
+                $"{amorphie_tag}",
+                $"entityData/getEntity/{domainName}/{entityName}"
+            );
 
-            foreach (var targetTag in sourceTags)
+            var returnValue = new Dictionary<string, dynamic>();
+
+            foreach (var field in entity.Data)
             {
-                if (tagName.Contains(targetTag.Tag))
-                {
-                   
-                    JToken dataAsJson = JToken.Parse(test);
+                var sourceTags = field.Sources.OrderBy(f => f.Order).ToArray();
 
-                    if (dataAsJson.SelectToken(targetTag.Path) != null)
+                foreach (var targetTag in sourceTags)
+                {
+                    if (tagName.Contains(targetTag.Tag))
                     {
-                        returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path)!.Value<string>()!);
+
+                        JToken dataAsJson = JToken.Parse(test);
+
+                        if (dataAsJson.SelectToken(targetTag.Path) != null)
+                        {
+                            returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path)!.Value<string>()!);
+                        }
+
+                        break;
                     }
 
-                    break;
                 }
-
             }
+
+            // var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
+            var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{3}" } };
+            await client.SaveStateAsync(STATE_STORE, urlToConsume, returnValue, metadata: metadata);
+
+            httpContext.Response.Headers.Add("X-Cache", "Miss");
+
+
+            app.Logger.LogInformation($"ExecuteTag is responded with {returnValue}");
+            // return Results.Ok(test);
+
+            return Results.Ok(returnValue);
         }
-
-        // var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
-        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{3}" } };
-        await client.SaveStateAsync(STATE_STORE, urlToConsume, returnValue, metadata: metadata);
-
-        httpContext.Response.Headers.Add("X-Cache", "Miss");
-
-
-        app.Logger.LogInformation($"ExecuteTag is responded with {returnValue}");
-        // return Results.Ok(test);
-
-        return Results.Ok(returnValue);
-    }
-    catch (Dapr.Client.InvocationException ex)
-    {
-        if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+        catch (Dapr.Client.InvocationException ex)
         {
-            return Results.NotFound("Entity is not found.");
-        }
+            if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return Results.NotFound("Entity is not found.");
+            }
 
-        if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
+            if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
+            {
+                return Results.Problem("Entity query service is unavailable", null, 510);
+            }
+
+            return Results.Problem($"Entity query service error: {ex.Response.StatusCode}", null, 510);
+        }
+        catch (Exception ex)
         {
-            return Results.Problem("Entity query service is unavailable", null, 510);
+            return Results.Problem($"Unhandled Entity query service error: {ex.Message}", null, 510);
         }
-
-        return Results.Problem($"Entity query service error: {ex.Response.StatusCode}", null, 510);
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Unhandled Entity query service error: {ex.Message}", null, 510);
-    }
 
     }
 };
@@ -242,7 +243,7 @@ async Task<IResult> ExecuteEntity(
     {
         var entity = await client.InvokeMethodAsync<GetEntityResponse>(
             HttpMethod.Get,
-            "amorphie-tag.test-amorphie-tag",
+            $"{amorphie_tag}",
             $"entityData/getEntity/{domainName}/{entityName}"
         );
 
@@ -261,8 +262,8 @@ async Task<IResult> ExecuteEntity(
                                         "amorphie-tag-execute",
                                         $"tag/{targetTag.Tag}/execute?reference={queryReference?.FirstOrDefault()}");
                     JToken dataAsJson = JToken.Parse(data.ToString());
-                    JToken test=dataAsJson.SelectToken("name.firstname");
-                    JToken nameToken=dataAsJson.SelectToken(targetTag.Path);
+                    JToken test = dataAsJson.SelectToken("name.firstname");
+                    JToken nameToken = dataAsJson.SelectToken(targetTag.Path);
 
                     if (dataAsJson.SelectToken(targetTag.Path) != null)
                     {
@@ -319,7 +320,7 @@ async Task<IResult> TemplateExecuter(
     try
     {
 
-        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, "amorphie-tag.test-amorphie-tag", $"Tag/getTag/{tagName}");
+        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
 
     }
     catch (Dapr.Client.InvocationException ex)
@@ -365,14 +366,14 @@ async Task<IResult> TemplateExecuter(
     // }
     // else
     {
-        using (HttpClient httpClient = new HttpClient())
-        {
-            var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
 
-            var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
-            await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
+        using HttpClient httpClient = new();
+        var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
 
-            httpContext.Response.Headers.Add("X-Cache", "Miss");
+        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
+        await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
+
+        httpContext.Response.Headers.Add("X-Cache", "Miss");
         //         var requestData = new
         //     {
         //         page = 1,
@@ -387,11 +388,195 @@ async Task<IResult> TemplateExecuter(
         //     dynamic customerApiResponse = JsonConvert.DeserializeObject(responseContent);
 
         //     app.Logger.LogInformation($"ExecuteTag is responded with {customerApiResponse}");
-            
 
 
-            app.Logger.LogInformation($"ExecuteTag is responded with {response}");
-            var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(response);
+
+        app.Logger.LogInformation($"ExecuteTag is responded with {response}");
+        var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(response);
+        var machineName = Environment.MachineName;
+        var payload = new RenderRequestDefinition
+        {
+            Name = ViewTemplateName ?? "test-mehmet4",
+            RenderData = data,
+            RenderID = Guid.NewGuid(),
+            SemVer = "1.0.0",
+            Action = "amorphie-template-executer",
+            Customer = "test-mehmet1",
+            Identity = machineName ?? "amorphie-tag",
+            ItemId = "test-mehmet1",
+            ProcessName = "test-mehmet1",
+            RenderDataForLog = data,
+        };
+
+        /// ----- TODO: minimize
+        var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
+
+        HttpRequestMessage yourmsg = new()
+        {
+            Method = HttpMethod.Post,
+            RequestUri = new Uri("https://test-template-engine.burgan.com.tr/Template/Render"),
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var responses = await httpClient.SendAsync(yourmsg);
+
+        // httpClient.BaseAddress = new Uri("https://test-template-engine.burgan.com.tr/");
+        // var status = await httpClient.PostAsync("Template/Render", new StringContent(json, Encoding.UTF8, "application/json"));
+        ///////---------------------------
+        app.Logger.LogInformation($"ExecuteTag is responded with {responses}");
+        return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
+
+        // post http client with body
+
+
+        //12113810636
+
+
+
+        //swagger-adresi: https://test-template-engine.burgan.com.tr/swagger/index.html
+    }
+
+}
+
+async Task<IResult> TemplateExecuteTag(
+    [FromRoute(Name = "tagName")] string tagName,
+    [FromRoute(Name = "domainName")] string domainName,
+    [FromRoute(Name = "entityName")] string entityName,
+    [FromQuery(Name = "viewTemplateName")] string? ViewTemplateName,
+
+    HttpRequest request,
+    HttpContext httpContext
+    )
+{
+    app.Logger.LogInformation("ExecuteTag is calling");
+
+    DtoTag tag;
+
+    try
+    {
+        //b TODO: dapr service call to long
+        //tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
+        //var test = client.CreateInvokeMethodRequest(HttpMethod.Get, "amorphie-tag", $"tag/{tagId}");
+        // var result = client.InvokeMethodWithResponseAsync(test).Result.Content.ReadAsStringAsync().Result;
+        // var json = (JObject)JsonConvert.DeserializeObject(result);
+        // tag = json["data"].ToObject<DtoTag>();
+        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
+
+    }
+    catch (Dapr.Client.InvocationException ex)
+    {
+        if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+            return Results.NotFound("Tag is not found.");
+
+        if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
+            return Results.Problem($"Tag query service is unavailable {ex.Message}", null, 510);
+
+        return Results.Problem($"Tag query service error : {ex.Response.StatusCode}", null, 510);
+    }
+    catch (Exception ex)
+    {
+
+        return Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510);
+    }
+
+    if (string.IsNullOrEmpty(tag.Url))
+    {
+        return Results.BadRequest("This tag does not have URL");
+    }
+
+    var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
+    var urlToConsume = tag.Url;
+    foreach (var p in parameters)
+    {
+        if (!request.Query.ContainsKey(p.TrimStart('@')))
+            return Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}");
+        // Düzeltildi
+        urlToConsume = urlToConsume.Replace(p, request!.QueryString.Value!.TrimStart('?').Split('&').FirstOrDefault(x => x.StartsWith(p.TrimStart('@')))!.Split('=').LastOrDefault() ?? string.Empty);
+        //urlToConsume = urlToConsume.Replace(p, request.Query.FirstOrDefault(x => x.Value != p).ToString());
+    }
+
+
+    var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, urlToConsume);
+
+    if (cachedResponse is not null)
+    {
+        httpContext.Response.Headers.Add("X-Cache", "Hit");
+        return Results.Ok(cachedResponse);
+    }
+    else
+    {
+        HttpClient httpClient = new();
+        var result = await httpClient.GetAsync(urlToConsume);
+        string test = await result.Content.ReadAsStringAsync();
+        app.Logger.LogInformation($"ExecuteTag is responded with {test}");
+
+
+        try
+        {
+            var entity = await client.InvokeMethodAsync<GetEntityResponse>(
+                HttpMethod.Get,
+                $"{amorphie_tag}",
+                $"entityData/getEntity/{domainName}/{entityName}"
+            );
+
+            var returnValue = new Dictionary<string, dynamic>();
+
+            foreach (var field in entity.Data)
+            {
+                var sourceTags = field.Sources.OrderBy(f => f.Order).ToArray();
+
+                foreach (var targetTag in sourceTags)
+                {
+                    if (tagName.Contains(targetTag.Tag))
+                    {
+
+                        JToken dataAsJson = JToken.Parse(test);
+
+                        if (dataAsJson.SelectToken(targetTag.Path) != null)
+                        {
+                            returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path)!.Value<string>()!);
+                        }
+
+                        break;
+                    }
+
+                }
+            }
+
+            // var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
+            var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{3}" } };
+            await client.SaveStateAsync(STATE_STORE, urlToConsume, returnValue, metadata: metadata);
+
+            httpContext.Response.Headers.Add("X-Cache", "Miss");
+
+
+            app.Logger.LogInformation($"ExecuteTag is responded with {returnValue}");
+            // return Results.Ok(test);
+
+
+
+            var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
+            await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
+
+            // httpContext.Response.Headers.Add("X-Cache", "Miss");
+            //         var requestData = new
+            //     {
+            //         page = 1,
+            //         size = 1,
+            //         identityNumber = "44671321132"
+            //     };
+
+            //     HttpContent content = new StringContent(JsonSerializer.Serialize<dynamic>(requestData), Encoding.UTF8, "application/json");
+
+            //     var customerApi=httpClient.PostAsync("https://test-entegrasyon-customerapi.burgan.com.tr/Customer",content);
+            // var responseContent = customerApi.Result.Content.ReadAsStringAsync().Result;
+            //     dynamic customerApiResponse = JsonConvert.DeserializeObject(responseContent);
+
+            //     app.Logger.LogInformation($"ExecuteTag is responded with {customerApiResponse}");
+
+
+
+            app.Logger.LogInformation($"ExecuteTag is responded with {returnValue}");
+            var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(returnValue);
             var machineName = Environment.MachineName;
             var payload = new RenderRequestDefinition
             {
@@ -410,7 +595,7 @@ async Task<IResult> TemplateExecuter(
             /// ----- TODO: minimize
             var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
 
-            HttpRequestMessage yourmsg = new HttpRequestMessage
+            HttpRequestMessage yourmsg = new()
             {
                 Method = HttpMethod.Post,
                 RequestUri = new Uri("https://test-template-engine.burgan.com.tr/Template/Render"),
@@ -423,17 +608,26 @@ async Task<IResult> TemplateExecuter(
             ///////---------------------------
             app.Logger.LogInformation($"ExecuteTag is responded with {responses}");
             return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
+        }
+        catch (Dapr.Client.InvocationException ex)
+        {
+            if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return Results.NotFound("Entity is not found.");
+            }
 
+            if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
+            {
+                return Results.Problem("Entity query service is unavailable", null, 510);
+            }
+
+            return Results.Problem($"Entity query service error: {ex.Response.StatusCode}", null, 510);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem($"Unhandled Entity query service error: {ex.Message}", null, 510);
         }
 
-        // post http client with body
-
-
-        //12113810636
-
-
-
-        //swagger-adresi: https://test-template-engine.burgan.com.tr/swagger/index.html
     }
-    
 };
+
