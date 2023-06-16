@@ -16,7 +16,7 @@ var postgreSql = builder.Configuration["PostgreSql"];
 
 
 var STATE_STORE = builder.Configuration["STATE_STORE"];
-var amorphie_tag = builder.Configuration["amorphie-tag"];
+var amorphie_tag = builder.Configuration["amorphie-tags"];
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 
