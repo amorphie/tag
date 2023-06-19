@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // var postgreSql = builder.Configuration["PostgreSql"];
 await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
 var postgreSql = builder.Configuration["PostgreSql"];
-var amorphie_tag="";
+var amorphie_tag = "";
 
 //var test = await client.GetConfiguration("amorphie-config", new List<string>() { "STATE_STORE" });
 
@@ -26,10 +26,13 @@ builder.Services.AddDbContext<TagDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
 
 var app = builder.Build();
-if(app.Environment.IsDevelopment()){
- amorphie_tag= builder.Configuration["amorphie-tags"];
-}else{
-    amorphie_tag="amorphie-tag.test-amorphie-tag";
+if (app.Environment.IsDevelopment())
+{
+    amorphie_tag = builder.Configuration["amorphie-tags"];
+}
+else
+{
+    amorphie_tag = "amorphie-tag.test-amorphie-tag";
 }
 app.UseCloudEvents();
 app.UseRouting();
@@ -582,7 +585,7 @@ async Task<IResult> TemplateExecuteTag(
             var payload = new RenderRequestDefinition
             {
                 Name = ViewTemplateName ?? "test-mehmet4",
-                RenderData = data,
+                RenderData = returnValue,
                 RenderID = Guid.NewGuid(),
                 SemVer = "1.0.0",
                 Action = "amorphie-template-executer",
@@ -590,12 +593,12 @@ async Task<IResult> TemplateExecuteTag(
                 Identity = machineName ?? "amorphie-tag",
                 ItemId = "test-mehmet1",
                 ProcessName = "test-mehmet1",
-                RenderDataForLog = data,
+                RenderDataForLog = returnValue,
             };
 
             /// ----- TODO: minimize
             var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
-
+            app.Logger.LogInformation($"ExecuteTag jsonEncode is responded with {json}");
             HttpRequestMessage yourmsg = new()
             {
                 Method = HttpMethod.Post,
