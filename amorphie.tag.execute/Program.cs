@@ -558,8 +558,7 @@ async Task<IResult> TemplateExecuteTag(
 
 
 
-            var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
-            await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
+            // var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
 
             // httpContext.Response.Headers.Add("X-Cache", "Miss");
             //         var requestData = new
