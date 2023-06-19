@@ -10,13 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 // var postgreSql = builder.Configuration["PostgreSql"];
 await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
 var postgreSql = builder.Configuration["PostgreSql"];
-
+var amorphie_tag="";
 
 //var test = await client.GetConfiguration("amorphie-config", new List<string>() { "STATE_STORE" });
 
 
 var STATE_STORE = builder.Configuration["STATE_STORE"];
-var amorphie_tag = builder.Configuration["amorphie-tags"];
+
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole();
 
@@ -26,7 +26,11 @@ builder.Services.AddDbContext<TagDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
 
 var app = builder.Build();
-
+if(app.Environment.IsDevelopment()){
+ amorphie_tag= builder.Configuration["amorphie-tags"];
+}else{
+    amorphie_tag="amorphie-tag.test-amorphie-tag";
+}
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
