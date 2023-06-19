@@ -264,10 +264,8 @@ async Task<IResult> ExecuteEntity(
                     var data = await client.InvokeMethodAsync<dynamic>(
                                         HttpMethod.Get,
                                         "amorphie-tag-execute",
-                                        $"tag/{targetTag.Tag}/execute?reference={queryReference?.FirstOrDefault()}");
+                                        $"tag/{domainName}/{entityName}/{targetTag.Tag}/execute?reference={queryReference?.FirstOrDefault()}");
                     JToken dataAsJson = JToken.Parse(data.ToString());
-                    JToken test = dataAsJson.SelectToken("name.firstname");
-                    JToken nameToken = dataAsJson.SelectToken(targetTag.Path);
 
                     if (dataAsJson.SelectToken(targetTag.Path) != null)
                     {
@@ -511,7 +509,7 @@ async Task<IResult> TemplateExecuteTag(
         HttpClient httpClient = new();
         var result = await httpClient.GetAsync(urlToConsume);
         string test = await result.Content.ReadAsStringAsync();
-        app.Logger.LogInformation($"ExecuteTag is responded with {test}");
+        app.Logger.LogInformation($"ExecuteTag testData is responded with {test}");
 
 
         try
@@ -553,7 +551,7 @@ async Task<IResult> TemplateExecuteTag(
             httpContext.Response.Headers.Add("X-Cache", "Miss");
 
 
-            app.Logger.LogInformation($"ExecuteTag is responded with {returnValue}");
+            app.Logger.LogInformation($"ExecuteTag filterData is responded with {returnValue}");
             // return Results.Ok(test);
 
 
@@ -578,8 +576,8 @@ async Task<IResult> TemplateExecuteTag(
 
 
 
-            app.Logger.LogInformation($"ExecuteTag is responded with {returnValue}");
             var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(returnValue);
+            app.Logger.LogInformation($"ExecuteTag renderData is responded with {data}");
             var machineName = Environment.MachineName;
             var payload = new RenderRequestDefinition
             {
@@ -609,7 +607,7 @@ async Task<IResult> TemplateExecuteTag(
             // httpClient.BaseAddress = new Uri("https://test-template-engine.burgan.com.tr/");
             // var status = await httpClient.PostAsync("Template/Render", new StringContent(json, Encoding.UTF8, "application/json"));
             ///////---------------------------
-            app.Logger.LogInformation($"ExecuteTag is responded with {responses}");
+            app.Logger.LogInformation($"ExecuteTag templateResponse is responded with {responses}");
             return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
         }
         catch (Dapr.Client.InvocationException ex)
