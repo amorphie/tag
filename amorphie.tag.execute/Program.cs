@@ -585,7 +585,7 @@ async Task<IResult> TemplateExecuteTag(
             var payload = new RenderRequestDefinition
             {
                 Name = ViewTemplateName ?? "test-mehmet4",
-                RenderData = returnValue,
+                RenderData = data,
                 RenderID = Guid.NewGuid(),
                 SemVer = "1.0.0",
                 Action = "amorphie-template-executer",
@@ -593,7 +593,7 @@ async Task<IResult> TemplateExecuteTag(
                 Identity = machineName ?? "amorphie-tag",
                 ItemId = "test-mehmet1",
                 ProcessName = "test-mehmet1",
-                RenderDataForLog = returnValue,
+                RenderDataForLog = data,
             };
 
             /// ----- TODO: minimize
