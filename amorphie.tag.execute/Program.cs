@@ -599,10 +599,6 @@ async Task<IResult> TemplateExecuteTag(
         // var status = await httpClient.PostAsync("Template/Render", new StringContent(json, Encoding.UTF8, "application/json"));
         ///////---------------------------
         app.Logger.LogInformation($"ExecuteTag templateResponse is responded with {responses}");
-        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{3}" } };
-        await client.SaveStateAsync(STATE_STORE, urlToConsume, responses.Content.ReadFromJsonAsync<dynamic>().Result, metadata: metadata);
-
-        httpContext.Response.Headers.Add("X-Cache", "Miss");
         return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
     }
     catch (Dapr.Client.InvocationException ex)
