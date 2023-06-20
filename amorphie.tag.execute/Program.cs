@@ -593,7 +593,7 @@ async Task<IResult> TemplateExecuteTag(
                 Identity = machineName ?? "amorphie-tag",
                 ItemId = "test-mehmet1",
                 ProcessName = "test-mehmet1",
-                RenderDataForLog = data,
+                RenderDataForLog = "data",
             };
 
             /// ----- TODO: minimize
