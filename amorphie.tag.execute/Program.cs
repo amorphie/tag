@@ -590,10 +590,10 @@ async Task<IResult> TemplateExecuteTag(
                 SemVer = "1.0.0",
                 Action = "amorphie-template-executer",
                 Customer = "test-mehmet1",
-                Identity = machineName ?? "amorphie-tag",
+                Identity = "amorphie-tag",
                 ItemId = "test-mehmet1",
                 ProcessName = "test-mehmet1",
-                RenderDataForLog = "data",
+                RenderDataForLog = data,
             };
 
             /// ----- TODO: minimize
