@@ -319,142 +319,142 @@ async Task<IResult> ExecuteTag(
 // }
 
 
-async Task<IResult> TemplateExecuter(
-    [FromRoute(Name = "tagName")] string tagName,
-    //Swagger'da deneme yapmak için eklendi normal requestten gelen query kullanılabilir.
-    [FromQuery(Name = "reference")] string? reference,
-    [FromServices] TagDBContext context,
-    [FromQuery(Name = "viewTemplateName")] string? ViewTemplateName,
-    HttpRequest request,
-    HttpContext httpContext
+// async Task<IResult> TemplateExecuter(
+//     [FromRoute(Name = "tagName")] string tagName,
+//     //Swagger'da deneme yapmak için eklendi normal requestten gelen query kullanılabilir.
+//     [FromQuery(Name = "reference")] string? reference,
+//     [FromServices] TagDBContext context,
+//     [FromQuery(Name = "viewTemplateName")] string? ViewTemplateName,
+//     HttpRequest request,
+//     HttpContext httpContext
 
-)
-{
-    //View tablosundaki template name templateEngine tarafında template olarak oluşturulacak ???. 
-    //Bu template name queryden gelen template bilgisine göre template engineden template oluşturulup response olarak return edilecek. 
-    app.Logger.LogInformation("ExecuteTag is calling");
+// )
+// {
+//     //View tablosundaki template name templateEngine tarafında template olarak oluşturulacak ???. 
+//     //Bu template name queryden gelen template bilgisine göre template engineden template oluşturulup response olarak return edilecek. 
+//     app.Logger.LogInformation("ExecuteTag is calling");
 
-    DtoTag? tag;
+//     DtoTag? tag;
 
-    try
-    {
+//     try
+//     {
 
-        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
+//         tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
 
-    }
-    catch (Dapr.Client.InvocationException ex)
-    {
-        if (ex.Response.StatusCode == HttpStatusCode.NotFound)
-            return Results.NotFound("Tag is not found.");
+//     }
+//     catch (Dapr.Client.InvocationException ex)
+//     {
+//         if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+//             return Results.NotFound("Tag is not found.");
 
-        if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
-            return Results.Problem("Tag query service is unavailable", null, 510);
+//         if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
+//             return Results.Problem("Tag query service is unavailable", null, 510);
 
-        return Results.Problem($"Tag query service error : {ex.Response.StatusCode}", null, 510);
-    }
-    catch (Exception ex)
-    {
+//         return Results.Problem($"Tag query service error : {ex.Response.StatusCode}", null, 510);
+//     }
+//     catch (Exception ex)
+//     {
 
-        return Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510);
-    }
+//         return Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510);
+//     }
 
-    if (string.IsNullOrEmpty(tag.Url))
-    {
-        return Results.BadRequest("This tag does not have URL");
-    }
+//     if (string.IsNullOrEmpty(tag.Url))
+//     {
+//         return Results.BadRequest("This tag does not have URL");
+//     }
 
-    var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
-    var urlToConsume = tag.Url;
-    //Template döneceği için bu foreach döngüsüne gerek yok???
-    foreach (var p in parameters)
-    {
-        if (!request.Query.ContainsKey(p.TrimStart('@')))
-            return Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}");
-        // Düzeltildi
-        urlToConsume = urlToConsume.Replace(p, request.QueryString.Value!.TrimStart('?').Split('&').FirstOrDefault(x => x.StartsWith(p.TrimStart('@')))!.Split('=').LastOrDefault() ?? string.Empty);
-        //urlToConsume = urlToConsume.Replace(p, request.Query.FirstOrDefault(x => x.Value != p).ToString());
-    }
-
-
-    var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, urlToConsume);
-
-    // if (cachedResponse is not null)
-    // {
-    //     httpContext.Response.Headers.Add("X-Cache", "Hit");
-    //     return Results.Ok(cachedResponse);
-    // }
-    // else
-    {
-
-        using HttpClient httpClient = new();
-        var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
-
-        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
-        await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
-
-        httpContext.Response.Headers.Add("X-Cache", "Miss");
-        //         var requestData = new
-        //     {
-        //         page = 1,
-        //         size = 1,
-        //         identityNumber = "44671321132"
-        //     };
-
-        //     HttpContent content = new StringContent(JsonSerializer.Serialize<dynamic>(requestData), Encoding.UTF8, "application/json");
-
-        //     var customerApi=httpClient.PostAsync("https://test-entegrasyon-customerapi.burgan.com.tr/Customer",content);
-        // var responseContent = customerApi.Result.Content.ReadAsStringAsync().Result;
-        //     dynamic customerApiResponse = JsonConvert.DeserializeObject(responseContent);
-
-        //     app.Logger.LogInformation($"ExecuteTag is responded with {customerApiResponse}");
+//     var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
+//     var urlToConsume = tag.Url;
+//     //Template döneceği için bu foreach döngüsüne gerek yok???
+//     foreach (var p in parameters)
+//     {
+//         if (!request.Query.ContainsKey(p.TrimStart('@')))
+//             return Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}");
+//         // Düzeltildi
+//         urlToConsume = urlToConsume.Replace(p, request.QueryString.Value!.TrimStart('?').Split('&').FirstOrDefault(x => x.StartsWith(p.TrimStart('@')))!.Split('=').LastOrDefault() ?? string.Empty);
+//         //urlToConsume = urlToConsume.Replace(p, request.Query.FirstOrDefault(x => x.Value != p).ToString());
+//     }
 
 
+//     var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, urlToConsume);
 
-        app.Logger.LogInformation($"ExecuteTag is responded with {response}");
-        var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(response);
-        var machineName = Environment.MachineName;
-        var payload = new RenderRequestDefinition
-        {
-            Name = ViewTemplateName ?? "test-mehmet4",
-            RenderData = data,
-            RenderID = Guid.NewGuid(),
-            SemVer = "1.0.0",
-            Action = "amorphie-template-executer",
-            Customer = "test-mehmet1",
-            Identity = machineName ?? "amorphie-tag",
-            ItemId = "test-mehmet1",
-            ProcessName = "test-mehmet1",
-            RenderDataForLog = data,
-        };
+//     // if (cachedResponse is not null)
+//     // {
+//     //     httpContext.Response.Headers.Add("X-Cache", "Hit");
+//     //     return Results.Ok(cachedResponse);
+//     // }
+//     // else
+//     {
 
-        /// ----- TODO: minimize
-        var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
+//         using HttpClient httpClient = new();
+//         var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
 
-        HttpRequestMessage yourmsg = new()
-        {
-            Method = HttpMethod.Post,
-            RequestUri = new Uri("https://test-template-engine.burgan.com.tr/Template/Render"),
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
-        };
-        var responses = await httpClient.SendAsync(yourmsg);
+//         var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
+//         await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
 
-        // httpClient.BaseAddress = new Uri("https://test-template-engine.burgan.com.tr/");
-        // var status = await httpClient.PostAsync("Template/Render", new StringContent(json, Encoding.UTF8, "application/json"));
-        ///////---------------------------
-        app.Logger.LogInformation($"ExecuteTag is responded with {responses}");
-        return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
+//         httpContext.Response.Headers.Add("X-Cache", "Miss");
+//         //         var requestData = new
+//         //     {
+//         //         page = 1,
+//         //         size = 1,
+//         //         identityNumber = "44671321132"
+//         //     };
 
-        // post http client with body
+//         //     HttpContent content = new StringContent(JsonSerializer.Serialize<dynamic>(requestData), Encoding.UTF8, "application/json");
 
+//         //     var customerApi=httpClient.PostAsync("https://test-entegrasyon-customerapi.burgan.com.tr/Customer",content);
+//         // var responseContent = customerApi.Result.Content.ReadAsStringAsync().Result;
+//         //     dynamic customerApiResponse = JsonConvert.DeserializeObject(responseContent);
 
-        //12113810636
+//         //     app.Logger.LogInformation($"ExecuteTag is responded with {customerApiResponse}");
 
 
 
-        //swagger-adresi: https://test-template-engine.burgan.com.tr/swagger/index.html
-    }
+//         app.Logger.LogInformation($"ExecuteTag is responded with {response}");
+//         var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(response);
+//         var machineName = Environment.MachineName;
+//         var payload = new RenderRequestDefinition
+//         {
+//             Name = ViewTemplateName ?? "test-mehmet4",
+//             RenderData = data,
+//             RenderID = Guid.NewGuid(),
+//             SemVer = "1.0.0",
+//             Action = "amorphie-template-executer",
+//             Customer = "test-mehmet1",
+//             Identity = machineName ?? "amorphie-tag",
+//             ItemId = "test-mehmet1",
+//             ProcessName = "test-mehmet1",
+//             RenderDataForLog = data,
+//         };
 
-}
+//         /// ----- TODO: minimize
+//         var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
+
+//         HttpRequestMessage yourmsg = new()
+//         {
+//             Method = HttpMethod.Post,
+//             RequestUri = new Uri("https://test-template-engine.burgan.com.tr/Template/Render"),
+//             Content = new StringContent(json, Encoding.UTF8, "application/json")
+//         };
+//         var responses = await httpClient.SendAsync(yourmsg);
+
+//         // httpClient.BaseAddress = new Uri("https://test-template-engine.burgan.com.tr/");
+//         // var status = await httpClient.PostAsync("Template/Render", new StringContent(json, Encoding.UTF8, "application/json"));
+//         ///////---------------------------
+//         app.Logger.LogInformation($"ExecuteTag is responded with {responses}");
+//         return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
+
+//         // post http client with body
+
+
+//         //12113810636
+
+
+
+//         //swagger-adresi: https://test-template-engine.burgan.com.tr/swagger/index.html
+//     }
+
+// }
 
 async Task<IResult> TemplateExecuteTag(
     [FromRoute(Name = "tagName")] string tagName,

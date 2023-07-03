@@ -60,7 +60,7 @@ public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEn
        [FromServices] TagDBContext context
 )
     {
-        var deletedData = context.EntityData!.FirstOrDefault(d => d.Entity.Name == entityName && d.Field == fieldName);
+        var deletedData = context.EntityData!.FirstOrDefault(d => d.Entity!.Name == entityName && d.Field == fieldName);
         if (deletedData != null)
         {
             context.EntityData!.Remove(deletedData);
