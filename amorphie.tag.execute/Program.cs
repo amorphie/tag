@@ -25,7 +25,22 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TagDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
 
+builder.Services.AddCors(options =>
+
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder.WithOrigins("*")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
+
+
 var app = builder.Build();
+
 if (app.Environment.IsDevelopment())
 {
     amorphie_tag = builder.Configuration["amorphie-tags"];
@@ -37,7 +52,7 @@ else
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
-
+app.UseCors();
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -636,11 +651,11 @@ async Task<IResult> TemplateExecuteTag(
 }
 
 
-    async Task<IResult> TagExecute(
-    [FromRoute(Name = "tagName")] string tagName,
-    HttpRequest request,
-    HttpContext httpContext
-    )
+async Task<IResult> TagExecute(
+[FromRoute(Name = "tagName")] string tagName,
+HttpRequest request,
+HttpContext httpContext
+)
 {
     app.Logger.LogInformation("ExecuteTag is calling");
 

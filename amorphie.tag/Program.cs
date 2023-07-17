@@ -44,6 +44,17 @@ builder.Services.AddDbContext<TagDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag.data")));
 
 
+builder.Services.AddCors(options =>
+
+{
+    options.AddDefaultPolicy(
+        builder =>
+        {
+            builder.WithOrigins("*")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 var app = builder.Build();
 
 using var scope = app.Services.CreateScope();
@@ -53,9 +64,7 @@ db.Database.Migrate();
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
-
-
-
+app.UseCors();
 app.UseSwagger();
 app.UseSwaggerUI();
 
