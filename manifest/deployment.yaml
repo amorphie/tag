@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amorphie-tag
+  namespace: amorphie-tag
+spec:
+  selector:
+    matchLabels:
+      app: amorphie-tag
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: amorphie-tag
+      annotations:
+        dapr.io/app-id: amorphie-tag
+        dapr.io/enabled: 'true'
+        dapr.io/app-port: '5000'
+    spec:
+      serviceAccountName: amorphie-taguser
+      containers:
+        - name: amorphie-tag
+          image: burganbank/amorphie.fact-user:latest
+          ports:
+            - containerPort: 5000
+          env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: "Test"
+          - name: EnableApm
+            value: "true"
+          - name: TZ
+            value: Europe/Istanbul
+          resources:
+            limits:
+              cpu: "1"
+              memory: "4096Mi"
+            requests:
+              cpu: "0.1"
+              memory: "128Mi"
+          volumeMounts:
+          - mountPath: /app/appsettings.Test.json
+            name: appsettings-test-config-volume
+            subPath: appsettings.test.json
+      volumes:
+        - name: appsettings-test-config-volume
+          configMap:
+            name: appsettings-test-config
