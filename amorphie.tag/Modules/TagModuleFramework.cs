@@ -86,28 +86,23 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
         {
             existingRecord.Url = data.Url;
             hasChanges = true;
-            existingRecord.LastModifiedDate = DateTime.Now.ToUniversalTime();
         }
+        if (data.Name != null && data.Name != existingRecord.Name)
+        {
+            existingRecord.Name = data.Name;
+            hasChanges = true;
+        }
+        if(hasChanges)
+        {
+            existingRecord.LastModifiedDate = DateTime.Now.ToUniversalTime();
+        } 
         if (data.Ttl != null && data.Ttl != existingRecord.Ttl)
         {
             existingRecord.Ttl = data.Ttl.Value;
             hasChanges = true;
         }
-        if (data.Name != null && data.Name != existingRecord.Name)
-        {
-            existingRecord.Name = data.Name;
-            existingRecord.LastModifiedDate = DateTime.Now.ToUniversalTime();
-            hasChanges = true;
-        }
 
-        if (hasChanges)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return hasChanges;
     }
 
 
