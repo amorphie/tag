@@ -24,7 +24,8 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
     }
     async ValueTask<IResult> getTag(
       [FromRoute(Name = "tagName")] string tagName,
-      [FromServices] TagDBContext context
+      [FromServices] TagDBContext context,
+      IMapper mapper
       )
     {
 
@@ -32,7 +33,8 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
             .Include(st => st.TagsRelations)
             .FirstOrDefaultAsync(t => t.Name == tagName);
 
-        var tagDto = ObjectMapper.Mapper.Map<DtoTag>(tag);
+        //var tagDto = ObjectMapper.Mapper.Map<DtoTag>(tag);
+        var tagDto = mapper.Map<DtoTag>(tag);
 
         if (tag == null)
             return Results.NotFound();

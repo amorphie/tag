@@ -1,6 +1,7 @@
 using amorphie.core.Base;
 using amorphie.core.Enums;
 using amorphie.core.IBase;
+using AutoMapper;
 using Result = amorphie.core.Base.Result;
 
 public static class TagModule
@@ -125,7 +126,8 @@ public static class TagModule
     // }
     static IResult getTag(
       [FromRoute(Name = "tagName")] string tagName,
-      [FromServices] TagDBContext context
+      [FromServices] TagDBContext context,
+      [FromServices] IMapper mapper
       )
     {
 
@@ -133,7 +135,8 @@ public static class TagModule
             .Include(st => st.TagsRelations)
             .FirstOrDefault(t => t.Name == tagName);
 
-        var tagDto = ObjectMapper.Mapper.Map<DtoTag>(tag);
+        //var tagDto = ObjectMapper.Mapper.Map<DtoTag>(tag);
+        var tagDto = mapper.Map<DtoTag>(tag);
 
         if (tag == null)
             return Results.NotFound(new Response<DtoTag> { Result = new Result(Status.Error, "Tag Not Found") });
@@ -177,7 +180,8 @@ public static class TagModule
 
     static IResult saveTag(
         [FromBody] DtoSaveTagRequest data,
-        [FromServices] TagDBContext context
+        [FromServices] TagDBContext context,
+        [FromServices] IMapper mapper
         )
     {
 
@@ -186,13 +190,14 @@ public static class TagModule
 
         if (existingRecord == null)
         {
-            var tag = ObjectMapper.Mapper.Map<Tag>(data);
+            // var tag = ObjectMapper.Mapper.Map<Tag>(data);
+            var tag = mapper.Map<Tag>(data);
             tag.CreatedDate = DateTime.UtcNow;
             context!.Tags!.Add(tag);
             context.SaveChanges();
             //return new SuccessDataResult<DtoTag>(ObjectMapper.Mapper.Map<DtoTag>(tag), "Saved");
             // return new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(tag), Result = new amorphie.core.Base.Result(Status.Success, "Kaydedildi") };
-            return Results.Ok(new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(tag), Result = new Result(Status.Success, "Tag Saved") });
+            return Results.Ok(new Response<DtoTag> { Data = mapper.Map<DtoTag>(tag), Result = new Result(Status.Success, "Tag Saved") });
         }
         else
         {
@@ -201,11 +206,11 @@ public static class TagModule
             {
                 context!.SaveChanges();
                 //return new SuccessDataResult<DtoTag>(ObjectMapper.Mapper.Map<DtoTag>(existingRecord), "Updated");
-                return Results.Ok(new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(existingRecord), Result = new Result(Status.Success, "Update Başarili") });
+                return Results.Ok(new Response<DtoTag> { Data = mapper.Map<DtoTag>(existingRecord), Result = new Result(Status.Success, "Update Başarili") });
 
             }
         }
-        return Results.BadRequest(new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(existingRecord), Result = new Result(Status.Error, "Değişiklik yok") });
+        return Results.BadRequest(new Response<DtoTag> { Data = mapper.Map<DtoTag>(existingRecord), Result = new Result(Status.Error, "Değişiklik yok") });
     }
 
     static IResult deleteTag(
@@ -237,7 +242,8 @@ public static class TagModule
     static IResult addTagToTag(
         [FromRoute(Name = "ownerName")] string ownerName,
         [FromBody] string tagNameToAdd,
-        [FromServices] TagDBContext context
+        [FromServices] TagDBContext context,
+        IMapper mapper
         )
     {
         var tag = context!.Tags!
@@ -260,7 +266,7 @@ public static class TagModule
         var result = context!.Tags!.Include(t => t.TagsRelations).FirstOrDefault(t => t.TagsRelations.Any(x => x.TagName == tagNameToAdd));
 
         // return new SuccessDataResult<DtoTag>(ObjectMapper.Mapper.Map<DtoTag>(result)!, "Added");
-        return Results.Ok(new Response<DtoTag> { Data = ObjectMapper.Mapper.Map<DtoTag>(result), Result = new Result(Status.Success, "Tag To Add Saved") });
+        return Results.Ok(new Response<DtoTag> { Data = mapper.Map<DtoTag>(result), Result = new Result(Status.Success, "Tag To Add Saved") });
     }
 
     static IResult deleteTagFromTag(
