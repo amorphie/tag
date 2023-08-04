@@ -61,6 +61,11 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+
 app.Logger.LogInformation("Registering Routes");
 
 //app.MapTagEndpoints();
