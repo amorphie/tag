@@ -30,7 +30,11 @@ public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEn
         [FromServices] TagDBContext context
     )
     {
-        var entity = await context!.Entities!
+        if (context == null || context.Entities == null)
+        {
+            return Results.NotFound("Context or Entities is null.");
+        }
+        var entity = await context.Entities
             .Include(e => e.Data)
             .ThenInclude(d => d.Sources)
             .ThenInclude(s => s.Tag)
@@ -59,11 +63,17 @@ public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEn
        [FromRoute(Name = "fieldName")] string fieldName,
        [FromServices] TagDBContext context
 )
+
     {
-        var deletedData = context.EntityData!.FirstOrDefault(d => d.Entity!.Name == entityName && d.Field == fieldName);
+
+        if (context == null || context.EntityData == null)
+        {
+            return Results.NotFound("Context or EntityData is null.");
+        }
+        var deletedData = context.EntityData.FirstOrDefault(d => d.Entity!.Name == entityName && d.Field == fieldName);
         if (deletedData != null)
         {
-            context.EntityData!.Remove(deletedData);
+            context.EntityData.Remove(deletedData);
             await context.SaveChangesAsync(); // await ile SaveChangesAsync'yi bekleyin
             return Results.Ok();
         }
@@ -79,7 +89,11 @@ public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEn
         [FromServices] TagDBContext context
     )
     {
-        var entityData = await context!.EntityData!
+        if (context == null || context.EntityData == null)
+        {
+            return Results.NotFound("Context or EntityData is null.");
+        }
+        var entityData = await context.EntityData
             .Include(d => d.Sources)
             .ThenInclude(s => s.Tag)
             .Where(d => d.Entity!.Name == entityName && d.Field == fieldName)
@@ -102,13 +116,11 @@ public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEn
         [FromServices] TagDBContext context
     )
     {
-        // var entityData = await context!.EntityData!
-        //     .Include(d => d.Sources)
-        //     .ThenInclude(s => s.Tag)
-        //     .Where(d => d.Entity!.Name == entityName && d.Field == fieldName)
-        //     .FirstOrDefaultAsync();
-
-        var entityData = await context!.EntityData!
+        if (context == null || context.EntityData == null)
+        {
+            return Results.NotFound("Context or EntityData is null.");
+        }
+        var entityData = await context.EntityData
             .Include(d => d.Sources)
             .ThenInclude(s => s.Tag)
             .Where(d => d.Entity!.Name == entityName)

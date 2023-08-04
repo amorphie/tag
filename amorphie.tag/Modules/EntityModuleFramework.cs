@@ -1,10 +1,9 @@
 
-using amorphie.core.Module.minimal_api;
-using amorphie.core.Repository;
 using amorphie.tag.Modules.Base;
 using amorphie.tag.Validator;
 using AutoMapper;
 using FluentValidation;
+
 
 public sealed class EntityModuleFrameWorkModule : BaseEntityModule<DtoEntity, Entity, EntityValidator>
 {
@@ -30,7 +29,12 @@ public sealed class EntityModuleFrameWorkModule : BaseEntityModule<DtoEntity, En
 
     )
     {
-        var entity = await context!.Entities!
+
+        if (context == null || context.Entities == null)
+        {
+            return Results.NotFound("Context or Entities is null.");
+        }
+        var entity = await context.Entities
             .Include(e => e.Data)
             .ThenInclude(d => d.Sources)
             .ThenInclude(s => s.Tag)
@@ -57,31 +61,45 @@ public sealed class EntityModuleFrameWorkModule : BaseEntityModule<DtoEntity, En
     #endregion
 
     /// <summary> Entity tablosundan entityId ve domainId göre kayıt siler. </summary>
-    async ValueTask<IResult> deleteEntity(
-    [FromRoute(Name = "domainName")] string domainName,
-    [FromRoute(Name = "entityName")] string entityName,
-    [FromServices] TagDBContext context
-
+    async Task<IResult> deleteEntity(
+     [FromRoute(Name = "domainName")] string domainName,
+     [FromRoute(Name = "entityName")] string entityName,
+     [FromServices] TagDBContext context
  )
     {
-        //Entity tablosundan entityName ve domainName göre kayıt siler.
-        //Entity tablosunda entityName ve domainName eşleşen kayıt varsa Entity Data tablosundaki ilişkili kayıtlarınıda siler.
-        //Entity tablosunda entityName ve domainName eşleşen kayıt yoksa 204 döndürür.
-
-
-        //Entity tablosuna sorgu atar entityName ve domainName ile eşleşen kayı varsa siler
-        if (await context.Entities!.Where(e => e.Name == entityName && e.DomainName == domainName).ExecuteDeleteAsync() == 1)
+        if (context == null || context.Entities == null)
         {
-            //Entity tablosunda silinen Entity'nin Entity Datada ki kayıtları silinir.
-            //Entity tablosunda silinen Entity'nin EntityDataSource tablosundaki kayıtlarıda silinir.
-            //Silinmiş olan Entity ile ilgili diğer tablolardaki bütün kayıtlar silinir.?
-            await context.EntityData!.Where(d => d.EntityName == entityName).ExecuteDeleteAsync();
-            return Results.Ok();
+            return Results.NotFound("Context or Entities is null.");
         }
-        //Entity tablosunda entityName ve domainName ile eşleşen kayıt yoksa 204 döndürür.
-        else
+        using var transaction = await context.Database.BeginTransactionAsync();
+
+        try
         {
-            return Results.NoContent();
+            var entityToDelete = await context.Entities
+                .Where(e => e.Name == entityName && e.DomainName == domainName)
+                .Include(e => e.Data)
+                .FirstOrDefaultAsync();
+
+            if (entityToDelete != null)
+            {
+                context.Entities.Remove(entityToDelete);
+                context.EntityData!.RemoveRange(entityToDelete.Data);
+                await context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return Results.Ok();
+            }
+            else
+            {
+                await transaction.RollbackAsync();
+                return Results.NoContent();
+            }
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return Results.BadRequest($"An error occurred: {ex.Message}");
         }
     }
 }

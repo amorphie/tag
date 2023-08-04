@@ -14,7 +14,7 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
     {
     }
 
-   
+
 
 
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
@@ -30,8 +30,11 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
       IMapper mapper
       )
     {
-
-        var tag = await context!.Tags!
+        if (context == null || context.Tags == null)
+        {
+            return Results.NotFound("Context or Tags is null.");
+        }
+        var tag = await context.Tags
             .Include(st => st.TagsRelations)
             .FirstOrDefaultAsync(t => t.Name == tagName);
 
@@ -42,47 +45,48 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
             return Results.NotFound();
         return Results.Ok(tagDto);
     }
-     async   ValueTask<IResult> saveTagWithWorkflow(
-        [FromBody] DtoPostWorkflow data,
-        [FromServices] TagDBContext context,
-        IMapper mapper,
-        CancellationToken cancellationToken
-        )
+    async ValueTask<IResult> saveTagWithWorkflow(
+    [FromBody] DtoPostWorkflow data,
+    [FromServices] TagDBContext context,
+    IMapper mapper,
+    CancellationToken cancellationToken
+)
+{
+    if (context == null || context.Tags == null)
     {
-
-        var existingRecord = await context!.Tags!.FirstOrDefaultAsync(t => t.Id == data.recordId);
-
-
-        if (existingRecord == null)
-        {
-            var alreadyHasRecord =await context!.Tags!.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name);
-            if(alreadyHasRecord!=null)
-            {
-                return Results.BadRequest("Already has " + data.entityData!.Name + " tag");
-            }
-            // var tag = ObjectMapper.Mapper.Map<Tag>(data.entityData!);
-            var tag = mapper.Map<Tag>(data.entityData!);
-            
-            tag.CreatedDate = DateTime.UtcNow;
-            context!.Tags!.Add(tag);
-            await context.SaveChangesAsync(cancellationToken);
-            return Results.Ok(tag);
-        }
-        else
-        {
-            // Apply update to only changed fields.
-            if (SaveTagUpdate(data.entityData!, existingRecord))
-            {
-               await context!.SaveChangesAsync(cancellationToken);
-                
-
-            }
-            return Results.Ok();
-
-           
-        }
+        return Results.NotFound("Context or Tags is null.");
     }
-   static bool SaveTagUpdate(DtoSaveTagRequest data, Tag existingRecord)
+    
+    var existingRecord = await context.Tags.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
+
+
+    if (existingRecord == null)
+    {
+        var alreadyHasRecord = await context.Tags.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
+        if (alreadyHasRecord != null)
+        {
+            return Results.BadRequest("Already has " + data.entityData!.Name + " tag");
+        }
+        
+        var tag = mapper.Map<Tag>(data.entityData!);
+
+        tag.CreatedDate = DateTime.UtcNow;
+        context.Tags.Add(tag);
+        await context.SaveChangesAsync(cancellationToken);
+        return Results.Ok(tag);
+    }
+    else
+    {
+        // Apply update to only changed fields.
+        if (SaveTagUpdate(data.entityData!, existingRecord))
+        {
+            await context!.SaveChangesAsync(cancellationToken);
+        }
+        
+        return Results.Ok();
+    }
+}
+    static bool SaveTagUpdate(DtoSaveTagRequest data, Tag existingRecord)
     {
         var hasChanges = false;
         // Apply update to only changed fields.
@@ -96,10 +100,10 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
             existingRecord.Name = data.Name;
             hasChanges = true;
         }
-        if(hasChanges)
+        if (hasChanges)
         {
             existingRecord.LastModifiedDate = DateTime.Now.ToUniversalTime();
-        } 
+        }
         if (data.Ttl != null && data.Ttl != existingRecord.Ttl)
         {
             existingRecord.Ttl = data.Ttl.Value;
@@ -110,5 +114,5 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
     }
 
 
-    
+
 }

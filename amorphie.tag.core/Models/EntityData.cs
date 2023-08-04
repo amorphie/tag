@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using amorphie.core.Base;
 
+
 public class EntityData : EntityBase
 {
     public Guid EntityId { get; set; }
@@ -11,5 +12,5 @@ public class EntityData : EntityBase
     public string EntityName { get; set; } = string.Empty;
     public int? Ttl { get; set; }
     [JsonIgnore]
-    public List<EntityDataSource> Sources = new List<EntityDataSource>();
+    public List<EntityDataSource> Sources = new();
 }

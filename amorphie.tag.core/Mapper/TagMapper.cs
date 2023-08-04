@@ -1,5 +1,6 @@
 using AutoMapper;
 
+namespace amorphie.tag.core.Mapper;
 
 class TagMapper : Profile
 {
