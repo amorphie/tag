@@ -1,0 +1,140 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "amorphie.tag",
+    "dateExported": "2023-01-13T10:45:09.147Z",
+    "version": "1.1",
+    "folders": [
+        {
+            "_id": "cb9ba1e0-954d-4611-a627-66c196577308",
+            "name": "Domain",
+            "containerId": "",
+            "created": "2023-01-04T09:08:24.521Z",
+            "sortNum": 10000
+        },
+        {
+            "_id": "e1a9cb3e-baef-4ccd-a94f-462f3f88c5ac",
+            "name": "Tag",
+            "containerId": "",
+            "created": "2023-01-04T09:08:35.665Z",
+            "sortNum": 20000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "56776c19-bc09-4739-a894-2af08b7320af",
+            "colId": "14401976-5431-4a52-b839-9793db8e306f",
+            "containerId": "e1a9cb3e-baef-4ccd-a94f-462f3f88c5ac",
+            "name": "getAllTags",
+            "url": "http://localhost:4101/tag?page=0&pageSize=100",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2023-01-04T09:09:26.433Z",
+            "modified": "2023-01-04T09:21:14.621Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "page",
+                    "value": "0",
+                    "isPath": false
+                },
+                {
+                    "name": "pageSize",
+                    "value": "100",
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        },
+        {
+            "_id": "5f545f63-101d-4f1e-9924-59bdf30627f2",
+            "colId": "14401976-5431-4a52-b839-9793db8e306f",
+            "containerId": "e1a9cb3e-baef-4ccd-a94f-462f3f88c5ac",
+            "name": "getTag",
+            "url": "{{tagMethod}}{tag-name}",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2023-01-04T09:41:27.892Z",
+            "modified": "2023-01-04T11:18:13.759Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "tag-name",
+                    "value": "loan-partner",
+                    "isPath": true
+                }
+            ],
+            "tests": []
+        },
+        {
+            "_id": "981043a9-1d15-4834-8047-d879e3f221c3",
+            "colId": "14401976-5431-4a52-b839-9793db8e306f",
+            "containerId": "e1a9cb3e-baef-4ccd-a94f-462f3f88c5ac",
+            "name": "saveUpdateTag",
+            "url": "{{tagMethod}}",
+            "method": "POST",
+            "sortNum": 40000,
+            "created": "2023-01-13T09:29:32.985Z",
+            "modified": "2023-01-13T10:32:45.654Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\r\n  \"name\": \"test3\",\r\n  \"url\": \"string\",\r\n  \"ttl\": 0\r\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "52920ffa-5cc0-4aac-ae0c-e4223d9b0e37",
+            "colId": "14401976-5431-4a52-b839-9793db8e306f",
+            "containerId": "e1a9cb3e-baef-4ccd-a94f-462f3f88c5ac",
+            "name": "deleteTag",
+            "url": "{{tagMethod}}test1",
+            "method": "DELETE",
+            "sortNum": 50000,
+            "created": "2023-01-13T09:49:31.990Z",
+            "modified": "2023-01-13T09:50:15.174Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "50839f68-c040-45ca-9350-d0e3383e90a4",
+            "colId": "14401976-5431-4a52-b839-9793db8e306f",
+            "containerId": "e1a9cb3e-baef-4ccd-a94f-462f3f88c5ac",
+            "name": "addTagToTag",
+            "url": "{{tagMethod}}retail-customer/tags",
+            "method": "POST",
+            "sortNum": 60000,
+            "created": "2023-01-13T10:30:27.775Z",
+            "modified": "2023-01-13T10:37:27.773Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "\"test2\"",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "b18c5ece-00d2-4381-b2cb-d1827fcffa0e",
+            "colId": "14401976-5431-4a52-b839-9793db8e306f",
+            "containerId": "e1a9cb3e-baef-4ccd-a94f-462f3f88c5ac",
+            "name": "deleteTagToTag",
+            "url": "{{tagMethod}}retail-customer/tags/test2",
+            "method": "DELETE",
+            "sortNum": 70000,
+            "created": "2023-01-13T10:38:32.644Z",
+            "modified": "2023-01-13T10:42:08.494Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        }
+    ]
+}

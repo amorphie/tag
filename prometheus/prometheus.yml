@@ -6,5 +6,10 @@ scrape_configs:
     scrape_interval: 5s
 
     static_configs:
-      - targets: ["host.docker.internal:41012", "host.docker.internal:41022"] 
-      
+      - targets:
+          [
+            "host.docker.internal:41012",
+            "host.docker.internal:41022",
+            "host.docker.internal:4101",
+            "host.docker.internal:4102",
+          ]

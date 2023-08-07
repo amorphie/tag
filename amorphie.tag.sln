@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "amorphie.tag", "amorphie.ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "amorphie.tag.execute", "amorphie.tag.execute\amorphie.tag.execute.csproj", "{13D19E42-793C-4F41-A386-E831BE86C68F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "amorphie.tag.core", "amorphie.tag.core\amorphie.tag.core.csproj", "{D15F0649-D6BA-4702-A115-AFEFA1DE46D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{13D19E42-793C-4F41-A386-E831BE86C68F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13D19E42-793C-4F41-A386-E831BE86C68F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13D19E42-793C-4F41-A386-E831BE86C68F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D15F0649-D6BA-4702-A115-AFEFA1DE46D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D15F0649-D6BA-4702-A115-AFEFA1DE46D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D15F0649-D6BA-4702-A115-AFEFA1DE46D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D15F0649-D6BA-4702-A115-AFEFA1DE46D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
