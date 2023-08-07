@@ -20,7 +20,7 @@ spec:
       serviceAccountName: amorphie-taguser
       containers:
         - name: amorphie-tag
-          image: burganbank/amorphie.fact-user:latest
+          image: burganbank/amorphie.tag:latest
           ports:
             - containerPort: 5000
           env:
