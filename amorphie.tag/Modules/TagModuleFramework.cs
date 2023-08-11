@@ -65,7 +65,19 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
         var alreadyHasRecord = await context.Tags.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
         if (alreadyHasRecord != null)
         {
-            return Results.BadRequest("Already has " + data.entityData!.Name + " tag");
+
+            var alreadyHasRecord =await context!.Tags!.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name);
+            if(alreadyHasRecord!=null)
+            {
+                return Results.BadRequest("Already has " + data.entityData!.Name + " tag");
+            }
+            var tag = ObjectMapper.Mapper.Map<Tag>(data.entityData!);
+            tag.Id=data.recordId;
+            tag.CreatedDate = DateTime.UtcNow;
+            context!.Tags!.Add(tag);
+            await context.SaveChangesAsync(cancellationToken);
+            return Results.Ok(tag);
+
         }
         
         var tag = mapper.Map<Tag>(data.entityData!);

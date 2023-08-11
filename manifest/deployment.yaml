@@ -20,7 +20,7 @@ spec:
       serviceAccountName: amorphie-taguser
       containers:
         - name: amorphie-tag
-          image: burganbank/amorphie.fact-user:latest
+          image: burganbank/amorphie.tag:latest
           ports:
             - containerPort: 5000
           env:
@@ -40,7 +40,7 @@ spec:
           volumeMounts:
           - mountPath: /app/appsettings.Test.json
             name: appsettings-test-config-volume
-            subPath: appsettings.test.json
+            subPath: appsettings.Test.json
       volumes:
         - name: appsettings-test-config-volume
           configMap:
