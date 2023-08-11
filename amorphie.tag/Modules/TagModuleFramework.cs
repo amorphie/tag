@@ -58,7 +58,7 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
                 return Results.BadRequest("Already has " + data.entityData!.Name + " tag");
             }
             var tag = ObjectMapper.Mapper.Map<Tag>(data.entityData!);
-            
+            tag.Id=data.recordId;
             tag.CreatedDate = DateTime.UtcNow;
             context!.Tags!.Add(tag);
             await context.SaveChangesAsync(cancellationToken);
