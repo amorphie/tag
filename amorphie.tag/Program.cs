@@ -1,13 +1,10 @@
-using System.Text.Json.Serialization;
-using amorphie.core.security.Extensions;
 using amorphie.core.Extension;
 using amorphie.tag.Validator;
 using FluentValidation;
-using static amorphie.tag.data.TagDBContext;
 using amorphie.core.Identity;
 using amorphie.core.Repository;
 using System.Reflection;
-
+using amorphie.tag.core.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
@@ -15,11 +12,6 @@ await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[]
 var postgreSql = builder.Configuration["PostgreSql"];
 var postgreDb = builder.Configuration["PostgreDB"];
 
-//var client = new DaprClientBuilder().Build();
-#pragma warning disable 618
-//var configurations = await client.GetConfiguration("amorphie-config", new List<string>() { "PostgreDB" });
-
-#pragma warning restore 618
 var assemblies = new Assembly[] { typeof(DomainValidator).Assembly, typeof(DomainMapper).Assembly };
 builder.Services.AddScoped<IValidator<Domain>, DomainValidator>();
 
@@ -65,6 +57,11 @@ app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
 app.UseCors();
+app.UseSwagger();
+app.UseSwaggerUI();
+
+
+
 app.UseSwagger();
 app.UseSwaggerUI();
 

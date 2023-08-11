@@ -5,14 +5,11 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 using var client = new DaprClientBuilder().Build();
 
 var builder = WebApplication.CreateBuilder(args);
-// var secret = await client.GetSecretAsync("amorphie-secretstore", "amorphie-secretstore");
-// builder.Configuration.AddInMemoryCollection(secret);
-// var postgreSql = builder.Configuration["PostgreSql"];
+
 await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
 var postgreSql = builder.Configuration["PostgreSql"];
 var amorphie_tag = "";
 
-//var test = await client.GetConfiguration("amorphie-config", new List<string>() { "STATE_STORE" });
 
 
 var STATE_STORE = builder.Configuration["STATE_STORE"];
