@@ -3,6 +3,7 @@ using amorphie.core.Base;
 
 using amorphie.core.Module.minimal_api;
 using amorphie.core.Repository;
+using amorphie.tag.core.Mapper;
 using amorphie.tag.Modules.Base;
 using amorphie.tag.Validator;
 using AutoMapper;
@@ -62,9 +63,6 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
 
     if (existingRecord == null)
     {
-        var alreadyHasRecord = await context.Tags.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
-        if (alreadyHasRecord != null)
-        {
 
             var alreadyHasRecord =await context!.Tags!.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name);
             if(alreadyHasRecord!=null)
@@ -78,14 +76,6 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
             await context.SaveChangesAsync(cancellationToken);
             return Results.Ok(tag);
 
-        }
-        
-        var tag = mapper.Map<Tag>(data.entityData!);
-
-        tag.CreatedDate = DateTime.UtcNow;
-        context.Tags.Add(tag);
-        await context.SaveChangesAsync(cancellationToken);
-        return Results.Ok(tag);
     }
     else
     {
