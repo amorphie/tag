@@ -59,11 +59,11 @@ jobs:
           
       - name: Replace vault address
         run: |
-          sed -i -e "s/vault-address/${{ secrets.VAULT_ADDRESS }}/g" ./manifest-execute/Dapr/vault-component.yaml
+          sed -i -e "s,vault-address,${{ secrets.VAULT_ADDRESS }},g" ./manifest-execute/Dapr/vault-component.yaml
 
       - name: Replace vault token
         run: |
-          sed -i -e "s/amorphie-execute-vaulttoken/${{ secrets.VAULT_TOKEN }}/g" ./manifest-execute/Dapr/vault-component.yaml
+          sed -i -e "s,amorphie-execute-vaulttoken,${{ secrets.VAULT_TOKEN }},g" ./manifest-execute/Dapr/vault-component.yaml
 
       # Deploy app to AKS
       - uses: azure/k8s-deploy@v1
