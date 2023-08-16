@@ -55,6 +55,18 @@ jobs:
           arguments: --force true
 
 
+      - name: Deploy appsettings as Configmap
+        run: |
+          cd ./amorphie.tag.execute
+          ls
+          if [ -e appsettings.Test.json ]
+          then
+            echo "Creating appsettings from appsettings.Test.json"
+            sleep 5
+            kubectl create configmap appsettings-test-config -n amorphie-workflow --from-file=appsettings.Test.json 2>/dev/null
+          else
+            echo "Test ortami icin appsettings.Test.json yok. Olusturmaniz gerekiyor"
+          fi
 
           
       - name: Replace vault address
