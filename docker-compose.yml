@@ -1,17 +1,47 @@
 version: "3.9"
 services:
-
   redis:
     container_name: bbt-redis
     image: redis:latest
     restart: always
     ports:
       - '6379:6379'
-    command: redis-server --save 20 1 --loglevel warning
-    volumes: 
-      - redis:/data
+    command: sh -c "/redis.sh redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes --daemonize yes"
+    volumes:
+      - "./redis.sh:/redis.sh"
     networks:
       - bbt-development
+
+  vault:
+    image: vault:latest
+    container_name: vault
+    restart: on-failure:10
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_ADDR: 'https://0.0.0.0:8200'
+      VAULT_API_ADDR: 'https://0.0.0.0:8200'
+      VAULT_DEV_ROOT_TOKEN_ID: 'admin'
+      VAULT_TOKEN: 'admin'
+    volumes:
+      - ./file:/vault/file
+    cap_add:
+      - IPC_LOCK
+    healthcheck:
+      retries: 5
+    command: server -dev -dev-root-token-id="admin"
+    networks:
+      - bbt-development
+
+  vault-prepopulate:
+    image: alpine/curl
+    depends_on:
+      - vault
+    volumes:
+      - ./vault.sh:/usr/local/bin/prepopulate_vault.sh
+    command: ["sh", "-c", "/usr/local/bin/prepopulate_vault.sh"]
+    networks:
+       - bbt-development
 
   redisinsight:
     container_name: bbt-red-insight
@@ -38,7 +68,14 @@ services:
     restart: unless-stopped
     networks:
       - bbt-development
-
+    
+  placement:
+      image: "daprio/dapr:latest"
+      command: ["./placement", "-port", "50006", "log-level", "debug", "--log-as-json"]
+      ports:
+      - "50006:50006"
+      networks:
+      - bbt-development
   pgadmin:
     container_name: bbt-pgadmin
     image: dpage/pgadmin4
@@ -72,6 +109,19 @@ services:
       - "9090:9090"
     networks:
       - bbt-development
+  grafana:
+    container_name: bbt-grafana
+    image: "grafana/grafana"
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - grafana-data:/var/lib/grafana
+   
+    ports:
+      - "3000:3000"
+    networks:
+      - bbt-development
+    depends_on:
+      - prometheus
 networks:
   bbt-development:
     external: true
@@ -82,3 +132,5 @@ volumes:
   postgres:
   pgadmin:
   dapr:
+  grafana-data:
+  prometheus:

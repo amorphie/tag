@@ -10,11 +10,18 @@
             "args": [],
             "cwd": "${workspaceFolder}/amorphie.tag",
             "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+http://\\S+:([0-9]+)",
+                "uriFormat": "http://localhost:%s/swagger/index.html"
+            },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "ASPNETCORE_URLS": "http://localhost:4101",
                 "DAPR_HTTP_PORT": "41010",
-                "DAPR_GRPC_PORT": "41011"
+                "DAPR_GRPC_PORT": "41011",
+                "STATE_STORE":"amorphie-cache",
+                "PostgreDB":"Host=localhost:5432;Database=tags;Username=postgres;Password=postgres"
             },
             "postDebugTask": "daprd-down-amorphie-tag"
         },
@@ -27,11 +34,19 @@
             "args": [],
             "cwd": "${workspaceFolder}/amorphie.tag.execute",
             "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+http://\\S+:([0-9]+)",
+                "uriFormat": "http://localhost:%s/swagger/index.html"
+            },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "ASPNETCORE_URLS": "http://localhost:4102",
                 "DAPR_HTTP_PORT": "41020",
-                "DAPR_GRPC_PORT": "41021"
+                "DAPR_GRPC_PORT": "41021",
+                "STATE_STORE":"amorphie-cache",
+                "PostgreDB":"Host=localhost:5432;Database=tags;Username=postgres;Password=postgres",
+                "amorphie-tags":"amorphie-tag"
             },
             "postDebugTask": "daprd-down-amorphie-tag-execute"
         }

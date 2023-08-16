@@ -13,7 +13,7 @@
             ]
         },
         {
-            "label": "(EF) Updata Entity Framework Cli",
+            "label": "(EF) Update Entity Framework Cli",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -21,7 +21,7 @@
                 "update",
                 "dotnet-ef",
                 "-g"
-            ]
+            ],
         },
         {
             "label": "(EF) Apply Project Database Migrations",
@@ -32,7 +32,8 @@
                 "ef",
                 "database",
                 "update",
-                "--project", "${workspaceFolder}/amorphie.tag.data/amorphie.tag.data.csproj"
+                "--project",
+                "${workspaceFolder}/amorphie.tag.data/amorphie.tag.data.csproj"
             ],
             "runOptions": {
                 "runOn": "folderOpen"
@@ -85,10 +86,9 @@
             "label": "dapr-debug-amorphie-tag",
             "type": "daprd",
             "dependsOn": "build-amorphie-tag",
-            "componentsPath": "dapr/components",
+            "componentsPath": "dapr/Components",
             "config": "dapr/config.yaml",
             "metricsPort": 41012
-         
         },
         {
             "appId": "amorphie-tag-execute",
@@ -98,10 +98,9 @@
             "label": "dapr-debug-amorphie-tag-execute",
             "type": "daprd",
             "dependsOn": "build-amorphie-tag-execute",
-            "componentsPath": "dapr/components",
+            "componentsPath": "dapr/Components",
             "config": "dapr/config.yaml",
             "metricsPort": 41022
-            
         },
         {
             "appId": "amorphie-tag",
