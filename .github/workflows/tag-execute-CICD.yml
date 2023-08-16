@@ -29,7 +29,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./amorphie.tag-execute/Dockerfile
+          file: ./Dockerfile-execute
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
 
