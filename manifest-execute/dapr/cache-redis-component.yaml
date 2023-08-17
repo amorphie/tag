@@ -8,7 +8,7 @@ spec:
   version: v1
   metadata:
   - name: redisHost
-    value: "redis-cluster.redis-amorphie.svc.cluster.local:6379"
+    value: "redis-cluster.amorphie-redis.svc.cluster.local:6379"
   - name: redisPassword
     secretKeyRef:
       name: test-redis-secret
