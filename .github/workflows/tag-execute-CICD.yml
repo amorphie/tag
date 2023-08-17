@@ -1,9 +1,10 @@
 name: tag-execute-CI-CD
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - 'main'
+    paths:
+      - './amorphie.tag.execute'
   workflow_dispatch:
 
 env:
@@ -84,7 +85,6 @@ jobs:
           manifests: |
             ${{ github.workspace }}/manifest-execute/deployment.yaml
             ${{ github.workspace }}/manifest-execute/service.yaml
-            ${{ github.workspace }}/manifest-execute/ingress.yaml
             ${{ github.workspace }}/manifest-execute/dapr/cache-redis-component.yaml
             ${{ github.workspace }}/manifest-execute/dapr/vault-component.yaml
           images: |
