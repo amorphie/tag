@@ -1,11 +1,11 @@
 name: tag-CI-CD
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - 'main'
+    paths:
+      - './amorphie.tag'
   workflow_dispatch:
-
 env:
   APP_NAME: amorphie.tag
   NAMESPACE: amorphie-tag
