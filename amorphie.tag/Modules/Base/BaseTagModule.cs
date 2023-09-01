@@ -17,6 +17,6 @@ public abstract class BaseTagModule<TDTOModel, TDBModel, TValidator>
 
     public override string[]? PropertyCheckList => new string[] { "Name", "Url", "Ttl" };
 
-     public override string? UrlFragment => "Tag";
+    public override string? UrlFragment => "Tag";
 
 }

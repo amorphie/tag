@@ -51,53 +51,53 @@ public sealed class TagFrameworkModule : BaseTagModule<DtoTag, Tag, TagValidator
     IMapper mapper,
     CancellationToken cancellationToken
 )
-{
-    if (context == null || context.Tags == null)
     {
-        return Results.NotFound("Context or Tags is null.");
-    }
-    
-    var existingRecord = await context.Tags.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
-
-
-    if (existingRecord == null)
-    {
-        var alreadyHasRecord = await context.Tags.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
-        if (alreadyHasRecord != null)
+        if (context == null || context.Tags == null)
         {
+            return Results.NotFound("Context or Tags is null.");
+        }
 
-            var alreadyHasRecord =await context!.Tags!.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name);
-            if(alreadyHasRecord!=null)
+        var existingRecord = await context.Tags.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
+
+
+        if (existingRecord == null)
+        {
+            var alreadyHasRecord = await context.Tags.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
+            if (alreadyHasRecord != null)
             {
-                return Results.BadRequest("Already has " + data.entityData!.Name + " tag");
+
+                var alreadyHasRecord = await context!.Tags!.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name);
+                if (alreadyHasRecord != null)
+                {
+                    return Results.BadRequest("Already has " + data.entityData!.Name + " tag");
+                }
+                var tag = ObjectMapper.Mapper.Map<Tag>(data.entityData!);
+                tag.Id = data.recordId;
+                tag.CreatedDate = DateTime.UtcNow;
+                context!.Tags!.Add(tag);
+                await context.SaveChangesAsync(cancellationToken);
+                return Results.Ok(tag);
+
             }
-            var tag = ObjectMapper.Mapper.Map<Tag>(data.entityData!);
-            tag.Id=data.recordId;
+
+            var tag = mapper.Map<Tag>(data.entityData!);
+
             tag.CreatedDate = DateTime.UtcNow;
-            context!.Tags!.Add(tag);
+            context.Tags.Add(tag);
             await context.SaveChangesAsync(cancellationToken);
             return Results.Ok(tag);
-
         }
-        
-        var tag = mapper.Map<Tag>(data.entityData!);
-
-        tag.CreatedDate = DateTime.UtcNow;
-        context.Tags.Add(tag);
-        await context.SaveChangesAsync(cancellationToken);
-        return Results.Ok(tag);
-    }
-    else
-    {
-        // Apply update to only changed fields.
-        if (SaveTagUpdate(data.entityData!, existingRecord))
+        else
         {
-            await context!.SaveChangesAsync(cancellationToken);
+            // Apply update to only changed fields.
+            if (SaveTagUpdate(data.entityData!, existingRecord))
+            {
+                await context!.SaveChangesAsync(cancellationToken);
+            }
+
+            return Results.Ok();
         }
-        
-        return Results.Ok();
     }
-}
     static bool SaveTagUpdate(DtoSaveTagRequest data, Tag existingRecord)
     {
         var hasChanges = false;
