@@ -6,9 +6,9 @@ services:
     restart: always
     ports:
       - '6379:6379'
-    command: sh -c "/redis.sh redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes --daemonize yes"
+    command: redis-server --save 20 1 --loglevel warning
     volumes:
-      - "./redis.sh:/redis.sh"
+      - redis:/data
     networks:
       - bbt-development
 
