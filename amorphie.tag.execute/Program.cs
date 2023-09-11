@@ -6,7 +6,7 @@ using var client = new DaprClientBuilder().Build();
 
 var builder = WebApplication.CreateBuilder(args);
 
-await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });
+await builder.Configuration.AddVaultSecrets("amorphie-tag", new string[] { "amorphie-tag" });
 var postgreSql = builder.Configuration["PostgreSql"];
 var amorphie_tag = "";
 

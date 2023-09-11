@@ -1,96 +1,37 @@
-
 using amorphie.core.Module.minimal_api;
-using amorphie.core.Repository;
-using amorphie.tag.Modules.Base;
-using amorphie.tag.Validator;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using FluentValidation;
+using Microsoft.OpenApi.Models;
+using amorphie.tag.data;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using amorphie.core.Base;
 
-public sealed class DomainModule : BaseDomainModule<DtoDomain, Domain, DomainValidator>
+namespace amorphie.domain.Module;
+
+public class DomainModule : BaseBBTRoute<DtoDomain, Domain, TagDBContext>
 {
-    public DomainModule(WebApplication app) : base(app)
-    {
-    }
+    public DomainModule(WebApplication app)
+        : base(app) { }
+
+    public override string[]? PropertyCheckList => new string[] { "Name" };
 
     public override string? UrlFragment => "domain";
 
-
-    public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
+   public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
         routeGroupBuilder.MapGet("{domainName}/{entityName}", getEntity);
-        routeGroupBuilder.MapPost("saveDomainWithWorkflow", saveDomainWithWorkflow);
 
     }
 
-        async ValueTask<IResult> saveDomainWithWorkflow(
-    [FromBody] DtoPostDomainWorkflow data,
-    [FromServices] TagDBContext context,
-    IMapper mapper,
-    CancellationToken cancellationToken
-)
-{
-    if (context == null || context.Domains == null)
-    {
-        return Results.NotFound("Context or Tags is null.");
-    }
-    
-    var existingRecord = await context.Domains.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
 
-
-    if (existingRecord == null)
-    {
-        var alreadyHasRecord = await context.Domains.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
-        if (alreadyHasRecord != null)
-        {
-            return Results.BadRequest("Already has " + data.entityData!.Name + " domain");
-        }
-        
-        var domain = mapper.Map<Domain>(data.entityData!);
-
-        domain.CreatedAt = DateTime.UtcNow;
-        context.Domains.Add(domain);
-        await context.SaveChangesAsync(cancellationToken);
-        return Results.Ok(domain);
-    }
-    else
-    {
-        // Apply update to only changed fields.
-        if (SaveDomainUpdate(data.entityData!, existingRecord))
-        {
-            await context!.SaveChangesAsync(cancellationToken);
-        }
-        
-        return Results.Ok();
-    }
-}
- static bool SaveDomainUpdate(DtoDomain data, Domain existingRecord)
-    {
-        var hasChanges = false;
-        // Apply update to only changed fields.
-        if (data.Description != null && data.Description != existingRecord.Description)
-        {
-            existingRecord.Description = data.Description;
-            hasChanges = true;
-        }
-        if (data.Name != null && data.Name != existingRecord.Name)
-        {
-            existingRecord.Name = data.Name;
-            hasChanges = true;
-        }
-        if (hasChanges)
-        {
-            existingRecord.ModifiedAt = DateTime.UtcNow;
-        }
-       
-
-        return hasChanges;
-    }
-
-   async Task<IResult> getEntity(
+async Task<IResult> getEntity(
     [FromRoute(Name = "domainName")] string domainName,
     [FromRoute(Name = "entityName")] string entityName,
-    [FromServices] TagDBContext context
+    [FromServices] TagDBContext context,
+    IMapper mapper
 )
 {
     if (context == null || context.Entities == null)
@@ -99,23 +40,23 @@ public sealed class DomainModule : BaseDomainModule<DtoDomain, Domain, DomainVal
     }
     
     var entity = await context.Entities
-        .Include(e => e.Data)
-        .ThenInclude(d => d.Sources)
-        .ThenInclude(s => s.Tag)
+        .Include(e => e.EntityData)
+            .ThenInclude(d => d.Sources)
+                .ThenInclude(s => s.Tag)
         .Where(e => e.Name == entityName)
         .FirstOrDefaultAsync();
 
     if (entity != null)
     {
-        return Results.Ok(
-            new GetEntityResponse(
-                entity.Name,
-                entity.Description!,
-                entity.Data.Select(d => new GetEntityDataResponse(d.Field, d.Ttl,
-                    d.Sources.Select(s => new GetEntityDataSourcesResponse(s.Order, s.Tag!.Name, s.DataPath)).ToArray()
-                )).ToArray()
-            )
-        );
+        JsonSerializerOptions options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            MaxDepth=3
+            
+        };
+        var response = mapper.Map<EntityAllDto>(entity);
+        var serialezedResponse = JsonSerializer.Serialize(response,options);
+        return Results.Ok(response);
     }
     else
     {
@@ -123,3 +64,30 @@ public sealed class DomainModule : BaseDomainModule<DtoDomain, Domain, DomainVal
     }
 }
 }
+
+
+    // protected async ValueTask<IResult> SearchMethod(
+    //     [FromServices] DomainDbContext context,
+    //     [FromServices] IMapper mapper,
+    //     [AsParameters] DomainModuleSearch userSearch,
+    //     HttpContext httpContext,
+    //     CancellationToken token
+    // )
+    // {
+    //     IList<DomainModule> resultList = await context
+    //         .Set<DomainModule>()
+    //         .AsNoTracking()
+    //         .Where(
+    //             x =>
+    //                 x.FirstMidName.Contains(userSearch.Keyword!)
+    //                 || x.LastName.Contains(userSearch.Keyword!)
+    //         )
+    //         .Skip(userSearch.Page)
+    //         .Take(userSearch.PageSize)
+    //         .ToListAsync(token);
+
+    //     return (resultList != null && resultList.Count > 0)
+    //         ? Results.Ok(mapper.Map<IList<DomainModuleDTO>>(resultList))
+    //         : Results.NoContent();
+    // }
+

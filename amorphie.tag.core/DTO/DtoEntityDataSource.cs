@@ -1,5 +1,5 @@
 using amorphie.core.Base;
-
+[Serializable]
 public class DtoEntityDataSource : DtoBase
 {
 

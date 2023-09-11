@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  operate:
+    container_name: bbt-tag-zeebe-operate
+    image: camunda/operate:latest
+    ports:
+      - "8081:8080"
+    environment:
+      - CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS=bbt-template-zeebe:26500
+      - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://bbt-template-elastic:9200
+      - CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL=http://bbt-template-elastic:9200
+    networks:
+      - bbt-development
+    depends_on:
+      - zeebe
+      - elastic

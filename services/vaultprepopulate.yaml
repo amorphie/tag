@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  vaultprepopulate:
+    image: alpine/curl:latest
+    depends_on:
+      - vault
+    volumes:
+      - ./vault.sh:/usr/local/bin/prepopulate_vault.sh
+    command: ["sh", "-c", "/usr/local/bin/prepopulate_vault.sh"]
+    networks:
+       - bbt-development

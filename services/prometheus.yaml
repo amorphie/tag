@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  prometheus:
+    container_name: bbt-tag-prometheus
+    image: prom/prometheus:latest
+    command:
+      - "--config.file=/etc/prometheus.yml"
+    volumes:
+      - ./prometheus:/etc
+    ports:
+      - "9090:9090"
+    networks:
+      - bbt-development

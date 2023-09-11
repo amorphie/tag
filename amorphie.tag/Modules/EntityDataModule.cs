@@ -1,41 +1,51 @@
-
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using amorphie.core.Module.minimal_api;
-using amorphie.core.Repository;
-using amorphie.tag.Modules.Base;
-using amorphie.tag.Validator;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using FluentValidation;
+using amorphie.core.Swagger;
+using Microsoft.OpenApi.Models;
+using amorphie.tag.data;
+using System.Text.Json;
+using amorphie.tag.data;
 
-public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEntityData, EntityData, EntityDataValidator>
+namespace amorphie.domain.Module;
+
+public class EntityDataModule : BaseBBTRoute<DtoEntityData, EntityData, TagDBContext>
 {
-    public EntityDataModuleFrameWorkModule(WebApplication app) : base(app)
-    {
-    }
+    public EntityDataModule(WebApplication app)
+        : base(app) { }
 
+    public override string[]? PropertyCheckList => new string[] { "Name" };
 
+    public override string? UrlFragment => "entityData";
 
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
-        routeGroupBuilder.MapDelete("{entityName}/{fieldName}", deleteEntityData);
+        routeGroupBuilder.MapGet("{domainName}/{entityName}", getEntityData);
         routeGroupBuilder.MapGet("{entityName}/{fieldName}", getEntityDataWithFieldName);
-        routeGroupBuilder.MapGet("getEntityDataWithEntityName/{entityName}", getEntityDataWithEntityName);
-        routeGroupBuilder.MapGet("getEntity/{domainName}/{entityName}", getEntity); // getEntity with DomainName
+        routeGroupBuilder.MapGet("{entityName}", getEntityDataWithEntityName);
+        routeGroupBuilder.MapDelete("{entityName}/{fieldName}", deleteEntityData);
+
+
     }
 
-    //Get EntityData with DomainName and EntityName
-    async ValueTask<IResult> getEntity(
-        [FromRoute(Name = "domainName")] string domainName,
-        [FromRoute(Name = "entityName")] string entityName,
-        [FromServices] TagDBContext context
-    )
+    async ValueTask<IResult> getEntityData(
+    [FromRoute(Name = "domainName")] string domainName,
+    [FromRoute(Name = "entityName")] string entityName,
+    [FromServices] TagDBContext context
+)
     {
         if (context == null || context.Entities == null)
         {
             return Results.NotFound("Context or Entities is null.");
         }
         var entity = await context.Entities
-            .Include(e => e.Data)
+            .Include(e => e.EntityData)
             .ThenInclude(d => d.Sources)
             .ThenInclude(s => s.Tag)
             .Where(e => e.Name == entityName && e.DomainName == domainName)
@@ -47,7 +57,7 @@ public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEn
                 new GetEntityResponse(
                     entity.Name,
                     entity.Description!,
-                    entity.Data.Select(d => new GetEntityDataResponse(d.Field, d.Ttl,
+                    entity.EntityData.Select(d => new GetEntityDataResponse(d.Field, d.Ttl,
                         d.Sources.Select(s => new GetEntityDataSourcesResponse(s.Order, s.Tag!.Name, s.DataPath)).ToArray()
                     )).ToArray()
                 ));
@@ -57,15 +67,12 @@ public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEn
     }
 
 
-    //Delete EntityData with EntityName and Entity FieldName
-    async ValueTask<IResult> deleteEntityData(
+    protected async ValueTask<IResult> deleteEntityData(
        [FromRoute(Name = "entityName")] string entityName,
        [FromRoute(Name = "fieldName")] string fieldName,
        [FromServices] TagDBContext context
-)
-
+    )
     {
-
         if (context == null || context.EntityData == null)
         {
             return Results.NotFound("Context or EntityData is null.");
@@ -74,20 +81,20 @@ public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEn
         if (deletedData != null)
         {
             context.EntityData.Remove(deletedData);
-            await context.SaveChangesAsync(); // await ile SaveChangesAsync'yi bekleyin
+            await context.SaveChangesAsync();
             return Results.Ok();
         }
         else
-        {
             return Results.NoContent();
-        }
+
     }
 
-    async ValueTask<IResult> getEntityDataWithFieldName(
-        [FromRoute(Name = "entityName")] string entityName,
-        [FromRoute(Name = "fieldName")] string fieldName,
-        [FromServices] TagDBContext context
-    )
+
+    protected async ValueTask<IResult> getEntityDataWithFieldName(
+       [FromRoute(Name = "entityName")] string entityName,
+       [FromRoute(Name = "fieldName")] string fieldName,
+       [FromServices] TagDBContext context
+   )
     {
         if (context == null || context.EntityData == null)
         {
@@ -111,7 +118,8 @@ public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEn
         else
             return Results.NoContent();
     }
-    async ValueTask<IResult> getEntityDataWithEntityName(
+
+    protected async ValueTask<IResult> getEntityDataWithEntityName(
         [FromRoute(Name = "entityName")] string entityName,
         [FromServices] TagDBContext context
     )
@@ -138,4 +146,32 @@ public sealed class EntityDataModuleFrameWorkModule : BaseEntityDataModule<DtoEn
         else
             return Results.NoContent();
     }
+
 }
+
+
+// protected async ValueTask<IResult> SearchMethod(
+//     [FromServices] DomainDbContext context,
+//     [FromServices] IMapper mapper,
+//     [AsParameters] DomainModuleSearch userSearch,
+//     HttpContext httpContext,
+//     CancellationToken token
+// )
+// {
+//     IList<DomainModule> resultList = await context
+//         .Set<DomainModule>()
+//         .AsNoTracking()
+//         .Where(
+//             x =>
+//                 x.FirstMidName.Contains(userSearch.Keyword!)
+//                 || x.LastName.Contains(userSearch.Keyword!)
+//         )
+//         .Skip(userSearch.Page)
+//         .Take(userSearch.PageSize)
+//         .ToListAsync(token);
+
+//     return (resultList != null && resultList.Count > 0)
+//         ? Results.Ok(mapper.Map<IList<DomainModuleDTO>>(resultList))
+//         : Results.NoContent();
+// }
+

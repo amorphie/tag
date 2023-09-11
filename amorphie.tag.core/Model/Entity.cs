@@ -11,5 +11,5 @@ public class Entity : EntityBase
     public Guid DomainId { get; set; }
     public string? DomainName { get; set; } = string.Empty;
     public Domain? Domain { get; set; }
-    public List<EntityData> Data = new List<EntityData>();
+    public List<EntityData> EntityData = new List<EntityData>();
 }

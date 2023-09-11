@@ -7,6 +7,7 @@ public class Tag : EntityBase
 {
 
     public string Name { get; set; } = string.Empty;
+    public string? Status { get; set; } = string.Empty;
     public string? Url { get; set; }
     public int? Ttl { get; set; }
     public DateTime? CreatedDate { get; set; }

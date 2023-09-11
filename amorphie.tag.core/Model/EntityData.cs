@@ -12,5 +12,4 @@ public class EntityData : EntityBase
     public string EntityName { get; set; } = string.Empty;
     public int? Ttl { get; set; }
     [JsonIgnore]
-    public List<EntityDataSource> Sources = new();
-}
+public List<EntityDataSource> Sources { get; set; } = new List<EntityDataSource>();}

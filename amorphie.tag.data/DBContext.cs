@@ -53,7 +53,7 @@ public class TagDBContext : DbContext
             .WithOne(o => o.Domain);
 
         modelBuilder.Entity<Entity>()
-           .HasMany(b => b.Data)
+           .HasMany(b => b.EntityData)
            .WithOne(o => o.Entity);
 
         modelBuilder.Entity<EntityData>()

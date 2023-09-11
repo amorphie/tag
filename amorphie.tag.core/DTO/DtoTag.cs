@@ -5,7 +5,8 @@ public class DtoTag : DtoBase
 {
     [Key]
     public string? Name { get; set; }
+    public string? Status { get; set; }
     public string? Url { get; set; }
     public int? Ttl { get; set; }
-    public List<DtoTagRelation> TagsRelations { get; set; } = new List<DtoTagRelation>();
+    // public List<DtoTagRelation> TagsRelations { get; set; } = new List<DtoTagRelation>();
 }
