@@ -26,7 +26,7 @@ public class EntityDataModule : BaseBBTRoute<DtoEntityData, EntityData, TagDBCon
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
-        routeGroupBuilder.MapGet("{domainName}/{entityName}", getEntityData);
+        routeGroupBuilder.MapGet("getEntityData/{domainName}/{entityName}", getEntityData);
         routeGroupBuilder.MapGet("{entityName}/{fieldName}", getEntityDataWithFieldName);
         routeGroupBuilder.MapGet("{entityName}", getEntityDataWithEntityName);
         routeGroupBuilder.MapDelete("{entityName}/{fieldName}", deleteEntityData);
