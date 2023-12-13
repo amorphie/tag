@@ -116,7 +116,7 @@ public class EntityModule : BaseBBTRoute<DtoEntity, Entity, TagDBContext>
     {
         IQueryable<Entity> query = context
                     .Set<Entity>()
-                    .AsNoTracking().Where(x=>x.Name.ToLower().Contains(entitySearch.Keyword.ToLower())||x.DomainName.ToLower().Contains(entitySearch.Keyword.ToLower()));
+                    .AsNoTracking().Where(x => x.Name.ToLower().Contains(entitySearch.Keyword.ToLower()) || x.DomainName.ToLower().Contains(entitySearch.Keyword.ToLower()));
 
         if (!string.IsNullOrEmpty(entitySearch.SortColumn))
         {

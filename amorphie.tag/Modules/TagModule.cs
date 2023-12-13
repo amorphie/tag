@@ -131,22 +131,22 @@ public class TagModule : BaseBBTRoute<DtoTag, Tag, TagDBContext>
         CancellationToken token
     )
     {
-         IQueryable<Tag> query = context
-                .Set<Tag>()
-                .AsNoTracking().Where(x=>EF.Functions.Like(x.Name, $"%{tagSearch.Keyword}%"));
+        IQueryable<Tag> query = context
+               .Set<Tag>()
+               .AsNoTracking().Where(x => EF.Functions.Like(x.Name, $"%{tagSearch.Keyword}%"));
 
-            if (!string.IsNullOrEmpty(tagSearch.SortColumn))
-            {
-                query = await query.Sort(tagSearch.SortColumn, tagSearch.SortDirection);
-            }
-            IList<Tag> resultList = await query
-                .Skip(tagSearch.Page * tagSearch.PageSize)
-                .Take(tagSearch.PageSize)
-                .ToListAsync(token);
+        if (!string.IsNullOrEmpty(tagSearch.SortColumn))
+        {
+            query = await query.Sort(tagSearch.SortColumn, tagSearch.SortDirection);
+        }
+        IList<Tag> resultList = await query
+            .Skip(tagSearch.Page * tagSearch.PageSize)
+            .Take(tagSearch.PageSize)
+            .ToListAsync(token);
 
-            return (resultList != null && resultList.Count > 0)
-                ? Results.Ok(mapper.Map<IList<DtoTag>>(resultList))
-                : Results.NoContent();
+        return (resultList != null && resultList.Count > 0)
+            ? Results.Ok(mapper.Map<IList<DtoTag>>(resultList))
+            : Results.NoContent();
 
     }
 }
