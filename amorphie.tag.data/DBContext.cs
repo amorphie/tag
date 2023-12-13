@@ -23,7 +23,7 @@ namespace amorphie.tag.data;
         public TagDBContext CreateDbContext(string[] args)
         {
             
-            var connStr = "Host=localhost:5432;Database=tags;Username=postgres;Password=postgres";
+            var connStr = "Host=localhost:5432;Database=TagDb;Username=postgres;Password=postgres";
             var builder = new DbContextOptionsBuilder<TagDBContext>()
                 .EnableSensitiveDataLogging()
                 .UseNpgsql(connStr);
@@ -59,7 +59,18 @@ public class TagDBContext : DbContext
         modelBuilder.Entity<EntityData>()
             .HasMany(b => b.Sources)
             .WithOne(o => o.EntityData);
+
+        modelBuilder.Entity<Domain>().HasIndex(item => item.SearchVector).HasMethod("GIN");
+        modelBuilder.Entity<Domain>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new[] { "Name" }), true);
+        modelBuilder.Entity<Tag>().HasIndex(item => item.SearchVector).HasMethod("GIN");
+        modelBuilder.Entity<Tag>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new[] { "Name","Status" }), true);
+        modelBuilder.Entity<Entity>().HasIndex(item => item.SearchVector).HasMethod("GIN");
+        modelBuilder.Entity<Entity>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new[] { "Name","DomainName" }), true);
+        modelBuilder.Entity<EntityData>().HasIndex(item => item.SearchVector).HasMethod("GIN");
+        modelBuilder.Entity<EntityData>().Property(item => item.SearchVector).HasComputedColumnSql(FullTextSearchHelper.GetTsVectorComputedColumnSql("english", new[] { "Field","EntityName" }), true);
+
     }
+    
     
 }
 
