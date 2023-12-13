@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  pgadmin:
+    container_name: bbt-tag-pgadmin
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "info@info.com"
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5502:80"
+    restart: unless-stopped
+    networks:
+      - bbt-development

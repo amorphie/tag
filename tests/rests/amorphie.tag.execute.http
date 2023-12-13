@@ -1,5 +1,5 @@
 
-GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/idm/user/retail-customer/execute?reference=21359199436&email=werwerw&tel=32453453  HTTP/1.1
+GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/customer/businessLine/customer/execute?reference=21359199436&email=werwerw&tel=32453453  HTTP/1.1
 
 
 ###
@@ -12,7 +12,7 @@ GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/idm/clien
 GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/loan-partner-staff/execute?partner=sfsdf&reference=214234 HTTP/1.1
 ###http://localhost:3000/cb.partner/@partner/staff/@reference
 ### EntityExecute
-GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/domain/idm/entity/user/Execute?tag=retail-customer&reference=23342234 HTTP/1.1
+GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/domain/customer/entity/customer/Execute?tag=customer&reference=23342234 HTTP/1.1
 ###
 GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/tag/retail-customer/execute?reference=23342234&param2=ugur&paramss=karatas  HTTP/1.1
 ###
@@ -28,4 +28,4 @@ GET http://localhost:3001/cb.template?template=test-html HTTP/1.1
 GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/template/retail-customer/execute?reference=23342234&viewTemplateName=test-mehmet4 HTTP/1.1
 
 ###
-GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/domain/idm/entity/sacma/execute?tag=retail-customer&reference=23342234 HTTP/1.1
+GET http://localhost:41020/v1.0/invoke/amorphie-tag-execute/method/domain/customer/entity/customer/execute?tag=customer&reference=23342234 HTTP/1.1

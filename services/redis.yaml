@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  redis:
+    container_name: bbt-tag-redis
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - redis:/data
+    networks:
+      - bbt-development

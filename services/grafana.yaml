@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  grafana:
+    container_name: bbt-tag-grafana
+    image: grafana/grafana:latest
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - grafana-data:/var/lib/grafana
+    
+    ports:
+      - "3000:3000"
+    networks:
+      - bbt-development
+    depends_on:
+      - prometheus

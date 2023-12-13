@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  zipkin:
+    container_name: bbt-tag-zipkin
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+    networks:
+      - bbt-development

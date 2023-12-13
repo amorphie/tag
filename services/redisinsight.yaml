@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  redisinsight:
+    container_name: bbt-tag-red-insight
+    image: redislabs/redisinsight:latest
+    ports:
+      - '5501:8001'
+    volumes:
+      - redisinsight:/db
+    restart: unless-stopped
+    networks:
+      - bbt-development

@@ -1,7 +1,4 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using amorphie.core.Base;
-using Microsoft.EntityFrameworkCore;
-using static Enums;
 
 public class View : EntityBase
 {

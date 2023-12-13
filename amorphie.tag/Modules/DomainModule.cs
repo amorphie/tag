@@ -1,61 +1,97 @@
-
 using amorphie.core.Module.minimal_api;
-using amorphie.core.Repository;
-using amorphie.tag.Modules.Base;
-using amorphie.tag.Validator;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using FluentValidation;
+using Microsoft.OpenApi.Models;
+using amorphie.tag.data;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using amorphie.core.Base;
+using amorphie.core.Extension;
 
-public sealed class DomainModule : BaseDomainModule<DtoDomain, Domain, DomainValidator>
+namespace amorphie.domain.Module;
+
+public class DomainModule : BaseBBTRoute<DtoDomain, Domain, TagDBContext>
 {
-    public DomainModule(WebApplication app) : base(app)
-    {
-    }
+    public DomainModule(WebApplication app)
+        : base(app) { }
+
+    public override string[]? PropertyCheckList => new string[] { "Name" };
 
     public override string? UrlFragment => "domain";
-
 
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
         routeGroupBuilder.MapGet("{domainName}/{entityName}", getEntity);
+        routeGroupBuilder.MapGet("/search", SearchMethod);
 
     }
 
 
-   async Task<IResult> getEntity(
-    [FromRoute(Name = "domainName")] string domainName,
-    [FromRoute(Name = "entityName")] string entityName,
-    [FromServices] TagDBContext context
-)
-{
-    if (context == null || context.Entities == null)
+    async Task<IResult> getEntity(
+        [FromRoute(Name = "domainName")] string domainName,
+        [FromRoute(Name = "entityName")] string entityName,
+        [FromServices] TagDBContext context,
+        IMapper mapper
+    )
     {
-        return Results.NotFound("Context or Entities is null.");
-    }
-    
-    var entity = await context.Entities
-        .Include(e => e.Data)
-        .ThenInclude(d => d.Sources)
-        .ThenInclude(s => s.Tag)
-        .Where(e => e.Name == entityName)
-        .FirstOrDefaultAsync();
+        if (context == null || context.Entities == null)
+        {
+            return Results.NotFound("Context or Entities is null.");
+        }
 
-    if (entity != null)
-    {
-        return Results.Ok(
-            new GetEntityResponse(
-                entity.Name,
-                entity.Description!,
-                entity.Data.Select(d => new GetEntityDataResponse(d.Field, d.Ttl,
-                    d.Sources.Select(s => new GetEntityDataSourcesResponse(s.Order, s.Tag!.Name, s.DataPath)).ToArray()
-                )).ToArray()
-            )
-        );
+        var entity = await context.Entities
+            .Include(e => e.EntityData)
+                .ThenInclude(d => d.Sources)
+                    .ThenInclude(s => s.Tag)
+            .Where(e => e.Name == entityName)
+            .FirstOrDefaultAsync();
+
+        if (entity != null)
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                MaxDepth = 3
+
+            };
+            var response = mapper.Map<EntityAllDto>(entity);
+            var serialezedResponse = JsonSerializer.Serialize(response, options);
+            return Results.Ok(response);
+        }
+        else
+        {
+            return Results.NotFound();
+        }
     }
-    else
+
+
+
+    protected async ValueTask<IResult> SearchMethod(
+        [FromServices] TagDBContext context,
+        [FromServices] IMapper mapper,
+        [AsParameters] DomainSearch domainSearch,
+        HttpContext httpContext,
+        CancellationToken token
+    )
     {
-        return Results.NotFound();
+        IQueryable<Domain> query = context
+                  .Set<Domain>()
+                  .AsNoTracking().Where(x => x.Name.ToLower().Contains(domainSearch.Keyword.ToLower()));
+
+        if (!string.IsNullOrEmpty(domainSearch.SortColumn))
+        {
+            query = await query.Sort(domainSearch.SortColumn, domainSearch.SortDirection);
+        }
+        IList<Domain> resultList = await query
+            .Skip(domainSearch.Page * domainSearch.PageSize)
+            .Take(domainSearch.PageSize)
+            .ToListAsync(token);
+
+        return (resultList != null && resultList.Count > 0)
+            ? Results.Ok(mapper.Map<IList<DtoDomain>>(resultList))
+            : Results.NoContent();
     }
-}
+
 }

@@ -1,5 +1,5 @@
 using amorphie.core.Base;
-
+[Serializable]
 public class DtoEntityData : DtoBase
 {
     public Guid EntityId { get; set; }

@@ -1,20 +1,74 @@
 version: "3.9"
 services:
+
   redis:
-    container_name: bbt-redis
+    container_name: bbt-tag-redis
     image: redis:latest
     restart: always
     ports:
       - '6379:6379'
-    command: sh -c "/redis.sh redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes --daemonize yes"
+    command: redis-server --save 20 1 --loglevel warning
     volumes:
-      - "./redis.sh:/redis.sh"
+      - redis:/data
     networks:
       - bbt-development
 
+  redisinsight:
+    container_name: bbt-tag-red-insight
+    image: redislabs/redisinsight:latest
+    ports:
+      - '5501:8001'
+    volumes:
+      - redisinsight:/db
+    restart: unless-stopped
+    networks:
+      - bbt-development
+
+
+  postgres:
+    container_name: bbt-tag-postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - bbt-development
+
+  pgadmin:
+    container_name: bbt-tag-pgadmin
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "info@info.com"
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5502:80"
+    restart: unless-stopped
+    networks:
+      - bbt-development
+
+  elastic:
+    container_name: bbt-tag-elastic
+    image: elasticsearch:8.8.1
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    networks:
+      - bbt-development
+    ports:
+      - 9200:9200
+
   vault:
-    image: vault:latest
-    container_name: vault
+    container_name: bbt-tag-vault
+    image: vault:1.13.3
     restart: on-failure:10
     ports:
       - "8200:8200"
@@ -34,84 +88,38 @@ services:
       - bbt-development
 
   vault-prepopulate:
-    image: alpine/curl
+    image: alpine/curl:latest
     depends_on:
       - vault
     volumes:
       - ./vault.sh:/usr/local/bin/prepopulate_vault.sh
-    command: ["sh", "-c", "/usr/local/bin/prepopulate_vault.sh"]
+    command: ["sh", "-c", "/usr/local/bin/prepopulate_vault.sh && /usr/local/bin/prepopulate_vault.sh"]
     networks:
        - bbt-development
 
-  redisinsight:
-    container_name: bbt-red-insight
-    image: redislabs/redisinsight:latest
-    ports:
-      - '5501:8001'
-    volumes:
-      - redisinsight:/db
-    restart: unless-stopped
-    networks:
-      - bbt-development
-
-  postgres:
-    container_name: bbt-postgres
-    image: postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      PGDATA: /data/postgres
-    volumes:
-      - postgres:/data/postgres
-    ports:
-      - "5432:5432"
-    restart: unless-stopped
-    networks:
-      - bbt-development
-    
-  placement:
-      image: "daprio/dapr:latest"
-      command: ["./placement", "-port", "50006", "log-level", "debug", "--log-as-json"]
-      ports:
-      - "50006:50006"
-      networks:
-      - bbt-development
-  pgadmin:
-    container_name: bbt-pgadmin
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "info@info.com"
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-    ports:
-      - "5502:80"
-    restart: unless-stopped
-    networks:
-      - bbt-development
-      
   zipkin:
-    container_name: bbt-zipkin
-    image: "openzipkin/zipkin"
+    container_name: bbt-tag-zipkin
+    image: openzipkin/zipkin:latest
     ports:
       - "9411:9411"
     networks:
       - bbt-development
+
   prometheus:
-    container_name: bbt-prometheus
-    image: "prom/prometheus"
+    container_name: bbt-tag-prometheus
+    image: prom/prometheus:latest
     command:
       - "--config.file=/etc/prometheus.yml"
     volumes:
-      - ./prometheus/:/etc
+      - ./prometheus:/etc
     ports:
       - "9090:9090"
     networks:
       - bbt-development
+
   grafana:
-    container_name: bbt-grafana
-    image: "grafana/grafana"
+    container_name: bbt-tag-grafana
+    image: grafana/grafana:latest
     volumes:
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - grafana-data:/var/lib/grafana
@@ -122,6 +130,15 @@ services:
       - bbt-development
     depends_on:
       - prometheus
+
+  placement:
+      image: daprio/dapr:latest
+      command: ["./placement", "-port", "50006", "log-level", "debug", "--log-as-json"]
+      ports:
+      - "50006:50006"
+      networks:
+      - bbt-development
+
 networks:
   bbt-development:
     external: true
@@ -134,3 +151,4 @@ volumes:
   dapr:
   grafana-data:
   prometheus:
+
