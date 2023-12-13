@@ -10,6 +10,7 @@ using AutoMapper;
 using amorphie.core.Swagger;
 using Microsoft.OpenApi.Models;
 using amorphie.tag.data;
+using amorphie.core.Extension;
 
 
 namespace amorphie.tag.Module;
@@ -19,7 +20,7 @@ public class TagModule : BaseBBTRoute<DtoTag, Tag, TagDBContext>
     public TagModule(WebApplication app)
         : base(app) { }
 
-    public override string[]? PropertyCheckList => new string[] { "Name", "Status", "url"};
+    public override string[]? PropertyCheckList => new string[] { "Name", "Status", "url" };
 
     public override string? UrlFragment => "tag";
 
@@ -29,7 +30,7 @@ public class TagModule : BaseBBTRoute<DtoTag, Tag, TagDBContext>
         routeGroupBuilder.MapGet("/getTag/{tagName}", getTag);
         routeGroupBuilder.MapPost("/tag", saveTagWithWorkflow);
 
-        // routeGroupBuilder.MapGet("/search", SearchMethod);
+        routeGroupBuilder.MapGet("/search", SearchMethod);
     }
 
     async ValueTask<IResult> getTag(
@@ -122,29 +123,30 @@ public class TagModule : BaseBBTRoute<DtoTag, Tag, TagDBContext>
 
 
 
-    // protected async ValueTask<IResult> SearchMethod(
-    //     [FromServices] TagDBContext context,
-    //     [FromServices] IMapper mapper,
-    //     [AsParameters] TagSearch userSearch,
-    //     HttpContext httpContext,
-    //     CancellationToken token
-    // )
-    // {
-    //     IList<Tag> resultList = await context
-    //         .Set<Tag>()
-    //         .AsNoTracking()
-    //         .Where(
-    //             x =>
-    //                 x.Name.Contains(userSearch.Keyword!)
-    //                 || x.Url!.Contains(userSearch.Keyword!)
-    //         )
-    //         .Skip(userSearch.Page)
-    //         .Take(userSearch.PageSize)
-    //         .ToListAsync(token);
+    protected async ValueTask<IResult> SearchMethod(
+        [FromServices] TagDBContext context,
+        [FromServices] IMapper mapper,
+        [AsParameters] TagSearch tagSearch,
+        HttpContext httpContext,
+        CancellationToken token
+    )
+    {
+         IQueryable<Tag> query = context
+                .Set<Tag>()
+                .AsNoTracking().Where(x=>EF.Functions.Like(x.Name, $"%{tagSearch.Keyword}%"));
 
-    //     return (resultList != null && resultList.Count > 0)
-    //         ? Results.Ok(mapper.Map<IList<DtoTag>>(resultList))
-    //         : Results.NoContent();
-    //     // }
-    // }
+            if (!string.IsNullOrEmpty(tagSearch.SortColumn))
+            {
+                query = await query.Sort(tagSearch.SortColumn, tagSearch.SortDirection);
+            }
+            IList<Tag> resultList = await query
+                .Skip(tagSearch.Page * tagSearch.PageSize)
+                .Take(tagSearch.PageSize)
+                .ToListAsync(token);
+
+            return (resultList != null && resultList.Count > 0)
+                ? Results.Ok(mapper.Map<IList<DtoTag>>(resultList))
+                : Results.NoContent();
+
+    }
 }

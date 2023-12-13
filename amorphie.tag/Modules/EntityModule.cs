@@ -10,6 +10,7 @@ using amorphie.core.Swagger;
 using Microsoft.OpenApi.Models;
 using amorphie.tag.data;
 using System.Text.Json;
+using amorphie.core.Extension;
 
 namespace amorphie.domain.Module;
 
@@ -27,7 +28,7 @@ public class EntityModule : BaseBBTRoute<DtoEntity, Entity, TagDBContext>
         base.AddRoutes(routeGroupBuilder);
         routeGroupBuilder.MapGet("{domainName}/{entityName}", getEntity);
         routeGroupBuilder.MapDelete("{domainName}/{entityName}", deleteEntity);
-
+        routeGroupBuilder.MapGet("/search", SearchMethod);
     }
 
 
@@ -50,7 +51,7 @@ public class EntityModule : BaseBBTRoute<DtoEntity, Entity, TagDBContext>
             .ThenInclude(s => s.Tag)
             .Where(e => e.Name == entityName && e.DomainName == domainName)
             .FirstOrDefaultAsync();
-        var mappedData=mapper.Map<GetEntityResponseDto>(entity);
+        var mappedData = mapper.Map<GetEntityResponseDto>(entity);
 
         if (entity != null)
         {
@@ -61,11 +62,11 @@ public class EntityModule : BaseBBTRoute<DtoEntity, Entity, TagDBContext>
     }
 
 
-     async Task<IResult> deleteEntity(
-     [FromRoute(Name = "domainName")] string domainName,
-     [FromRoute(Name = "entityName")] string entityName,
-     [FromServices] TagDBContext context
- )
+    async Task<IResult> deleteEntity(
+    [FromRoute(Name = "domainName")] string domainName,
+    [FromRoute(Name = "entityName")] string entityName,
+    [FromServices] TagDBContext context
+)
     {
         if (context == null || context.Entities == null)
         {
@@ -102,31 +103,33 @@ public class EntityModule : BaseBBTRoute<DtoEntity, Entity, TagDBContext>
             return Results.BadRequest($"An error occurred: {ex.Message}");
         }
     }
+
+
+
+    protected async ValueTask<IResult> SearchMethod(
+        [FromServices] TagDBContext context,
+        [FromServices] IMapper mapper,
+        [AsParameters] EntitySearch entitySearch,
+        HttpContext httpContext,
+        CancellationToken token
+    )
+    {
+        IQueryable<Entity> query = context
+                    .Set<Entity>()
+                    .AsNoTracking().Where(x=>x.Name.ToLower().Contains(entitySearch.Keyword.ToLower())||x.DomainName.ToLower().Contains(entitySearch.Keyword.ToLower()));
+
+        if (!string.IsNullOrEmpty(entitySearch.SortColumn))
+        {
+            query = await query.Sort(entitySearch.SortColumn, entitySearch.SortDirection);
+        }
+        IList<Entity> resultList = await query
+            .Skip(entitySearch.Page * entitySearch.PageSize)
+            .Take(entitySearch.PageSize)
+            .ToListAsync(token);
+
+        return (resultList != null && resultList.Count > 0)
+            ? Results.Ok(mapper.Map<IList<DtoEntity>>(resultList))
+            : Results.NoContent();
+    }
+
 }
-
-
-// protected async ValueTask<IResult> SearchMethod(
-//     [FromServices] DomainDbContext context,
-//     [FromServices] IMapper mapper,
-//     [AsParameters] DomainModuleSearch userSearch,
-//     HttpContext httpContext,
-//     CancellationToken token
-// )
-// {
-//     IList<DomainModule> resultList = await context
-//         .Set<DomainModule>()
-//         .AsNoTracking()
-//         .Where(
-//             x =>
-//                 x.FirstMidName.Contains(userSearch.Keyword!)
-//                 || x.LastName.Contains(userSearch.Keyword!)
-//         )
-//         .Skip(userSearch.Page)
-//         .Take(userSearch.PageSize)
-//         .ToListAsync(token);
-
-//     return (resultList != null && resultList.Count > 0)
-//         ? Results.Ok(mapper.Map<IList<DomainModuleDTO>>(resultList))
-//         : Results.NoContent();
-// }
-

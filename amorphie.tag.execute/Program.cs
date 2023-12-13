@@ -196,7 +196,7 @@ async Task<IResult> ExecuteTag(
             var entity = await client.InvokeMethodAsync<GetEntityResponse>(
                 HttpMethod.Get,
                 $"{amorphie_tag}",
-                $"entityData/getEntity/{domainName}/{entityName}"
+                $"entityData/getEntityData/{domainName}/{entityName}"
             );
 
             var returnValue = new Dictionary<string, dynamic>();

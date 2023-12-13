@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using amorphie.tag.data;
 using System.Text.Json;
 using amorphie.tag.data;
+using amorphie.core.Extension;
 
 namespace amorphie.domain.Module;
 
@@ -30,6 +31,7 @@ public class EntityDataModule : BaseBBTRoute<DtoEntityData, EntityData, TagDBCon
         routeGroupBuilder.MapGet("{entityName}/{fieldName}", getEntityDataWithFieldName);
         routeGroupBuilder.MapGet("{entityName}", getEntityDataWithEntityName);
         routeGroupBuilder.MapDelete("{entityName}/{fieldName}", deleteEntityData);
+        routeGroupBuilder.MapGet("/search", SearchMethod);
 
 
     }
@@ -44,6 +46,7 @@ public class EntityDataModule : BaseBBTRoute<DtoEntityData, EntityData, TagDBCon
         {
             return Results.NotFound("Context or Entities is null.");
         }
+
         var entity = await context.Entities
             .Include(e => e.EntityData)
             .ThenInclude(d => d.Sources)
@@ -147,31 +150,33 @@ public class EntityDataModule : BaseBBTRoute<DtoEntityData, EntityData, TagDBCon
             return Results.NoContent();
     }
 
+
+
+
+    protected async ValueTask<IResult> SearchMethod(
+        [FromServices] TagDBContext context,
+        [FromServices] IMapper mapper,
+        [AsParameters] EntityDataSearch entityDataSearch,
+        HttpContext httpContext,
+        CancellationToken token
+    )
+    {
+        IQueryable<EntityData> query = context
+                    .Set<EntityData>()
+                    .AsNoTracking().Where(x => x.Field.ToLower().Contains(entityDataSearch.Keyword.ToLower())||x.EntityName.ToLower().Contains(entityDataSearch.Keyword.ToLower()));
+
+        if (!string.IsNullOrEmpty(entityDataSearch.SortColumn))
+        {
+            query = await query.Sort(entityDataSearch.SortColumn, entityDataSearch.SortDirection);
+        }
+        IList<EntityData> resultList = await query
+            .Skip(entityDataSearch.Page * entityDataSearch.PageSize)
+            .Take(entityDataSearch.PageSize)
+            .ToListAsync(token);
+
+        return (resultList != null && resultList.Count > 0)
+            ? Results.Ok(mapper.Map<IList<DtoEntityData>>(resultList))
+            : Results.NoContent();
+
+    }
 }
-
-
-// protected async ValueTask<IResult> SearchMethod(
-//     [FromServices] DomainDbContext context,
-//     [FromServices] IMapper mapper,
-//     [AsParameters] DomainModuleSearch userSearch,
-//     HttpContext httpContext,
-//     CancellationToken token
-// )
-// {
-//     IList<DomainModule> resultList = await context
-//         .Set<DomainModule>()
-//         .AsNoTracking()
-//         .Where(
-//             x =>
-//                 x.FirstMidName.Contains(userSearch.Keyword!)
-//                 || x.LastName.Contains(userSearch.Keyword!)
-//         )
-//         .Skip(userSearch.Page)
-//         .Take(userSearch.PageSize)
-//         .ToListAsync(token);
-
-//     return (resultList != null && resultList.Count > 0)
-//         ? Results.Ok(mapper.Map<IList<DomainModuleDTO>>(resultList))
-//         : Results.NoContent();
-// }
-

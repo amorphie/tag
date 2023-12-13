@@ -9,7 +9,7 @@ using amorphie.tag.data;
 
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
-await builder.Configuration.AddVaultSecrets("amorphie-tag", new string[] { "amorphie-tag" });
+await VaultConfigExtension.AddVaultSecrets(builder.Configuration, "amorphie-tag", new string[] { "amorphie-tag" });
 var postgreSql = builder.Configuration["PostgreSql"];
 var postgreDb = builder.Configuration["PostgreDB"];
 //await builder.Configuration.AddVaultSecrets("amorphie-secretstore", new string[] { "amorphie-secretstore" });

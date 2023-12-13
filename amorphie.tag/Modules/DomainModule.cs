@@ -7,6 +7,7 @@ using amorphie.tag.data;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using amorphie.core.Base;
+using amorphie.core.Extension;
 
 namespace amorphie.domain.Module;
 
@@ -23,6 +24,7 @@ public class DomainModule : BaseBBTRoute<DtoDomain, Domain, TagDBContext>
     {
         base.AddRoutes(routeGroupBuilder);
         routeGroupBuilder.MapGet("{domainName}/{entityName}", getEntity);
+        routeGroupBuilder.MapGet("/search", SearchMethod);
 
     }
 
@@ -63,31 +65,33 @@ async Task<IResult> getEntity(
         return Results.NotFound();
     }
 }
+
+
+
+    protected async ValueTask<IResult> SearchMethod(
+        [FromServices] TagDBContext context,
+        [FromServices] IMapper mapper,
+        [AsParameters] DomainSearch domainSearch,
+        HttpContext httpContext,
+        CancellationToken token
+    )
+    {
+      IQueryable<Domain> query = context
+                .Set<Domain>()
+                .AsNoTracking().Where(x => x.Name.ToLower().Contains(domainSearch.Keyword.ToLower()));
+
+            if (!string.IsNullOrEmpty(domainSearch.SortColumn))
+            {
+                query = await query.Sort(domainSearch.SortColumn, domainSearch.SortDirection);
+            }
+            IList<Domain> resultList = await query
+                .Skip(domainSearch.Page * domainSearch.PageSize)
+                .Take(domainSearch.PageSize)
+                .ToListAsync(token);
+
+            return (resultList != null && resultList.Count > 0)
+                ? Results.Ok(mapper.Map<IList<DtoDomain>>(resultList))
+                : Results.NoContent();
+    }
+
 }
-
-
-    // protected async ValueTask<IResult> SearchMethod(
-    //     [FromServices] DomainDbContext context,
-    //     [FromServices] IMapper mapper,
-    //     [AsParameters] DomainModuleSearch userSearch,
-    //     HttpContext httpContext,
-    //     CancellationToken token
-    // )
-    // {
-    //     IList<DomainModule> resultList = await context
-    //         .Set<DomainModule>()
-    //         .AsNoTracking()
-    //         .Where(
-    //             x =>
-    //                 x.FirstMidName.Contains(userSearch.Keyword!)
-    //                 || x.LastName.Contains(userSearch.Keyword!)
-    //         )
-    //         .Skip(userSearch.Page)
-    //         .Take(userSearch.PageSize)
-    //         .ToListAsync(token);
-
-    //     return (resultList != null && resultList.Count > 0)
-    //         ? Results.Ok(mapper.Map<IList<DomainModuleDTO>>(resultList))
-    //         : Results.NoContent();
-    // }
-

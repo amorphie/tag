@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using amorphie.core.Base;
+using NpgsqlTypes;
 
 public class Tag : EntityBase
 {
@@ -16,5 +17,6 @@ public class Tag : EntityBase
     [InverseProperty("Tag")]
     public List<TagRelation> TagsRelations { get; set; } = new List<TagRelation>();
     public List<View> Views { get; set; } = new List<View>();
+    public NpgsqlTsVector? SearchVector { get; set; }
 
 }
