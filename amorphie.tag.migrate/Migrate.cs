@@ -8,7 +8,7 @@ namespace amorphie.tag.migrate
         private readonly ILogger<Migrate> _logger;
         private readonly IHostApplicationLifetime _host;
         private readonly TagDBContext _databaseContext;
-        public Migrate(ILogger<Migrate> logger,IHostApplicationLifetime host,TagDBContext databaseContext)
+        public Migrate(ILogger<Migrate> logger, IHostApplicationLifetime host, TagDBContext databaseContext)
         {
             _logger = logger;
             _host = host;
