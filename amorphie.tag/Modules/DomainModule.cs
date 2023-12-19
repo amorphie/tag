@@ -28,47 +28,47 @@ public class DomainModule : BaseBBTRoute<DtoDomain, Domain, TagDBContext>
         routeGroupBuilder.MapGet("/search", SearchMethod);
 
     }
-   async ValueTask<IResult> saveDomainWithWorkflow(
-    [FromBody] DtoPostDomainWorkflow data,
-    [FromServices] TagDBContext context,
-    IMapper mapper,
-    CancellationToken cancellationToken
-)
-{
-    if (context == null || context.Domains == null)
+    async ValueTask<IResult> saveDomainWithWorkflow(
+     [FromBody] DtoPostDomainWorkflow data,
+     [FromServices] TagDBContext context,
+     IMapper mapper,
+     CancellationToken cancellationToken
+ )
     {
-        return Results.NotFound("Context or Tags is null.");
-    }
-    
-    var existingRecord = await context.Domains.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
-
-
-    if (existingRecord == null)
-    {
-        var alreadyHasRecord = await context.Domains.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
-        if (alreadyHasRecord != null)
+        if (context == null || context.Domains == null)
         {
-            return Results.BadRequest("Already has " + data.entityData!.Name + " domain");
+            return Results.NotFound("Context or Tags is null.");
         }
-        
-        var domain = mapper.Map<Domain>(data.entityData!);
 
-        domain.CreatedAt = DateTime.UtcNow;
-        context.Domains.Add(domain);
-        await context.SaveChangesAsync(cancellationToken);
-        return Results.Ok(domain);
-    }
-    else
-    {
-        if (SaveDomainUpdate(data.entityData!, existingRecord))
+        var existingRecord = await context.Domains.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
+
+
+        if (existingRecord == null)
         {
-            await context!.SaveChangesAsync(cancellationToken);
+            var alreadyHasRecord = await context.Domains.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
+            if (alreadyHasRecord != null)
+            {
+                return Results.BadRequest("Already has " + data.entityData!.Name + " domain");
+            }
+
+            var domain = mapper.Map<Domain>(data.entityData!);
+
+            domain.CreatedAt = DateTime.UtcNow;
+            context.Domains.Add(domain);
+            await context.SaveChangesAsync(cancellationToken);
+            return Results.Ok(domain);
         }
-        
-        return Results.Ok();
+        else
+        {
+            if (SaveDomainUpdate(data.entityData!, existingRecord))
+            {
+                await context!.SaveChangesAsync(cancellationToken);
+            }
+
+            return Results.Ok();
+        }
     }
-}
- static bool SaveDomainUpdate(DtoDomain data, Domain existingRecord)
+    static bool SaveDomainUpdate(DtoDomain data, Domain existingRecord)
     {
         var hasChanges = false;
         if (data.Description != null && data.Description != existingRecord.Description)
@@ -85,7 +85,7 @@ public class DomainModule : BaseBBTRoute<DtoDomain, Domain, TagDBContext>
         {
             existingRecord.ModifiedAt = DateTime.UtcNow;
         }
-       
+
 
         return hasChanges;
     }
