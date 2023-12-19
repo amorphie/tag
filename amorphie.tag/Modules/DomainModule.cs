@@ -20,7 +20,7 @@ public class DomainModule : BaseBBTRoute<DtoDomain, Domain, TagDBContext>
 
     public override string? UrlFragment => "domain";
 
-   public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
+    public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
         routeGroupBuilder.MapPost("saveDomainWithWorkflow", saveDomainWithWorkflow);
@@ -28,47 +28,47 @@ public class DomainModule : BaseBBTRoute<DtoDomain, Domain, TagDBContext>
         routeGroupBuilder.MapGet("/search", SearchMethod);
 
     }
- async ValueTask<IResult> saveDomainWithWorkflow(
-    [FromBody] DtoPostDomainWorkflow data,
-    [FromServices] TagDBContext context,
-    IMapper mapper,
-    CancellationToken cancellationToken
-)
-{
-    if (context == null || context.Domains == null)
+    async ValueTask<IResult> saveDomainWithWorkflow(
+       [FromBody] DtoPostDomainWorkflow data,
+       [FromServices] TagDBContext context,
+       IMapper mapper,
+       CancellationToken cancellationToken
+   )
     {
-        return Results.NotFound("Context or Tags is null.");
-    }
-    
-    var existingRecord = await context.Domains.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
-
-
-    if (existingRecord == null)
-    {
-        var alreadyHasRecord = await context.Domains.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
-        if (alreadyHasRecord != null)
+        if (context == null || context.Domains == null)
         {
-            return Results.BadRequest("Already has " + data.entityData!.Name + " domain");
+            return Results.NotFound("Context or Tags is null.");
         }
-        
-        var domain = mapper.Map<Domain>(data.entityData!);
 
-        domain.CreatedAt = DateTime.UtcNow;
-        context.Domains.Add(domain);
-        await context.SaveChangesAsync(cancellationToken);
-        return Results.Ok(domain);
-    }
-    else
-    {
-        if (SaveDomainUpdate(data.entityData!, existingRecord))
+        var existingRecord = await context.Domains.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
+
+
+        if (existingRecord == null)
         {
-            await context!.SaveChangesAsync(cancellationToken);
+            var alreadyHasRecord = await context.Domains.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
+            if (alreadyHasRecord != null)
+            {
+                return Results.BadRequest("Already has " + data.entityData!.Name + " domain");
+            }
+
+            var domain = mapper.Map<Domain>(data.entityData!);
+
+            domain.CreatedAt = DateTime.UtcNow;
+            context.Domains.Add(domain);
+            await context.SaveChangesAsync(cancellationToken);
+            return Results.Ok(domain);
         }
-        
-        return Results.Ok();
+        else
+        {
+            if (SaveDomainUpdate(data.entityData!, existingRecord))
+            {
+                await context!.SaveChangesAsync(cancellationToken);
+            }
+
+            return Results.Ok();
+        }
     }
-}
- static bool SaveDomainUpdate(DtoDomain data, Domain existingRecord)
+    static bool SaveDomainUpdate(DtoDomain data, Domain existingRecord)
     {
         var hasChanges = false;
         if (data.Description != null && data.Description != existingRecord.Description)
@@ -85,47 +85,47 @@ public class DomainModule : BaseBBTRoute<DtoDomain, Domain, TagDBContext>
         {
             existingRecord.ModifiedAt = DateTime.UtcNow;
         }
-       
+
 
         return hasChanges;
     }
 
-async Task<IResult> getEntity(
-    [FromRoute(Name = "domainName")] string domainName,
-    [FromRoute(Name = "entityName")] string entityName,
-    [FromServices] TagDBContext context,
-    IMapper mapper
-)
-{
-    if (context == null || context.Entities == null)
+    async Task<IResult> getEntity(
+        [FromRoute(Name = "domainName")] string domainName,
+        [FromRoute(Name = "entityName")] string entityName,
+        [FromServices] TagDBContext context,
+        IMapper mapper
+    )
     {
-        return Results.NotFound("Context or Entities is null.");
-    }
-    
-    var entity = await context.Entities
-        .Include(e => e.EntityData)
-            .ThenInclude(d => d.Sources)
-                .ThenInclude(s => s.Tag)
-        .Where(e => e.Name == entityName)
-        .FirstOrDefaultAsync();
-
-    if (entity != null)
-    {
-        JsonSerializerOptions options = new JsonSerializerOptions
+        if (context == null || context.Entities == null)
         {
-            WriteIndented = true,
-            MaxDepth=3
-            
-        };
-        var response = mapper.Map<EntityAllDto>(entity);
-        var serialezedResponse = JsonSerializer.Serialize(response,options);
-        return Results.Ok(response);
+            return Results.NotFound("Context or Entities is null.");
+        }
+
+        var entity = await context.Entities
+            .Include(e => e.EntityData)
+                .ThenInclude(d => d.Sources)
+                    .ThenInclude(s => s.Tag)
+            .Where(e => e.Name == entityName)
+            .FirstOrDefaultAsync();
+
+        if (entity != null)
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                MaxDepth = 3
+
+            };
+            var response = mapper.Map<EntityAllDto>(entity);
+            var serialezedResponse = JsonSerializer.Serialize(response, options);
+            return Results.Ok(response);
+        }
+        else
+        {
+            return Results.NotFound();
+        }
     }
-    else
-    {
-        return Results.NotFound();
-    }
-}
 
 
 
@@ -137,22 +137,22 @@ async Task<IResult> getEntity(
         CancellationToken token
     )
     {
-      IQueryable<Domain> query = context
-                .Set<Domain>()
-                .AsNoTracking().Where(x => x.Name.ToLower().Contains(domainSearch.Keyword.ToLower()));
+        IQueryable<Domain> query = context
+                  .Set<Domain>()
+                  .AsNoTracking().Where(x => x.Name.ToLower().Contains(domainSearch.Keyword.ToLower()));
 
-            if (!string.IsNullOrEmpty(domainSearch.SortColumn))
-            {
-                query = await query.Sort(domainSearch.SortColumn, domainSearch.SortDirection);
-            }
-            IList<Domain> resultList = await query
-                .Skip(domainSearch.Page * domainSearch.PageSize)
-                .Take(domainSearch.PageSize)
-                .ToListAsync(token);
+        if (!string.IsNullOrEmpty(domainSearch.SortColumn))
+        {
+            query = await query.Sort(domainSearch.SortColumn, domainSearch.SortDirection);
+        }
+        IList<Domain> resultList = await query
+            .Skip(domainSearch.Page * domainSearch.PageSize)
+            .Take(domainSearch.PageSize)
+            .ToListAsync(token);
 
-            return (resultList != null && resultList.Count > 0)
-                ? Results.Ok(mapper.Map<IList<DtoDomain>>(resultList))
-                : Results.NoContent();
+        return (resultList != null && resultList.Count > 0)
+            ? Results.Ok(mapper.Map<IList<DtoDomain>>(resultList))
+            : Results.NoContent();
     }
 
 }

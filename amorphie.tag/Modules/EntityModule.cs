@@ -36,38 +36,39 @@ public class EntityModule : BaseBBTRoute<DtoEntity, Entity, TagDBContext>
     [FromServices] TagDBContext context,
     IMapper mapper,
     CancellationToken cancellationToken
-){
-    if (context == null || context.Entities == null)
+)
     {
-        return Results.NotFound("Context or Tags is null.");
-    }
-    
-    var existingRecord = await context.Entities.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
-
-      if (existingRecord == null)
-    {
-        var alreadyHasRecord = await context.Entities.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
-        if (alreadyHasRecord != null)
+        if (context == null || context.Entities == null)
         {
-            return Results.BadRequest("Already has " + data.entityData!.Name + " entity");
+            return Results.NotFound("Context or Tags is null.");
         }
-        var entity = mapper.Map<Entity>(data.entityData!);
 
-        entity.CreatedAt = DateTime.UtcNow;
-        context.Entities.Add(entity);
-        await context.SaveChangesAsync(cancellationToken);
-        return Results.Ok(entity);
-    }
-  else
-    {
-        if (SaveEntityUpdate(data.entityData!, existingRecord))
+        var existingRecord = await context.Entities.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
+
+        if (existingRecord == null)
         {
-            await context!.SaveChangesAsync(cancellationToken);
+            var alreadyHasRecord = await context.Entities.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
+            if (alreadyHasRecord != null)
+            {
+                return Results.BadRequest("Already has " + data.entityData!.Name + " entity");
+            }
+            var entity = mapper.Map<Entity>(data.entityData!);
+
+            entity.CreatedAt = DateTime.UtcNow;
+            context.Entities.Add(entity);
+            await context.SaveChangesAsync(cancellationToken);
+            return Results.Ok(entity);
         }
-        
-        return Results.Ok();
+        else
+        {
+            if (SaveEntityUpdate(data.entityData!, existingRecord))
+            {
+                await context!.SaveChangesAsync(cancellationToken);
+            }
+
+            return Results.Ok();
+        }
     }
-}
     static bool SaveEntityUpdate(DtoEntity data, Entity existingRecord)
     {
         var hasChanges = false;
@@ -81,7 +82,7 @@ public class EntityModule : BaseBBTRoute<DtoEntity, Entity, TagDBContext>
             existingRecord.Description = data.Description;
             hasChanges = true;
         }
-        
+
 
         return hasChanges;
     }
@@ -171,7 +172,7 @@ public class EntityModule : BaseBBTRoute<DtoEntity, Entity, TagDBContext>
     {
         IQueryable<Entity> query = context
                     .Set<Entity>()
-                    .AsNoTracking().Where(x=>x.Name.ToLower().Contains(entitySearch.Keyword.ToLower())||x.DomainName.ToLower().Contains(entitySearch.Keyword.ToLower()));
+                    .AsNoTracking().Where(x => x.Name.ToLower().Contains(entitySearch.Keyword.ToLower()) || x.DomainName.ToLower().Contains(entitySearch.Keyword.ToLower()));
 
         if (!string.IsNullOrEmpty(entitySearch.SortColumn))
         {
