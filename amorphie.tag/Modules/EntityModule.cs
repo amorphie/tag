@@ -26,9 +26,64 @@ public class EntityModule : BaseBBTRoute<DtoEntity, Entity, TagDBContext>
     public override void AddRoutes(RouteGroupBuilder routeGroupBuilder)
     {
         base.AddRoutes(routeGroupBuilder);
+        routeGroupBuilder.MapPost("saveEntityWithWorkflow", saveEntityWithWorkflow);
         routeGroupBuilder.MapGet("{domainName}/{entityName}", getEntity);
-        routeGroupBuilder.MapDelete("{domainName}/{entityName}", deleteEntity);
         routeGroupBuilder.MapGet("/search", SearchMethod);
+        routeGroupBuilder.MapDelete("{domainName}/{entityName}", deleteEntity);
+    }
+    async ValueTask<IResult> saveEntityWithWorkflow(
+    [FromBody] DtoPostEntityWorkflow data,
+    [FromServices] TagDBContext context,
+    IMapper mapper,
+    CancellationToken cancellationToken
+){
+    if (context == null || context.Entities == null)
+    {
+        return Results.NotFound("Context or Tags is null.");
+    }
+    
+    var existingRecord = await context.Entities.FirstOrDefaultAsync(t => t.Id == data.recordId, cancellationToken);
+
+      if (existingRecord == null)
+    {
+        var alreadyHasRecord = await context.Entities.FirstOrDefaultAsync(t => t.Name == data.entityData!.Name, cancellationToken);
+        if (alreadyHasRecord != null)
+        {
+            return Results.BadRequest("Already has " + data.entityData!.Name + " entity");
+        }
+        var entity = mapper.Map<Entity>(data.entityData!);
+
+        entity.CreatedAt = DateTime.UtcNow;
+        context.Entities.Add(entity);
+        await context.SaveChangesAsync(cancellationToken);
+        return Results.Ok(entity);
+    }
+  else
+    {
+        if (SaveEntityUpdate(data.entityData!, existingRecord))
+        {
+            await context!.SaveChangesAsync(cancellationToken);
+        }
+        
+        return Results.Ok();
+    }
+}
+    static bool SaveEntityUpdate(DtoEntity data, Entity existingRecord)
+    {
+        var hasChanges = false;
+        if (data.Name != null && data.Name != existingRecord.Name)
+        {
+            existingRecord.Name = data.Name;
+            hasChanges = true;
+        }
+        if (data.Description != null && data.Description != existingRecord.Description)
+        {
+            existingRecord.Description = data.Description;
+            hasChanges = true;
+        }
+        
+
+        return hasChanges;
     }
 
 

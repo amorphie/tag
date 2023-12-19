@@ -28,7 +28,7 @@ public class TagModule : BaseBBTRoute<DtoTag, Tag, TagDBContext>
     {
         base.AddRoutes(routeGroupBuilder);
         routeGroupBuilder.MapGet("/getTag/{tagName}", getTag);
-        routeGroupBuilder.MapPost("/tag", saveTagWithWorkflow);
+        routeGroupBuilder.MapPost("/saveTagWithWorkflow", saveTagWithWorkflow);
 
         routeGroupBuilder.MapGet("/search", SearchMethod);
     }
