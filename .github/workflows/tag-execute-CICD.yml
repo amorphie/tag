@@ -1,14 +1,15 @@
-name: tag-CI-CD
+name: tag-execute-CI-CD
 on:
   push:
     branches:
       - 'main'
     paths:
-      - './amorphie.tag'
+      - './amorphie.tag.execute'
   workflow_dispatch:
+
 env:
-  APP_NAME: amorphie.tag
-  NAMESPACE: amorphie-tag
+  APP_NAME: amorphie.tag-execute
+  NAMESPACE: amorphie-tag-execute
   CLUSTER_NAME: BurganAKS
   CLUSTER_RESOURCE_GROUP: BurganTech
   SECRET: docker-hub
@@ -29,7 +30,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfile-tag
+          file: ./Dockerfile-execute
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
 
@@ -54,16 +55,17 @@ jobs:
           namespace: ${{ env.NAMESPACE }}
           arguments: --force true
 
-  
+
       - name: Deploy appsettings as Configmap
         run: |
-          cd ./amorphie.tag
+          cd ./amorphie.tag.execute
           ls
           if [ -e appsettings.Test.json ]
           then
             echo "Creating appsettings from appsettings.Test.json"
-            kubectl delete configmap appsettings-test-config -n amorphie-tag
-            kubectl create configmap appsettings-test-config -n amorphie-tag --from-file=appsettings.Test.json 2>/dev/null
+            kubectl delete configmap appsettings-test-config -n amorphie-tag-execute
+            sleep 5
+            kubectl create configmap appsettings-test-config -n amorphie-tag-execute --from-file=appsettings.Test.json 2>/dev/null
           else
             echo "Test ortami icin appsettings.Test.json yok. Olusturmaniz gerekiyor"
           fi
@@ -71,20 +73,20 @@ jobs:
           
       - name: Replace vault address
         run: |
-          sed -i -e "s,vault-address,${{ secrets.VAULT_ADDRESS }},g" ./manifest/dapr/vault-component.yaml
+          sed -i -e "s,vault-address,${{ secrets.VAULT_ADDRESS }},g" ./manifest-execute/dapr/vault-component.yaml
 
       - name: Replace vault token
         run: |
-          sed -i -e "s,amorphie-execute-vaulttoken,${{ secrets.VAULT_TOKEN }},g" ./manifest/dapr/vault-component.yaml
+          sed -i -e "s,amorphie-execute-vaulttoken,${{ secrets.VAULT_TOKEN }},g" ./manifest-execute/dapr/vault-component.yaml
 
       # Deploy app to AKS
       - uses: azure/k8s-deploy@v1
         with:
           manifests: |
-            ${{ github.workspace }}/manifest/deployment.yaml
-            ${{ github.workspace }}/manifest/service.yaml
-            ${{ github.workspace }}/manifest/dapr/cache-redis-component.yaml
-            ${{ github.workspace }}/manifest/dapr/vault-component.yaml
+            ${{ github.workspace }}/manifest-execute/deployment.yaml
+            ${{ github.workspace }}/manifest-execute/service.yaml
+            ${{ github.workspace }}/manifest-execute/dapr/cache-redis-component.yaml
+            ${{ github.workspace }}/manifest-execute/dapr/vault-component.yaml
           images: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
           imagepullsecrets: |

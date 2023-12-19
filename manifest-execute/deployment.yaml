@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amorphie-tag-execute
+  namespace: amorphie-tag-execute
+spec:
+  selector:
+    matchLabels:
+      app: amorphie-tag-execute
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: amorphie-tag-execute
+      annotations:
+        dapr.io/app-id: amorphie-tag-execute
+        dapr.io/enabled: 'true'
+        dapr.io/app-port: '5000'
+    spec:
+      serviceAccountName: amorphie-tag-executeuser
+      containers:
+        - name: amorphie-tag-execute
+          image: burganbank/amorphie.tag-execute:latest
+          ports:
+            - containerPort: 5000
+          env:
+          - name: ASPNETCORE_ENVIRONMENT
+            value: "Test"
+          - name: EnableApm
+            value: "true"
+          - name: TZ
+            value: Europe/Istanbul
+          resources:
+            limits:
+              cpu: "1"
+              memory: "4096Mi"
+            requests:
+              cpu: "0.1"
+              memory: "128Mi"
+          volumeMounts:
+          - mountPath: /app/appsettings.Test.json
+            name: appsettings-test-config-volume
+            subPath: appsettings.Test.json
+      volumes:
+        - name: appsettings-test-config-volume
+          configMap:
+            name: appsettings-test-config

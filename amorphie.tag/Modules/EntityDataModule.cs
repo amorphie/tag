@@ -163,7 +163,7 @@ public class EntityDataModule : BaseBBTRoute<DtoEntityData, EntityData, TagDBCon
     {
         IQueryable<EntityData> query = context
                     .Set<EntityData>()
-                    .AsNoTracking().Where(x => x.Field.ToLower().Contains(entityDataSearch.Keyword.ToLower())||x.EntityName.ToLower().Contains(entityDataSearch.Keyword.ToLower()));
+                    .AsNoTracking().Where(x => x.Field.ToLower().Contains(entityDataSearch.Keyword.ToLower()) || x.EntityName.ToLower().Contains(entityDataSearch.Keyword.ToLower()));
 
         if (!string.IsNullOrEmpty(entityDataSearch.SortColumn))
         {

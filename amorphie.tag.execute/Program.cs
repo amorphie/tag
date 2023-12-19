@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 await builder.Configuration.AddVaultSecrets("amorphie-tag", new string[] { "amorphie-tag" });
 var postgreSql = builder.Configuration["PostgreSql"];
 var amorphie_tag = "";
-var templateEngineEndpoint= builder.Configuration["Url:TemplateEngine"];
+var templateEngineEndpoint = builder.Configuration["Url:TemplateEngine"];
 
 
 var STATE_STORE = builder.Configuration["STATE_STORE"];

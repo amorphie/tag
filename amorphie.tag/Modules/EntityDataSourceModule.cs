@@ -28,7 +28,7 @@ public class EntityDataSourceModule : BaseBBTRoute<DtoEntityDataSource, EntityDa
         base.AddRoutes(routeGroupBuilder);
     }
 
-   
+
 
 }
 

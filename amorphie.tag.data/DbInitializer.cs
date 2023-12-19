@@ -130,22 +130,22 @@ public static class DbInitializer
         var entities = new Entity[]{
             new Entity{
                  ModifiedBy = Guid.NewGuid(), ModifiedAt = DateTime.UtcNow,
-                 CreatedBy = Guid.NewGuid(), 
-                 CreatedAt = DateTime.UtcNow, 
-                 Id = new Guid("107f4644-57cd-46ff-80de-004c6cd44714"), 
-                 DomainId = new Guid("107f4644-57cd-46ff-80de-004c6cd44712"), 
-                 Name = "user", 
-                 Description = "User repository", 
+                 CreatedBy = Guid.NewGuid(),
+                 CreatedAt = DateTime.UtcNow,
+                 Id = new Guid("107f4644-57cd-46ff-80de-004c6cd44714"),
+                 DomainId = new Guid("107f4644-57cd-46ff-80de-004c6cd44712"),
+                 Name = "user",
+                 Description = "User repository",
                  DomainName = "idm",
             },
             new Entity{
                  ModifiedBy = Guid.NewGuid(), ModifiedAt = DateTime.UtcNow,
-                 CreatedBy = Guid.NewGuid(), 
-                 CreatedAt = DateTime.UtcNow, 
-                 Id = new Guid("107f4644-57cd-46ff-80de-004c6cd44715"), 
-                 DomainId = new Guid("107f4644-57cd-46ff-80de-004c6cd44712"), 
-                 Name = "scope", 
-                 Description = "Scope repository", 
+                 CreatedBy = Guid.NewGuid(),
+                 CreatedAt = DateTime.UtcNow,
+                 Id = new Guid("107f4644-57cd-46ff-80de-004c6cd44715"),
+                 DomainId = new Guid("107f4644-57cd-46ff-80de-004c6cd44712"),
+                 Name = "scope",
+                 Description = "Scope repository",
                  DomainName = "idm",
             }
         };
@@ -155,7 +155,7 @@ public static class DbInitializer
         }
         context.SaveChanges();
 
-        var entityData=new EntityData[]{
+        var entityData = new EntityData[]{
             new EntityData{
                 ModifiedBy = Guid.NewGuid(),
                 ModifiedAt = DateTime.UtcNow,
@@ -196,7 +196,7 @@ public static class DbInitializer
         }
         context.SaveChanges();
 
-        var entityDataSource=new EntityDataSource[]{
+        var entityDataSource = new EntityDataSource[]{
             new EntityDataSource{
                 ModifiedBy = Guid.NewGuid(),
                 ModifiedAt = DateTime.UtcNow,
