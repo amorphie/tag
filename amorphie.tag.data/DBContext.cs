@@ -27,6 +27,7 @@ namespace amorphie.tag.data;
         var builder = new DbContextOptionsBuilder<TagDBContext>()
             .EnableSensitiveDataLogging()
             .UseNpgsql(connStr);
+            
 
         return new TagDBContext(builder.Options);
     }
