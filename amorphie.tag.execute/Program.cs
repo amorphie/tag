@@ -1,4 +1,6 @@
+using amorphie.core.Middleware.Logging;
 using amorphie.core.security.Extensions;
+using Elastic.Apm.NetCoreAll;
 using Npgsql.Replication.TestDecoding;
 using Polly;
 using Polly.Extensions.Http;
@@ -19,8 +21,8 @@ var templateEngineEndpoint = builder.Configuration["Url:TemplateEngine"];
 
 var STATE_STORE = builder.Configuration["STATE_STORE"];
 
-builder.Logging.ClearProviders();
-builder.Logging.AddJsonConsole();
+builder.AddSeriLogWithHttpLogging<AmorphieLogEnricher>();
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -40,6 +42,11 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseAllElasticApm(app.Configuration);
+}
+app.UseLoggingHandlerMiddlewares();
 
 if (app.Environment.IsDevelopment())
 {
