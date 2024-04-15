@@ -6,6 +6,9 @@ using System.Reflection;
 using amorphie.tag.core.Mapper;
 using amorphie.core.Swagger;
 using amorphie.tag.data;
+using amorphie.core.Middleware.Logging;
+using Elastic.Apm.NetCoreAll;
+
 
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
@@ -20,8 +23,7 @@ builder.Services.AddScoped<IValidator<Domain>, DomainValidator>();
 builder.Services.AddScoped<IBBTIdentity, FakeIdentity>();
 builder.Services.AddValidatorsFromAssemblies(assemblies);
 builder.Services.AddAutoMapper(assemblies);
-builder.Logging.ClearProviders();
-builder.Logging.AddJsonConsole();
+
 builder.Services.AddDaprClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -33,9 +35,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Configuration.AddEnvironmentVariables();
 
-// Console.WriteLine("Environment: " + builder.Environment.EnvironmentName);
-// Console.WriteLine("State Store: " + builder.Configuration["STATE_STORE"]);
-// Console.WriteLine("Vault PostgreSql: " + postgreSql);
+builder.AddSeriLogWithHttpLogging<AmorphieLogEnricher>();
 
 
 builder.Services.AddDbContext<TagDBContext>
@@ -56,6 +56,12 @@ builder.Services.AddCors(options =>
         });
 });
 var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseAllElasticApm(app.Configuration);
+}
+app.UseLoggingHandlerMiddlewares();
 
 using var scope = app.Services.CreateScope();
 var db = scope.ServiceProvider.GetRequiredService<TagDBContext>();
