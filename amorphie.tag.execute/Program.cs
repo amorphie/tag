@@ -2,8 +2,6 @@ using amorphie.core.Middleware.Logging;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using System.Xml;
-using amorphie.core.security.Extensions;
-using Elastic.Apm.NetCoreAll;
 using Elastic.Apm.NetCoreAll;
 using MongoDB.Bson;
 using Npgsql.Replication.TestDecoding;
@@ -14,6 +12,7 @@ using Polly.Timeout;
 using Refit;
 using Serilog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
+using amorphie.core.Extension;
 
 using var client = new DaprClientBuilder().Build();
 
