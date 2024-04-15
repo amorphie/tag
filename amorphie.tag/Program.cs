@@ -9,6 +9,8 @@ using amorphie.tag.data;
 using amorphie.core.Middleware.Logging;
 using Elastic.Apm.NetCoreAll;
 
+using Elastic.Apm.NetCoreAll;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 using var client = new DaprClientBuilder().Build();
@@ -29,6 +31,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.OperationFilter<AddSwaggerParameterFilter>();
+
+});
+builder.Logging.ClearProviders();
+builder.Host.UseSerilog((_, serviceProvider, loggerConfiguration) =>
+{
+    loggerConfiguration
+        .ReadFrom.Configuration(builder.Configuration);
 
 });
 
@@ -76,9 +85,8 @@ app.MapSubscribeHandler();
 app.UseCors();
 app.UseSwagger();
 app.UseSwaggerUI();
-
-
-
+app.UseAllElasticApm(app.Configuration);
+app.UseHttpLogging();
 app.UseSwagger();
 app.UseSwaggerUI();
 

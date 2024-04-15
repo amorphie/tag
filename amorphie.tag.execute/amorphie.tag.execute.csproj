@@ -15,7 +15,9 @@
     <PackageReference Include="VaultSharp" Version="1.13.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="amorphie.core" Version="1.1.30" />
-
+    <PackageReference Include="Elastic.Apm.NetCoreAll" Version="1.26.0" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.AspnetCore" Version="8.0.1" />
   </ItemGroup>
 
   <ItemGroup>
