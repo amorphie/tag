@@ -6,6 +6,7 @@ USER amorphie-taguser
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0.200 AS build
 WORKDIR /src
+ENV DOTNET_NUGET_SIGNATURE_VERIFICATION=false
 COPY ["./amorphie.tag/amorphie.tag.csproj", "."]
 RUN dotnet restore "./amorphie.tag.csproj"
 COPY . .
