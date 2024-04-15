@@ -1,12 +1,18 @@
 using amorphie.core.Middleware.Logging;
+using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
+using System.Xml;
 using amorphie.core.security.Extensions;
 using Elastic.Apm.NetCoreAll;
+using Elastic.Apm.NetCoreAll;
+using MongoDB.Bson;
 using Npgsql.Replication.TestDecoding;
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Retry;
 using Polly.Timeout;
 using Refit;
+using Serilog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 using var client = new DaprClientBuilder().Build();
@@ -28,7 +34,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TagDBContext>
     (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
+builder.Host.UseSerilog((_, serviceProvider, loggerConfiguration) =>
+{
+    loggerConfiguration
+        .ReadFrom.Configuration(builder.Configuration);
 
+});
 builder.Services.AddCors(options =>
 
 {
@@ -62,7 +73,8 @@ app.MapSubscribeHandler();
 app.UseCors();
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.UseAllElasticApm(app.Configuration);
+app.UseHttpLogging();
 //async kullan. 
 
 app.MapGet("/tag/{domainName}/{entityName}/{tagName}/execute", ExecuteTag)
@@ -90,19 +102,20 @@ app.MapGet("/tag/{tagName}/execute", TagExecute)
 .Produces(StatusCodes.Status510NotExtended)
 .Produces(StatusCodes.Status400BadRequest)
 .Produces(StatusCodes.Status204NoContent);
-app.MapGet("/template/{domainName}/{entityName}/{tagName}/execute", TemplateExecuteTag);
+app.MapGet("/htmlTemplate/{domainName}/{entityName}/{tagName}/{viewTemplateName}/execute", HtmlTemplateExecuteTag);
+app.MapGet("/pdfTemplate/{domainName}/{entityName}/{tagName}/{viewTemplateName}/execute", PdfTemplateExecuteTag);
 // app.MapGet("/template/{tagName}/execute", ExecuteTemplate);
-app.MapGet("/tag/{tagName}/ugur", () => { })
-.WithOpenApi(operation =>
-{
-    operation.Summary = "Ugurun methodu";
-    return operation;
-})
-.Produces(StatusCodes.Status200OK)
-.Produces(StatusCodes.Status500InternalServerError)
-.Produces(StatusCodes.Status510NotExtended)
-.Produces(StatusCodes.Status400BadRequest)
-.Produces(StatusCodes.Status204NoContent);
+// app.MapGet("/tag/{tagName}/ugur", () => { })
+// .WithOpenApi(operation =>
+// {
+//     operation.Summary = "Ugurun methodu";
+//     return operation;
+// })
+// .Produces(StatusCodes.Status200OK)
+// .Produces(StatusCodes.Status500InternalServerError)
+// .Produces(StatusCodes.Status510NotExtended)
+// .Produces(StatusCodes.Status400BadRequest)
+// .Produces(StatusCodes.Status204NoContent);
 
 // app.MapGet("/domain/{domainName}/entity/{entityName}/Execute", ExecuteEntity)
 // .WithOpenApi(operation =>
@@ -136,7 +149,7 @@ async Task<IResult> ExecuteTag(
     )
 {
     app.Logger.LogInformation("ExecuteTag is calling");
-
+    var jsondata = String.Empty;
     DtoTag tag;
 
     try
@@ -192,10 +205,60 @@ async Task<IResult> ExecuteTag(
     }
     else
     {
+        // HttpClient httpClient = new();
+        // var result = await httpClient.GetAsync(urlToConsume);
+        // string test = await result.Content.ReadAsStringAsync();
+        // app.Logger.LogInformation($"ExecuteTag is responded with {test}");
+
         HttpClient httpClient = new();
-        var result = await httpClient.GetAsync(urlToConsume);
-        string test = await result.Content.ReadAsStringAsync();
-        app.Logger.LogInformation($"ExecuteTag is responded with {test}");
+        var response = await httpClient.GetAsync(urlToConsume);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            string? contentType = response.Content.Headers.ContentType?.MediaType;
+
+            try
+            {
+                if (contentType == "application/json")
+                {
+                    JToken dataAsJson = JToken.Parse(content);
+                    jsondata = content;
+                }
+                else if (contentType == "application/xml" || contentType == "text/xml")
+                {
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(content);
+                    string jsonContent = JsonConvert.SerializeXmlNode(doc);
+                    // var serializeJson = JsonConvert.SerializeObject(jsonContent);
+                    Console.WriteLine(jsonContent);
+                    // JToken dataAsJson = JToken.Parse(jsonContent);
+
+                    var deserializeData = JsonConvert.DeserializeObject(jsonContent);
+                    Console.WriteLine(JObject.FromObject(deserializeData).ToString());
+                    jsondata = jsonContent;
+
+                }
+                else
+                {
+                    if (content.TrimStart().StartsWith("{") || content.TrimStart().StartsWith("["))
+                    {
+                    }
+                    else if (content.TrimStart().StartsWith("<"))
+                    {
+                    }
+                    else
+                    {
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+        else
+        {
+        }
 
 
         try
@@ -217,7 +280,7 @@ async Task<IResult> ExecuteTag(
                     if (tagName.Contains(targetTag.Tag))
                     {
 
-                        JToken dataAsJson = JToken.Parse(test);
+                        JToken dataAsJson = JToken.Parse(jsondata);
 
                         if (dataAsJson.SelectToken(targetTag.Path) != null)
                         {
@@ -264,19 +327,48 @@ async Task<IResult> ExecuteTag(
     }
 };
 
-async Task<IResult> TemplateExecuteTag(
+async Task<IResult> HtmlTemplateExecuteTag(
+    [FromRoute(Name = "tagName")] string tagName,
+    [FromRoute(Name = "domainName")] string domainName,
+    [FromRoute(Name = "entityName")] string entityName,
+    [FromRoute(Name = "viewTemplateName")] string? ViewTemplateName,
+    [FromQuery(Name = "reference")] string? reference,
+    HttpRequest request,
+    HttpContext httpContext
+    )
+{
+    return await TemplateExecuteTag(tagName, domainName, entityName, ViewTemplateName, reference, request, httpContext, "html");
+
+}
+
+async Task<IResult> PdfTemplateExecuteTag(
     [FromRoute(Name = "tagName")] string tagName,
     [FromRoute(Name = "domainName")] string domainName,
     [FromRoute(Name = "entityName")] string entityName,
     [FromQuery(Name = "viewTemplateName")] string? ViewTemplateName,
-
+    [FromQuery(Name = "reference")] string? reference,
     HttpRequest request,
     HttpContext httpContext
+    )
+{
+    return await TemplateExecuteTag(tagName, domainName, entityName, ViewTemplateName, reference, request, httpContext, "pdf");
+
+}
+async Task<IResult> TemplateExecuteTag(
+     string tagName,
+     string domainName,
+     string entityName,
+    string? ViewTemplateName,
+    string? reference,
+    HttpRequest request,
+    HttpContext httpContext,
+    string type
     )
 {
     app.Logger.LogInformation("ExecuteTag is calling");
 
     DtoTag tag;
+    var jsondata = String.Empty;
 
     try
     {
@@ -325,9 +417,54 @@ async Task<IResult> TemplateExecuteTag(
 
     HttpClient httpClient = new();
     var result = await httpClient.GetAsync(urlToConsume);
-    string test = await result.Content.ReadAsStringAsync();
-    app.Logger.LogInformation($"ExecuteTag testData is responded with {test}");
+    // string test = await result.Content.ReadAsStringAsync();
+    // app.Logger.LogInformation($"ExecuteTag testData is responded with {test}");
+    if (result.IsSuccessStatusCode)
+    {
+        var content = await result.Content.ReadAsStringAsync();
+        string? contentType = result.Content.Headers.ContentType?.MediaType;
 
+        try
+        {
+            if (contentType == "application/json")
+            {
+                JToken dataAsJson = JToken.Parse(content);
+                jsondata = content;
+            }
+            else if (contentType == "application/xml" || contentType == "text/xml")
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(content);
+                string jsonContent = JsonConvert.SerializeXmlNode(doc);
+                // var serializeJson = JsonConvert.SerializeObject(jsonContent);
+                Console.WriteLine(jsonContent);
+                // JToken dataAsJson = JToken.Parse(jsonContent);
+
+                var deserializeData = JsonConvert.DeserializeObject(jsonContent);
+                Console.WriteLine(JObject.FromObject(deserializeData).ToString());
+                jsondata = jsonContent;
+
+            }
+            else
+            {
+                if (content.TrimStart().StartsWith("{") || content.TrimStart().StartsWith("["))
+                {
+                }
+                else if (content.TrimStart().StartsWith("<"))
+                {
+                }
+                else
+                {
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+    else
+    {
+    }
 
     try
     {
@@ -348,7 +485,7 @@ async Task<IResult> TemplateExecuteTag(
                 if (tagName.Contains(targetTag.Tag))
                 {
 
-                    JToken dataAsJson = JToken.Parse(test);
+                    JToken dataAsJson = JToken.Parse(jsondata);
 
                     if (dataAsJson.SelectToken(targetTag.Path) != null)
                     {
@@ -375,31 +512,40 @@ async Task<IResult> TemplateExecuteTag(
         var machineName = Environment.MachineName;
         var payload = new RenderRequestDefinition
         {
-            Name = ViewTemplateName ?? "test-mehmet4",
+            Name = ViewTemplateName ?? "contractTag",
             RenderData = data,
             RenderID = Guid.NewGuid(),
-            SemVer = "1.0.0",
             Action = "amorphie-template-executer",
-            Customer = "test-mehmet1",
+            Customer = "numberTemplate",
             Identity = "amorphie-tag",
-            ItemId = "test-mehmet1",
-            ProcessName = "test-mehmet1",
+            ItemId = "numberTemplate",
+            ProcessName = "numberTemplate",
             RenderDataForLog = data,
         };
 
         /// ----- TODO: minimize
         var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload));
         app.Logger.LogInformation($"ExecuteTag jsonEncode is responded with {json}");
         HttpRequestMessage yourmsg = new()
         {
             Method = HttpMethod.Post,
-            RequestUri = new Uri($"{templateEngineEndpoint}/Template/Render"),
+
+            RequestUri = type == "pdf" ? new Uri($"{templateEngineEndpoint}Template/Render/pdf") : new Uri($"{templateEngineEndpoint}Template/Render"),
             Content = new StringContent(json, Encoding.UTF8, "application/json")
         };
         var responses = await httpClient.SendAsync(yourmsg);
-
+        var options = new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            WriteIndented = true
+        };
         app.Logger.LogInformation($"ExecuteTag templateResponse is responded with {responses}");
-        return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
+        var deserializeData = await responses.Content.ReadFromJsonAsync<dynamic>();
+        // var serializedData = System.Text.Json.JsonSerializer.Serialize<dynamic>(deserializeData, options);
+        var deserializeResponse = System.Text.Json.JsonSerializer.Deserialize<string>(deserializeData, options);
+        // return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
+        return Results.Content(deserializeResponse);
     }
     catch (Dapr.Client.InvocationException ex)
     {
@@ -420,8 +566,6 @@ async Task<IResult> TemplateExecuteTag(
         return Results.Problem($"Unhandled Entity query service error: {ex.Message}", null, 510);
     }
 }
-
-
 async Task<IResult> TagExecute(
 [FromRoute(Name = "tagName")] string tagName,
 HttpRequest request,
