@@ -7,6 +7,7 @@ USER amorphie-executeuser
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+ENV DOTNET_NUGET_SIGNATURE_VERIFICATION=false
 COPY ["./amorphie.tag.execute/amorphie.tag.execute.csproj", "."]
 RUN dotnet restore "./amorphie.tag.execute.csproj"
 COPY . .
