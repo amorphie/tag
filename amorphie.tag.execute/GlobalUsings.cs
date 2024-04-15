@@ -9,4 +9,3 @@ global using System.Net;
 global using Newtonsoft.Json.Linq;
 global using System.Text;
 global using Newtonsoft.Json;
-global using amorphie.core.security.Extensions;
