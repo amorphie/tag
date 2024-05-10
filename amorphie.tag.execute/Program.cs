@@ -13,6 +13,10 @@ using Refit;
 using Serilog;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using amorphie.core.Extension;
+using System.Drawing.Text;
+using Google.Protobuf.WellKnownTypes;
+using amorphie.core.Base;
+using Elastic.Apm.Api;
 
 using var client = new DaprClientBuilder().Build();
 
@@ -353,32 +357,12 @@ async Task<IResult> PdfTemplateExecuteTag(
     return await TemplateExecuteTag(tagName, domainName, entityName, ViewTemplateName, reference, request, httpContext, "pdf");
 
 }
-async Task<IResult> TemplateExecuteTag(
-     string tagName,
-     string domainName,
-     string entityName,
-    string? ViewTemplateName,
-    string? reference,
-    HttpRequest request,
-    HttpContext httpContext,
-    string type
-    )
+async ValueTask<IResult> GetTag(string tagName, DtoTag tag)
 {
-    app.Logger.LogInformation("ExecuteTag is calling");
-
-    DtoTag tag;
-    var jsondata = String.Empty;
 
     try
     {
-        //b TODO: dapr service call to long
-        //tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
-        //var test = client.CreateInvokeMethodRequest(HttpMethod.Get, "amorphie-tag", $"tag/{tagId}");
-        // var result = client.InvokeMethodWithResponseAsync(test).Result.Content.ReadAsStringAsync().Result;
-        // var json = (JObject)JsonConvert.DeserializeObject(result);
-        // tag = json["data"].ToObject<DtoTag>();
         tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
-
     }
     catch (Dapr.Client.InvocationException ex)
     {
@@ -392,32 +376,35 @@ async Task<IResult> TemplateExecuteTag(
     }
     catch (Exception ex)
     {
-
         return Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510);
     }
-
     if (string.IsNullOrEmpty(tag.Url))
     {
         return Results.BadRequest("This tag does not have URL");
     }
+    return Results.Ok();
+}
 
-    var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
-    var urlToConsume = tag.Url;
+async ValueTask<IResult> GetConsumeUrl(string url, HttpRequest request, DtoUrl dtoUrl)
+{
+    var parameters = url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
+    var urlToConsume = url;
     foreach (var p in parameters)
     {
         if (!request.Query.ContainsKey(p.TrimStart('@')))
             return Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}");
-        // Düzeltildi
+
         urlToConsume = urlToConsume.Replace(p, request!.QueryString.Value!.TrimStart('?').Split('&').FirstOrDefault(x => x.StartsWith(p.TrimStart('@')))!.Split('=').LastOrDefault() ?? string.Empty);
-        //urlToConsume = urlToConsume.Replace(p, request.Query.FirstOrDefault(x => x.Value != p).ToString());
     }
+    dtoUrl.Url = urlToConsume;
+    return Results.Ok();
+}
+async Task<IResult> GetJsonData(string urlToConsume, JsonData getJsonData, HttpClient httpClient)
+{
+    var jsondata = String.Empty;
 
-
-
-    HttpClient httpClient = new();
     var result = await httpClient.GetAsync(urlToConsume);
-    // string test = await result.Content.ReadAsStringAsync();
-    // app.Logger.LogInformation($"ExecuteTag testData is responded with {test}");
+
     if (result.IsSuccessStatusCode)
     {
         var content = await result.Content.ReadAsStringAsync();
@@ -435,115 +422,144 @@ async Task<IResult> TemplateExecuteTag(
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(content);
                 string jsonContent = JsonConvert.SerializeXmlNode(doc);
-                // var serializeJson = JsonConvert.SerializeObject(jsonContent);
-                Console.WriteLine(jsonContent);
-                // JToken dataAsJson = JToken.Parse(jsonContent);
-
                 var deserializeData = JsonConvert.DeserializeObject(jsonContent);
-                Console.WriteLine(JObject.FromObject(deserializeData).ToString());
                 jsondata = jsonContent;
 
-            }
-            else
-            {
-                if (content.TrimStart().StartsWith("{") || content.TrimStart().StartsWith("["))
-                {
-                }
-                else if (content.TrimStart().StartsWith("<"))
-                {
-                }
-                else
-                {
-                }
             }
         }
         catch (Exception ex)
         {
+            return Results.BadRequest(ex.Message);
         }
+
     }
+
     else
     {
+        return Results.BadRequest("GetData Failed");
     }
+    getJsonData.Data = jsondata;
+    return Results.Ok();
+}
+async Task<GetEntityResponse> GetEntity(string domainName, string entityName)
+{
+    return await client.InvokeMethodAsync<GetEntityResponse>(
+              HttpMethod.Get,
+              $"{amorphie_tag}",
+              $"entityData/getEntityData/{domainName}/{entityName}"
+          );
+}
+void GetFieldSource(GetEntityDataResponse? field, string tagName, string jsondata, Dictionary<string, dynamic> entityDataResult, GetEntityDataSourcesResponse[]? fieldSources)
+{
+    foreach (var fieldSource in fieldSources)
+    {
+        if (tagName.Contains(fieldSource.Tag))
+        {
+            JToken dataAsJson = JToken.Parse(jsondata);
+
+            if (dataAsJson.SelectToken(fieldSource.Path) != null)
+            {
+                entityDataResult.Add(field.Field, dataAsJson.SelectToken(fieldSource.Path)!.Value<string>()!);
+            }
+            break;
+        }
+    }
+}
+async Task<string?> CallTemplateEngine(HttpClient httpClient, string type, Dictionary<string, dynamic>? entityDataResult, string ViewTemplateName)
+{
+    var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(entityDataResult);
+    app.Logger.LogInformation($"ExecuteTag renderData is responded with {data}");
+    var machineName = Environment.MachineName;
+    var payload = new RenderRequestDefinition
+    {
+        Name = ViewTemplateName ?? "contractTag",
+        RenderData = data,
+        RenderID = Guid.NewGuid(),
+        Action = "amorphie-template-executer",
+        Customer = "numberTemplate",
+        Identity = "amorphie-tag",
+        ItemId = "numberTemplate",
+        ProcessName = "numberTemplate",
+        RenderDataForLog = data,
+    };
+
+    var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
+    app.Logger.LogInformation($"ExecuteTag jsonEncode is responded with {json}");
+
+    HttpRequestMessage yourmsg = new()
+    {
+        Method = HttpMethod.Post,
+        RequestUri = type == "pdf" ? new Uri($"{templateEngineEndpoint}Template/Render/pdf") : new Uri($"{templateEngineEndpoint}Template/Render"),
+        Content = new StringContent(json, Encoding.UTF8, "application/json")
+    };
+
+    var responses = await httpClient.SendAsync(yourmsg);
+    var options = new JsonSerializerOptions
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        WriteIndented = true
+    };
+    app.Logger.LogInformation($"ExecuteTag templateResponse is responded with {responses}");
+    var deserializeData = await responses.Content.ReadFromJsonAsync<dynamic>();
+    return System.Text.Json.JsonSerializer.Deserialize<string>(deserializeData, options);
+}
+async Task<IResult> TemplateExecuteTag(
+     string tagName,
+     string domainName,
+     string entityName,
+    string? ViewTemplateName,
+    string? reference,
+    HttpRequest request,
+    HttpContext httpContext,
+    string type
+    )
+{
+    HttpClient httpClient = new();
+    app.Logger.LogInformation("ExecuteTag is calling");
+    DtoTag tag = null;
+    var getTagResult = await GetTag(tagName, tag);
+
+    if (getTagResult != Results.Ok())
+    {
+        app.Logger.LogInformation("");
+        return getTagResult;
+    }
+
+    var dtoUrl = new DtoUrl();
+    var urlToConsumerResult = await GetConsumeUrl(tag.Url, request, dtoUrl);
+
+    if (urlToConsumerResult != Results.Ok())
+    {
+        app.Logger.LogInformation("");
+        return urlToConsumerResult;
+    }
+
+    var urlToConsume = dtoUrl.Url;
+    var getJsonData = new JsonData();
+    var getJsonDataResult = await GetJsonData(urlToConsume, getJsonData, httpClient);
+
+    if (getJsonDataResult != Results.Ok())
+    {
+        app.Logger.LogInformation("");
+        return getJsonDataResult;
+    }
+    var jsondata = getJsonData.Data;
 
     try
     {
-        var entity = await client.InvokeMethodAsync<GetEntityResponse>(
-            HttpMethod.Get,
-            $"{amorphie_tag}",
-            $"entityData/getEntityData/{domainName}/{entityName}"
-        );
-
-        var returnValue = new Dictionary<string, dynamic>();
+        var entity = await GetEntity(domainName, entityName);
+        var entityDataResult = new Dictionary<string, dynamic>();
 
         foreach (var field in entity.Data)
         {
-            var sourceTags = field.Sources.OrderBy(f => f.Order).ToArray();
-
-            foreach (var targetTag in sourceTags)
-            {
-                if (tagName.Contains(targetTag.Tag))
-                {
-
-                    JToken dataAsJson = JToken.Parse(jsondata);
-
-                    if (dataAsJson.SelectToken(targetTag.Path) != null)
-                    {
-                        returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path)!.Value<string>()!);
-                    }
-
-                    break;
-                }
-
-            }
+            var fieldSources = field.Sources.OrderBy(f => f.Order).ToArray();
+            GetFieldSource(field, tagName, jsondata, entityDataResult, fieldSources);
         }
 
-        // var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
+        app.Logger.LogInformation($"ExecuteTag filterData is responded with {entityDataResult}");
 
+        var deserializeResponse = await CallTemplateEngine(httpClient, type, entityDataResult, ViewTemplateName);
 
-
-        app.Logger.LogInformation($"ExecuteTag filterData is responded with {returnValue}");
-        // return Results.Ok(test);
-
-
-
-        var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(returnValue);
-        app.Logger.LogInformation($"ExecuteTag renderData is responded with {data}");
-        var machineName = Environment.MachineName;
-        var payload = new RenderRequestDefinition
-        {
-            Name = ViewTemplateName ?? "contractTag",
-            RenderData = data,
-            RenderID = Guid.NewGuid(),
-            Action = "amorphie-template-executer",
-            Customer = "numberTemplate",
-            Identity = "amorphie-tag",
-            ItemId = "numberTemplate",
-            ProcessName = "numberTemplate",
-            RenderDataForLog = data,
-        };
-
-        /// ----- TODO: minimize
-        var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
-        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload));
-        app.Logger.LogInformation($"ExecuteTag jsonEncode is responded with {json}");
-        HttpRequestMessage yourmsg = new()
-        {
-            Method = HttpMethod.Post,
-
-            RequestUri = type == "pdf" ? new Uri($"{templateEngineEndpoint}Template/Render/pdf") : new Uri($"{templateEngineEndpoint}Template/Render"),
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
-        };
-        var responses = await httpClient.SendAsync(yourmsg);
-        var options = new JsonSerializerOptions
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            WriteIndented = true
-        };
-        app.Logger.LogInformation($"ExecuteTag templateResponse is responded with {responses}");
-        var deserializeData = await responses.Content.ReadFromJsonAsync<dynamic>();
-        // var serializedData = System.Text.Json.JsonSerializer.Serialize<dynamic>(deserializeData, options);
-        var deserializeResponse = System.Text.Json.JsonSerializer.Deserialize<string>(deserializeData, options);
-        // return Results.Ok(responses.Content.ReadFromJsonAsync<dynamic>().Result);
         return Results.Content(deserializeResponse);
     }
     catch (Dapr.Client.InvocationException ex)
