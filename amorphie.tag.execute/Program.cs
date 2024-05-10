@@ -357,9 +357,9 @@ async Task<IResult> PdfTemplateExecuteTag(
     return await TemplateExecuteTag(tagName, domainName, entityName, ViewTemplateName, reference, request, httpContext, "pdf");
 
 }
-async ValueTask<IResult> GetTag(string tagName, DtoTag tag)
+async ValueTask<ResultData> GetTag(string tagName)
 {
-
+    DtoTag tag = null;
     try
     {
         tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
@@ -367,39 +367,38 @@ async ValueTask<IResult> GetTag(string tagName, DtoTag tag)
     catch (Dapr.Client.InvocationException ex)
     {
         if (ex.Response.StatusCode == HttpStatusCode.NotFound)
-            return Results.NotFound("Tag is not found.");
+            return new ResultData(Results.NotFound("Tag is not found."), tag);
 
         if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
-            return Results.Problem($"Tag query service is unavailable {ex.Message}", null, 510);
+            return new ResultData(Results.Problem($"Tag query service is unavailable {ex.Message}", null, 510));
 
-        return Results.Problem($"Tag query service error : {ex.Response.StatusCode}", null, 510);
+        return new ResultData(Results.Problem($"Tag query service error : {ex.Response.StatusCode}", null, 510));
     }
     catch (Exception ex)
     {
-        return Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510);
+        return new ResultData(Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510));
     }
     if (string.IsNullOrEmpty(tag.Url))
     {
-        return Results.BadRequest("This tag does not have URL");
+        return new ResultData(Results.BadRequest("This tag does not have URL"));
     }
-    return Results.Ok();
+    return new ResultData(Results.Ok(), tag);
 }
 
-async ValueTask<IResult> GetConsumeUrl(string url, HttpRequest request, DtoUrl dtoUrl)
+async ValueTask<ResultData> GetConsumeUrl(string url, HttpRequest request)
 {
     var parameters = url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
     var urlToConsume = url;
     foreach (var p in parameters)
     {
         if (!request.Query.ContainsKey(p.TrimStart('@')))
-            return Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}");
+            return new ResultData(Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}"));
 
         urlToConsume = urlToConsume.Replace(p, request!.QueryString.Value!.TrimStart('?').Split('&').FirstOrDefault(x => x.StartsWith(p.TrimStart('@')))!.Split('=').LastOrDefault() ?? string.Empty);
     }
-    dtoUrl.Url = urlToConsume;
-    return Results.Ok();
+    return new ResultData(Results.Ok(), urlToConsume);
 }
-async Task<IResult> GetJsonData(string urlToConsume, JsonData getJsonData, HttpClient httpClient)
+async Task<ResultData> GetJsonData(string urlToConsume, HttpClient httpClient)
 {
     var jsondata = String.Empty;
 
@@ -424,22 +423,18 @@ async Task<IResult> GetJsonData(string urlToConsume, JsonData getJsonData, HttpC
                 string jsonContent = JsonConvert.SerializeXmlNode(doc);
                 var deserializeData = JsonConvert.DeserializeObject(jsonContent);
                 jsondata = jsonContent;
-
             }
         }
         catch (Exception ex)
         {
-            return Results.BadRequest(ex.Message);
+            return new ResultData(Results.BadRequest(ex.Message));
         }
-
     }
-
     else
     {
-        return Results.BadRequest("GetData Failed");
+        return new ResultData(Results.BadRequest("GetData Failed"));
     }
-    getJsonData.Data = jsondata;
-    return Results.Ok();
+    return new ResultData(Results.Ok(), jsondata);
 }
 async Task<GetEntityResponse> GetEntity(string domainName, string entityName)
 {
@@ -516,70 +511,77 @@ async Task<IResult> TemplateExecuteTag(
 {
     HttpClient httpClient = new();
     app.Logger.LogInformation("ExecuteTag is calling");
-    DtoTag tag = null;
-    var getTagResult = await GetTag(tagName, tag);
+    var getTagResult = await GetTag(tagName);
 
-    if (getTagResult != Results.Ok())
+    if (getTagResult.Result != Results.Ok())
     {
         app.Logger.LogInformation("");
-        return getTagResult;
+        return getTagResult.Result;
     }
+    DtoTag tag = getTagResult.Data;
 
-    var dtoUrl = new DtoUrl();
-    var urlToConsumerResult = await GetConsumeUrl(tag.Url, request, dtoUrl);
+    List<DtoTag> dtoTags = new List<DtoTag>();
+    var tag2 = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/openbanking-customer");
+    dtoTags.Add(tag);
+    dtoTags.Add(tag2);
+    //Burada Related Bütün Tagler Eklenecek.
+    var entityDataResult = new Dictionary<string, dynamic>();
 
-    if (urlToConsumerResult != Results.Ok())
+    foreach (var dtoTag in dtoTags)
     {
-        app.Logger.LogInformation("");
-        return urlToConsumerResult;
-    }
+        var urlToConsumerResult = await GetConsumeUrl(dtoTag.Url, request);
 
-    var urlToConsume = dtoUrl.Url;
-    var getJsonData = new JsonData();
-    var getJsonDataResult = await GetJsonData(urlToConsume, getJsonData, httpClient);
+        if (urlToConsumerResult.Result != Results.Ok())
+        {
+            app.Logger.LogInformation("");
+            return urlToConsumerResult.Result;
+        }
 
-    if (getJsonDataResult != Results.Ok())
-    {
-        app.Logger.LogInformation("");
-        return getJsonDataResult;
-    }
-    var jsondata = getJsonData.Data;
+        var urlToConsume = urlToConsumerResult.Data;
+        var getJsonDataResult = await GetJsonData(urlToConsume, httpClient);
 
-    try
-    {
+        if (getJsonDataResult.Result != Results.Ok())
+        {
+            app.Logger.LogInformation("");
+            return getJsonDataResult.Result;
+        }
+        var jsondata = getJsonDataResult.Data;
+
+
         var entity = await GetEntity(domainName, entityName);
-        var entityDataResult = new Dictionary<string, dynamic>();
 
         foreach (var field in entity.Data)
         {
             var fieldSources = field.Sources.OrderBy(f => f.Order).ToArray();
-            GetFieldSource(field, tagName, jsondata, entityDataResult, fieldSources);
+            GetFieldSource(field, dtoTag.Name, jsondata, entityDataResult, fieldSources);
         }
 
         app.Logger.LogInformation($"ExecuteTag filterData is responded with {entityDataResult}");
-
-        var deserializeResponse = await CallTemplateEngine(httpClient, type, entityDataResult, ViewTemplateName);
-
-        return Results.Content(deserializeResponse);
     }
-    catch (Dapr.Client.InvocationException ex)
-    {
-        if (ex.Response.StatusCode == HttpStatusCode.NotFound)
-        {
-            return Results.NotFound("Entity is not found.");
-        }
 
-        if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
-        {
-            return Results.Problem("Entity query service is unavailable", null, 510);
-        }
+    app.Logger.LogInformation($"Mehmet {entityDataResult}");
+    var deserializeResponse = await CallTemplateEngine(httpClient, type, entityDataResult, ViewTemplateName);
 
-        return Results.Problem($"Entity query service error: {ex.Response.StatusCode}", null, 510);
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Unhandled Entity query service error: {ex.Message}", null, 510);
-    }
+    return Results.Content(deserializeResponse);
+    // }
+    // catch (Dapr.Client.InvocationException ex)
+    // {
+    //     if (ex.Response.StatusCode == HttpStatusCode.NotFound)
+    //     {
+    //         return Results.NotFound("Entity is not found.");
+    //     }
+
+    //     if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
+    //     {
+    //         return Results.Problem("Entity query service is unavailable", null, 510);
+    //     }
+
+    //     return Results.Problem($"Entity query service error: {ex.Response.StatusCode}", null, 510);
+    // }
+    // catch (Exception ex)
+    // {
+    //     return Results.Problem($"Unhandled Entity query service error: {ex.Message}", null, 510);
+    // }
 }
 async Task<IResult> TagExecute(
 [FromRoute(Name = "tagName")] string tagName,
