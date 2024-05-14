@@ -6,7 +6,8 @@ public class TagRelation : EntityBase
 {
 
     public string OwnerName { get; set; } = string.Empty;
-    public Tag? Tag { get; set; }
+    [ForeignKey("Tag")]
     public Guid TagId { get; set; }
     public string TagName { get; set; } = string.Empty;
+    public Tag? Tag { get; set; }
 }
