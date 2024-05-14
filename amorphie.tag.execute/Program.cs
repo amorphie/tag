@@ -17,52 +17,52 @@ using System.Drawing.Text;
 using Google.Protobuf.WellKnownTypes;
 using amorphie.core.Base;
 using Elastic.Apm.Api;
-
-using var client = new DaprClientBuilder().Build();
+using System.Net;
+using System.Text.Json;
+using System.Net.Http.Json;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using Dapr.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
 await builder.Configuration.AddVaultSecrets("amorphie-tag", new string[] { "amorphie-tag" });
+
 var postgreSql = builder.Configuration["PostgreSql"];
-var amorphie_tag = "";
+var amorphie_tag = builder.Configuration["amorphie-tag"];
 var templateEngineEndpoint = builder.Configuration["Url:TemplateEngine"];
-
-
 var STATE_STORE = builder.Configuration["STATE_STORE"];
 
 builder.AddSeriLogWithHttpLogging<AmorphieLogEnricher>();
 
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<TagDBContext>
-    (options => options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
+builder.Services.AddDbContext<TagDBContext>(options =>
+    options.UseNpgsql(postgreSql, b => b.MigrationsAssembly("amorphie.tag")));
 builder.Host.UseSerilog((_, serviceProvider, loggerConfiguration) =>
 {
-    loggerConfiguration
-        .ReadFrom.Configuration(builder.Configuration);
-
+    loggerConfiguration.ReadFrom.Configuration(builder.Configuration);
 });
 builder.Services.AddCors(options =>
-
 {
-    options.AddDefaultPolicy(
-        builder =>
-        {
-            builder.WithOrigins("*")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.WithOrigins("*")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 var app = builder.Build();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseAllElasticApm(app.Configuration);
 }
+
 app.UseLoggingHandlerMiddlewares();
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
     amorphie_tag = builder.Configuration["amorphie-tags"];
 }
@@ -70,6 +70,7 @@ else
 {
     amorphie_tag = "amorphie-tag.test-amorphie-tag";
 }
+
 app.UseCloudEvents();
 app.UseRouting();
 app.MapSubscribeHandler();
@@ -78,396 +79,393 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseAllElasticApm(app.Configuration);
 app.UseHttpLogging();
-//async kullan. 
+
+var client = new DaprClientBuilder().Build();
 
 app.MapGet("/tag/{domainName}/{entityName}/{tagName}/execute", ExecuteTag)
-.WithOpenApi(operation =>
-{
-    operation.Summary = "Executes given entity with using tag-in query- parameters.";
-    return operation;
-})
-
-
-.Produces(StatusCodes.Status200OK)
-.Produces(StatusCodes.Status500InternalServerError)
-.Produces(StatusCodes.Status510NotExtended)
-.Produces(StatusCodes.Status400BadRequest)
-.Produces(StatusCodes.Status204NoContent);
+    .WithOpenApi(operation =>
+    {
+        operation.Summary = "Executes given entity with using tag-in query- parameters.";
+        return operation;
+    })
+    .Produces(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status500InternalServerError)
+    .Produces(StatusCodes.Status510NotExtended)
+    .Produces(StatusCodes.Status400BadRequest)
+    .Produces(StatusCodes.Status204NoContent);
 
 app.MapGet("/tag/{tagName}/execute", TagExecute)
-.WithOpenApi(operation =>
-{
-    operation.Summary = "Executes given tag with using query parameters and returns all entity fields.";
-    return operation;
-})
-.Produces(StatusCodes.Status200OK)
-.Produces(StatusCodes.Status500InternalServerError)
-.Produces(StatusCodes.Status510NotExtended)
-.Produces(StatusCodes.Status400BadRequest)
-.Produces(StatusCodes.Status204NoContent);
+    .WithOpenApi(operation =>
+    {
+        operation.Summary = "Executes given tag with using query parameters and returns all entity fields.";
+        return operation;
+    })
+    .Produces(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status500InternalServerError)
+    .Produces(StatusCodes.Status510NotExtended)
+    .Produces(StatusCodes.Status400BadRequest)
+    .Produces(StatusCodes.Status204NoContent);
+
 app.MapGet("/htmlTemplate/{domainName}/{entityName}/{tagName}/{viewTemplateName}/execute", HtmlTemplateExecuteTag);
 app.MapGet("/pdfTemplate/{domainName}/{entityName}/{tagName}/{viewTemplateName}/execute", PdfTemplateExecuteTag);
-// app.MapGet("/template/{tagName}/execute", ExecuteTemplate);
-// app.MapGet("/tag/{tagName}/ugur", () => { })
-// .WithOpenApi(operation =>
-// {
-//     operation.Summary = "Ugurun methodu";
-//     return operation;
-// })
-// .Produces(StatusCodes.Status200OK)
-// .Produces(StatusCodes.Status500InternalServerError)
-// .Produces(StatusCodes.Status510NotExtended)
-// .Produces(StatusCodes.Status400BadRequest)
-// .Produces(StatusCodes.Status204NoContent);
-
-// app.MapGet("/domain/{domainName}/entity/{entityName}/Execute", ExecuteEntity)
-// .WithOpenApi(operation =>
-// {
-//     operation.Summary = "Executes given entity with using tag-in query- parameters.";
-//     return operation;
-// })
-// .Produces(StatusCodes.Status200OK)
-// .Produces(StatusCodes.Status500InternalServerError)
-// .Produces(StatusCodes.Status510NotExtended)
-// .Produces(StatusCodes.Status400BadRequest)
-// .Produces(StatusCodes.Status204NoContent);
 
 try
 {
     app.Logger.LogInformation("Starting application...");
     app.Run();
-
 }
 catch (Exception ex)
 {
-    app.Logger.LogCritical(ex, "Aplication is terminated unexpectedly ");
+    app.Logger.LogCritical(ex, "Application terminated unexpectedly");
 }
 
 async Task<IResult> ExecuteTag(
-    [FromRoute(Name = "tagName")] string tagName,
-    [FromRoute(Name = "domainName")] string domainName,
-    [FromRoute(Name = "entityName")] string entityName,
+    [FromRoute] string tagName,
+    [FromRoute] string domainName,
+    [FromRoute] string entityName,
     HttpRequest request,
-    HttpContext httpContext
-    )
+    HttpContext httpContext)
 {
-    app.Logger.LogInformation("ExecuteTag is calling");
-    var jsondata = String.Empty;
-    DtoTag tag;
+    return await ExecuteTagInternal(tagName, domainName, entityName, request, httpContext);
+}
 
-    try
-    {
-        //b TODO: dapr service call to long
-        //tag = await client.InvokeMethodAsync<GetTagResponse>(HttpMethod.Get, "amorphie-tag", $"tag/{tagName}");
-        //var test = client.CreateInvokeMethodRequest(HttpMethod.Get, "amorphie-tag", $"tag/{tagId}");
-        // var result = client.InvokeMethodWithResponseAsync(test).Result.Content.ReadAsStringAsync().Result;
-        // var json = (JObject)JsonConvert.DeserializeObject(result);
-        // tag = json["data"].ToObject<DtoTag>();
-        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
-
-    }
-    catch (Dapr.Client.InvocationException ex)
-    {
-        if (ex.Response.StatusCode == HttpStatusCode.NotFound)
-            return Results.NotFound("Tag is not found.");
-
-        if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
-            return Results.Problem($"Tag query service is unavailable {ex.Message}", null, 510);
-
-        return Results.Problem($"Tag query service error : {ex.Response.StatusCode}", null, 510);
-    }
-    catch (Exception ex)
-    {
-
-        return Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510);
-    }
-
-    if (string.IsNullOrEmpty(tag.Url))
-    {
-        return Results.BadRequest("This tag does not have URL");
-    }
-
-    var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
-    var urlToConsume = tag.Url;
-    foreach (var p in parameters)
-    {
-        if (!request.Query.ContainsKey(p.TrimStart('@')))
-            return Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}");
-        // Düzeltildi
-        urlToConsume = urlToConsume.Replace(p, request!.QueryString.Value!.TrimStart('?').Split('&').FirstOrDefault(x => x.StartsWith(p.TrimStart('@')))!.Split('=').LastOrDefault() ?? string.Empty);
-        //urlToConsume = urlToConsume.Replace(p, request.Query.FirstOrDefault(x => x.Value != p).ToString());
-    }
-
-
-    var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, urlToConsume);
-
-    if (cachedResponse is not null)
-    {
-        httpContext.Response.Headers.Add("X-Cache", "Hit");
-        return Results.Ok(cachedResponse);
-    }
-    else
-    {
-        // HttpClient httpClient = new();
-        // var result = await httpClient.GetAsync(urlToConsume);
-        // string test = await result.Content.ReadAsStringAsync();
-        // app.Logger.LogInformation($"ExecuteTag is responded with {test}");
-
-        HttpClient httpClient = new();
-        var response = await httpClient.GetAsync(urlToConsume);
-
-        if (response.IsSuccessStatusCode)
-        {
-            var content = await response.Content.ReadAsStringAsync();
-            string? contentType = response.Content.Headers.ContentType?.MediaType;
-
-            try
-            {
-                if (contentType == "application/json")
-                {
-                    JToken dataAsJson = JToken.Parse(content);
-                    jsondata = content;
-                }
-                else if (contentType == "application/xml" || contentType == "text/xml")
-                {
-                    XmlDocument doc = new XmlDocument();
-                    doc.LoadXml(content);
-                    string jsonContent = JsonConvert.SerializeXmlNode(doc);
-                    // var serializeJson = JsonConvert.SerializeObject(jsonContent);
-                    Console.WriteLine(jsonContent);
-                    // JToken dataAsJson = JToken.Parse(jsonContent);
-
-                    var deserializeData = JsonConvert.DeserializeObject(jsonContent);
-                    Console.WriteLine(JObject.FromObject(deserializeData).ToString());
-                    jsondata = jsonContent;
-
-                }
-                else
-                {
-                    if (content.TrimStart().StartsWith("{") || content.TrimStart().StartsWith("["))
-                    {
-                    }
-                    else if (content.TrimStart().StartsWith("<"))
-                    {
-                    }
-                    else
-                    {
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-            }
-        }
-        else
-        {
-        }
-
-
-        try
-        {
-            var entity = await client.InvokeMethodAsync<GetEntityResponse>(
-                HttpMethod.Get,
-                $"{amorphie_tag}",
-                $"entityData/getEntityData/{domainName}/{entityName}"
-            );
-
-            var returnValue = new Dictionary<string, dynamic>();
-
-            foreach (var field in entity.Data)
-            {
-                var sourceTags = field.Sources.OrderBy(f => f.Order).ToArray();
-
-                foreach (var targetTag in sourceTags)
-                {
-                    if (tagName.Contains(targetTag.Tag))
-                    {
-
-                        JToken dataAsJson = JToken.Parse(jsondata);
-
-                        if (dataAsJson.SelectToken(targetTag.Path) != null)
-                        {
-                            returnValue.Add(field.Field, dataAsJson.SelectToken(targetTag.Path)!.Value<string>()!);
-                        }
-
-                        break;
-                    }
-
-                }
-            }
-
-            // var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
-            var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{3}" } };
-            await client.SaveStateAsync(STATE_STORE, urlToConsume, returnValue, metadata: metadata);
-
-            httpContext.Response.Headers.Add("X-Cache", "Miss");
-
-
-            app.Logger.LogInformation($"ExecuteTag is responded with {returnValue}");
-            // return Results.Ok(test);
-
-            return Results.Ok(returnValue);
-        }
-        catch (Dapr.Client.InvocationException ex)
-        {
-            if (ex.Response.StatusCode == HttpStatusCode.NotFound)
-            {
-                return Results.NotFound("Entity is not found.");
-            }
-
-            if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
-            {
-                return Results.Problem("Entity query service is unavailable", null, 510);
-            }
-
-            return Results.Problem($"Entity query service error: {ex.Response.StatusCode}", null, 510);
-        }
-        catch (Exception ex)
-        {
-            return Results.Problem($"Unhandled Entity query service error: {ex.Message}", null, 510);
-        }
-
-    }
-};
+async Task<IResult> TagExecute(
+    [FromRoute] string tagName,
+    HttpRequest request,
+    HttpContext httpContext)
+{
+    return await ExecuteTagInternal(tagName, null, null, request, httpContext);
+}
 
 async Task<IResult> HtmlTemplateExecuteTag(
-    [FromRoute(Name = "tagName")] string tagName,
-    [FromRoute(Name = "domainName")] string domainName,
-    [FromRoute(Name = "entityName")] string entityName,
-    [FromRoute(Name = "viewTemplateName")] string? ViewTemplateName,
-    [FromQuery(Name = "reference")] string? reference,
+    [FromRoute] string tagName,
+    [FromRoute] string domainName,
+    [FromRoute] string entityName,
+    [FromRoute] string viewTemplateName,
+    [FromQuery] string reference,
+    [FromQuery] string version,
     HttpRequest request,
-    HttpContext httpContext
-    )
+    HttpContext httpContext)
 {
-    return await TemplateExecuteTag(tagName, domainName, entityName, ViewTemplateName, reference, request, httpContext, "html");
-
+    app.Logger.LogInformation($"HtmlTemplateExecuteTag called with domainName={domainName}, entityName={entityName}, tagName={tagName}, viewTemplateName={viewTemplateName}, reference={reference}, version={version}");
+    return await TemplateExecuteTag(tagName, domainName, entityName, viewTemplateName, reference, version, request, httpContext, "html");
 }
 
 async Task<IResult> PdfTemplateExecuteTag(
-    [FromRoute(Name = "tagName")] string tagName,
-    [FromRoute(Name = "domainName")] string domainName,
-    [FromRoute(Name = "entityName")] string entityName,
-    [FromQuery(Name = "viewTemplateName")] string? ViewTemplateName,
-    [FromQuery(Name = "reference")] string? reference,
+    [FromRoute] string tagName,
+    [FromRoute] string domainName,
+    [FromRoute] string entityName,
+    [FromRoute] string viewTemplateName,
+    [FromQuery] string reference,
+    [FromQuery] string version,
     HttpRequest request,
-    HttpContext httpContext
-    )
+    HttpContext httpContext)
 {
-    return await TemplateExecuteTag(tagName, domainName, entityName, ViewTemplateName, reference, request, httpContext, "pdf");
-
+    app.Logger.LogInformation($"PdfTemplateExecuteTag called with domainName={domainName}, entityName={entityName}, tagName={tagName}, viewTemplateName={viewTemplateName}, reference={reference}, version={version}");
+    return await TemplateExecuteTag(tagName, domainName, entityName, viewTemplateName, reference, version, request, httpContext, "pdf");
 }
-async ValueTask<ResultData> GetTag(string tagName)
+
+async Task<IResult> ExecuteTagInternal(string tagName, string domainName, string entityName, HttpRequest request, HttpContext httpContext)
 {
-    DtoTag tag = null;
     try
     {
-        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
-    }
-    catch (Dapr.Client.InvocationException ex)
-    {
-        if (ex.Response.StatusCode == HttpStatusCode.NotFound)
-            return new ResultData(Results.NotFound("Tag is not found."), tag);
+        HttpClient httpClient = new();
+        app.Logger.LogInformation("ExecuteTag is calling");
 
-        if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
-            return new ResultData(Results.Problem($"Tag query service is unavailable {ex.Message}", null, 510));
+        var getTagResult = await GetTag(tagName);
+        if (getTagResult.Result != Results.Ok())
+        {
+            app.Logger.LogInformation("");
+            return getTagResult.Result;
+        }
 
-        return new ResultData(Results.Problem($"Tag query service error : {ex.Response.StatusCode}", null, 510));
+        DtoTag tag = getTagResult.Data;
+        var dtoTags = await GetRelatedTags(tag);
+        var entityDataResult = new Dictionary<string, dynamic>();
+
+        foreach (var dtoTag in dtoTags)
+        {
+            var urlToConsumerResult = await GetConsumeUrl(dtoTag.Url, request);
+            if (urlToConsumerResult.Result != Results.Ok())
+            {
+                app.Logger.LogInformation("");
+                return urlToConsumerResult.Result;
+            }
+
+            var urlToConsume = urlToConsumerResult.Data;
+            var getJsonDataResult = await GetJsonData(urlToConsume, httpClient);
+            if (getJsonDataResult.Result != Results.Ok())
+            {
+                app.Logger.LogInformation("");
+                return getJsonDataResult.Result;
+            }
+
+            var jsondata = getJsonDataResult.Data;
+
+            if (!string.IsNullOrEmpty(domainName) && !string.IsNullOrEmpty(entityName))
+            {
+                var entity = await GetEntity(domainName, entityName);
+
+                foreach (var field in entity.Data)
+                {
+                    var fieldSources = field.Sources.OrderBy(f => f.Order).ToArray();
+                    GetFieldSource(field, dtoTag.Name, jsondata, entityDataResult, fieldSources);
+                }
+            }
+            else
+            {
+                var dataAsJson = JToken.Parse(jsondata);
+                foreach (var property in dataAsJson)
+                {
+                    entityDataResult[property.Path] = property.First.ToString();
+                }
+            }
+
+            app.Logger.LogInformation($"ExecuteTag filterData responded with {entityDataResult}");
+        }
+
+        var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, tagName);
+
+        if (cachedResponse is not null)
+        {
+            app.Logger.LogInformation("Cache hit");
+            httpContext.Response.Headers.Append("X-Cache", "Hit");
+            return Results.Ok(cachedResponse);
+        }
+
+        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
+        await client.SaveStateAsync(STATE_STORE, tagName, entityDataResult, metadata: metadata);
+
+        httpContext.Response.Headers.Append("X-Cache", "Miss");
+
+        app.Logger.LogInformation($"ExecuteTag responded with {entityDataResult}");
+        return Results.Ok(entityDataResult);
     }
     catch (Exception ex)
     {
-        return new ResultData(Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510));
+        app.Logger.LogError(ex, "Unhandled Tag query service error");
+        return Results.Problem($"Unhandled Tag query service error: {ex.Message}", null, 510);
     }
-    if (string.IsNullOrEmpty(tag.Url))
+}
+
+async Task<IResult> TemplateExecuteTag(
+    string tagName,
+    string domainName,
+    string entityName,
+    string viewTemplateName,
+    string reference,
+    string version,
+    HttpRequest request,
+    HttpContext httpContext,
+    string type)
+{
+    try
     {
-        return new ResultData(Results.BadRequest("This tag does not have URL"));
+        HttpClient httpClient = new();
+        app.Logger.LogInformation("TemplateExecuteTag is calling");
+
+        var getTagResult = await GetTag(tagName);
+        if (getTagResult.Result != Results.Ok())
+        {
+            app.Logger.LogInformation("Failed to get tag");
+            return getTagResult.Result;
+        }
+
+        DtoTag tag = getTagResult.Data;
+        var dtoTags = await GetRelatedTags(tag);
+        var entityDataResult = new Dictionary<string, dynamic>();
+
+        foreach (var dtoTag in dtoTags)
+        {
+            var urlToConsumerResult = await GetConsumeUrl(dtoTag.Url, request);
+            if (urlToConsumerResult.Result != Results.Ok())
+            {
+                app.Logger.LogInformation("Failed to get URL to consume");
+                return urlToConsumerResult.Result;
+            }
+
+            var urlToConsume = urlToConsumerResult.Data;
+            var getJsonDataResult = await GetJsonData(urlToConsume, httpClient);
+            if (getJsonDataResult.Result != Results.Ok())
+            {
+                app.Logger.LogInformation("Failed to get JSON data");
+                return getJsonDataResult.Result;
+            }
+
+            var jsondata = getJsonDataResult.Data;
+            var entity = await GetEntity(domainName, entityName);
+
+            if (entity.Data == null || !entity.Data.Any())
+            {
+                app.Logger.LogInformation("No entity data found");
+                return Results.Problem("Entity query service error: NoContent", null, 510);
+            }
+
+            foreach (var field in entity.Data)
+            {
+                var fieldSources = field.Sources.OrderBy(f => f.Order).ToArray();
+                GetFieldSource(field, dtoTag.Name, jsondata, entityDataResult, fieldSources);
+            }
+
+            app.Logger.LogInformation($"TemplateExecuteTag filterData responded with {entityDataResult}");
+        }
+
+        app.Logger.LogInformation($"Final data: {entityDataResult}");
+        var deserializeResponse = await CallTemplateEngine(version, httpClient, type, entityDataResult, viewTemplateName);
+
+        httpContext.Response.Headers.Append("X-Cache", "Miss");
+
+        return Results.Content(deserializeResponse);
     }
-    return new ResultData(Results.Ok(), tag);
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "An error occurred while executing the template");
+        return Results.Problem(ex.Message);
+    }
+}
+
+async ValueTask<ResultData> GetTag(string tagName)
+{
+    try
+    {
+        var tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
+        if (string.IsNullOrEmpty(tag.Url))
+        {
+            return new ResultData(Results.BadRequest("This tag does not have URL"));
+        }
+        return new ResultData(Results.Ok(), tag);
+    }
+    catch (Dapr.Client.InvocationException ex)
+    {
+        return HandleTagInvocationException(ex);
+    }
+    catch (Exception ex)
+    {
+        return new ResultData(Results.Problem($"Unhandled Tag query service error: {ex.Message}", null, 510));
+    }
+}
+
+ResultData HandleTagInvocationException(Dapr.Client.InvocationException ex)
+{
+    return ex.Response.StatusCode switch
+    {
+        HttpStatusCode.NotFound => new ResultData(Results.NotFound("Tag is not found.")),
+        HttpStatusCode.InternalServerError => new ResultData(Results.Problem($"Tag query service is unavailable {ex.Message}", null, 510)),
+        _ => new ResultData(Results.Problem($"Tag query service error: {ex.Response.StatusCode}", null, 510)),
+    };
+}
+
+async Task<List<DtoTag>> GetRelatedTags(DtoTag tag)
+{
+    var dtoTags = new List<DtoTag> { tag };
+
+    foreach (var item in tag.TagsRelations)
+    {
+        if (!dtoTags.Any(t => t.Name == item.TagName))
+        {
+            var relatedTag = await GetTag(item.TagName);
+            if (relatedTag.Data != null)
+            {
+                dtoTags.Add(relatedTag.Data);
+            }
+        }
+    }
+
+    return dtoTags;
 }
 
 async ValueTask<ResultData> GetConsumeUrl(string url, HttpRequest request)
 {
-    var parameters = url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
-    var urlToConsume = url;
+    var parameters = url.Split(new char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries)
+        .Where(x => x.StartsWith('@')).ToList();
+
     foreach (var p in parameters)
     {
         if (!request.Query.ContainsKey(p.TrimStart('@')))
-            return new ResultData(Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}"));
+        {
+            return new ResultData(Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters: {string.Join(",", parameters)}"));
+        }
 
-        urlToConsume = urlToConsume.Replace(p, request!.QueryString.Value!.TrimStart('?').Split('&').FirstOrDefault(x => x.StartsWith(p.TrimStart('@')))!.Split('=').LastOrDefault() ?? string.Empty);
+        url = url.Replace(p, request.Query[p.TrimStart('@')]);
     }
-    return new ResultData(Results.Ok(), urlToConsume);
+
+    return new ResultData(Results.Ok(), url);
 }
+
 async Task<ResultData> GetJsonData(string urlToConsume, HttpClient httpClient)
 {
-    var jsondata = String.Empty;
-
     var result = await httpClient.GetAsync(urlToConsume);
 
-    if (result.IsSuccessStatusCode)
-    {
-        var content = await result.Content.ReadAsStringAsync();
-        string? contentType = result.Content.Headers.ContentType?.MediaType;
-
-        try
-        {
-            if (contentType == "application/json")
-            {
-                JToken dataAsJson = JToken.Parse(content);
-                jsondata = content;
-            }
-            else if (contentType == "application/xml" || contentType == "text/xml")
-            {
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(content);
-                string jsonContent = JsonConvert.SerializeXmlNode(doc);
-                var deserializeData = JsonConvert.DeserializeObject(jsonContent);
-                jsondata = jsonContent;
-            }
-        }
-        catch (Exception ex)
-        {
-            return new ResultData(Results.BadRequest(ex.Message));
-        }
-    }
-    else
+    if (!result.IsSuccessStatusCode)
     {
         return new ResultData(Results.BadRequest("GetData Failed"));
     }
+
+    var content = await result.Content.ReadAsStringAsync();
+    var contentType = result.Content.Headers.ContentType?.MediaType;
+    string jsondata;
+
+    try
+    {
+        if (contentType == "application/json")
+        {
+            jsondata = JToken.Parse(content).ToString();
+        }
+        else if (contentType == "application/xml" || contentType == "text/xml")
+        {
+            var doc = new XmlDocument();
+            doc.LoadXml(content);
+            jsondata = JsonConvert.SerializeXmlNode(doc);
+        }
+        else
+        {
+            jsondata = content;
+        }
+    }
+    catch (Exception ex)
+    {
+        return new ResultData(Results.BadRequest(ex.Message));
+    }
+
     return new ResultData(Results.Ok(), jsondata);
 }
+
 async Task<GetEntityResponse> GetEntity(string domainName, string entityName)
 {
-    return await client.InvokeMethodAsync<GetEntityResponse>(
-              HttpMethod.Get,
-              $"{amorphie_tag}",
-              $"entityData/getEntityData/{domainName}/{entityName}"
-          );
+    app.Logger.LogInformation($"Fetching entity data for domainName={domainName}, entityName={entityName}");
+    var response = await client.InvokeMethodAsync<GetEntityResponse>(HttpMethod.Get, $"{amorphie_tag}", $"entityData/getEntityData/{domainName}/{entityName}");
+    if (response.Data == null || !response.Data.Any())
+    {
+        app.Logger.LogInformation("No entity data returned from service");
+    }
+    return response;
 }
-void GetFieldSource(GetEntityDataResponse? field, string tagName, string jsondata, Dictionary<string, dynamic> entityDataResult, GetEntityDataSourcesResponse[]? fieldSources)
+
+void GetFieldSource(GetEntityDataResponse field, string tagName, string jsondata, Dictionary<string, dynamic> entityDataResult, GetEntityDataSourcesResponse[] fieldSources)
 {
     foreach (var fieldSource in fieldSources)
     {
         if (tagName.Contains(fieldSource.Tag))
         {
-            JToken dataAsJson = JToken.Parse(jsondata);
-
-            if (dataAsJson.SelectToken(fieldSource.Path) != null)
+            var dataAsJson = JToken.Parse(jsondata);
+            var token = dataAsJson.SelectToken(fieldSource.Path);
+            if (token != null)
             {
-                entityDataResult.Add(field.Field, dataAsJson.SelectToken(fieldSource.Path)!.Value<string>()!);
+                entityDataResult.Add(field.Field, token.Value<string>());
             }
             break;
         }
     }
 }
-async Task<string?> CallTemplateEngine(HttpClient httpClient, string type, Dictionary<string, dynamic>? entityDataResult, string ViewTemplateName)
+
+async Task<string> CallTemplateEngine(string version, HttpClient httpClient, string type, Dictionary<string, dynamic> entityDataResult, string viewTemplateName)
 {
-    var data = System.Text.Json.JsonSerializer.Serialize<dynamic>(entityDataResult);
-    app.Logger.LogInformation($"ExecuteTag renderData is responded with {data}");
-    var machineName = Environment.MachineName;
+    var data = JsonSerializer.Serialize(entityDataResult);
+    app.Logger.LogInformation($"ExecuteTag renderData responded with {data}");
+
     var payload = new RenderRequestDefinition
     {
-        Name = ViewTemplateName ?? "contractTag",
+        Name = viewTemplateName ?? "contractTag",
         RenderData = data,
         RenderID = Guid.NewGuid(),
         Action = "amorphie-template-executer",
@@ -476,181 +474,30 @@ async Task<string?> CallTemplateEngine(HttpClient httpClient, string type, Dicti
         ItemId = "numberTemplate",
         ProcessName = "numberTemplate",
         RenderDataForLog = data,
+        SemVer = version ?? "1.0.4"
     };
 
-    var json = System.Text.Json.JsonSerializer.Serialize<RenderRequestDefinition>(payload);
-    app.Logger.LogInformation($"ExecuteTag jsonEncode is responded with {json}");
+    var json = JsonSerializer.Serialize(payload);
+    app.Logger.LogInformation($"ExecuteTag jsonEncode responded with {json}");
 
-    HttpRequestMessage yourmsg = new()
+    var requestUri = type == "pdf"
+        ? new Uri($"{templateEngineEndpoint}Template/Render/pdf")
+        : new Uri($"{templateEngineEndpoint}Template/Render");
+
+    var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri)
     {
-        Method = HttpMethod.Post,
-        RequestUri = type == "pdf" ? new Uri($"{templateEngineEndpoint}Template/Render/pdf") : new Uri($"{templateEngineEndpoint}Template/Render"),
         Content = new StringContent(json, Encoding.UTF8, "application/json")
     };
 
-    var responses = await httpClient.SendAsync(yourmsg);
+    var response = await httpClient.SendAsync(requestMessage);
     var options = new JsonSerializerOptions
     {
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         WriteIndented = true
     };
-    app.Logger.LogInformation($"ExecuteTag templateResponse is responded with {responses}");
-    var deserializeData = await responses.Content.ReadFromJsonAsync<dynamic>();
-    return System.Text.Json.JsonSerializer.Deserialize<string>(deserializeData, options);
+
+    app.Logger.LogInformation($"ExecuteTag templateResponse responded with {response}");
+
+    var deserializeData = await response.Content.ReadFromJsonAsync<dynamic>();
+    return JsonSerializer.Deserialize<string>(deserializeData, options);
 }
-async Task<IResult> TemplateExecuteTag(
-     string tagName,
-     string domainName,
-     string entityName,
-    string? ViewTemplateName,
-    string? reference,
-    HttpRequest request,
-    HttpContext httpContext,
-    string type
-    )
-{
-    HttpClient httpClient = new();
-    app.Logger.LogInformation("ExecuteTag is calling");
-    var getTagResult = await GetTag(tagName);
-
-    if (getTagResult.Result != Results.Ok())
-    {
-        app.Logger.LogInformation("");
-        return getTagResult.Result;
-    }
-    DtoTag tag = getTagResult.Data;
-
-    List<DtoTag> dtoTags = new List<DtoTag>();
-    var tag2 = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/openbanking-customer");
-    dtoTags.Add(tag);
-    dtoTags.Add(tag2);
-    //Burada Related Bütün Tagler Eklenecek.
-    var entityDataResult = new Dictionary<string, dynamic>();
-
-    foreach (var dtoTag in dtoTags)
-    {
-        var urlToConsumerResult = await GetConsumeUrl(dtoTag.Url, request);
-
-        if (urlToConsumerResult.Result != Results.Ok())
-        {
-            app.Logger.LogInformation("");
-            return urlToConsumerResult.Result;
-        }
-
-        var urlToConsume = urlToConsumerResult.Data;
-        var getJsonDataResult = await GetJsonData(urlToConsume, httpClient);
-
-        if (getJsonDataResult.Result != Results.Ok())
-        {
-            app.Logger.LogInformation("");
-            return getJsonDataResult.Result;
-        }
-        var jsondata = getJsonDataResult.Data;
-
-
-        var entity = await GetEntity(domainName, entityName);
-
-        foreach (var field in entity.Data)
-        {
-            var fieldSources = field.Sources.OrderBy(f => f.Order).ToArray();
-            GetFieldSource(field, dtoTag.Name, jsondata, entityDataResult, fieldSources);
-        }
-
-        app.Logger.LogInformation($"ExecuteTag filterData is responded with {entityDataResult}");
-    }
-
-    app.Logger.LogInformation($"Mehmet {entityDataResult}");
-    var deserializeResponse = await CallTemplateEngine(httpClient, type, entityDataResult, ViewTemplateName);
-
-    return Results.Content(deserializeResponse);
-    // }
-    // catch (Dapr.Client.InvocationException ex)
-    // {
-    //     if (ex.Response.StatusCode == HttpStatusCode.NotFound)
-    //     {
-    //         return Results.NotFound("Entity is not found.");
-    //     }
-
-    //     if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
-    //     {
-    //         return Results.Problem("Entity query service is unavailable", null, 510);
-    //     }
-
-    //     return Results.Problem($"Entity query service error: {ex.Response.StatusCode}", null, 510);
-    // }
-    // catch (Exception ex)
-    // {
-    //     return Results.Problem($"Unhandled Entity query service error: {ex.Message}", null, 510);
-    // }
-}
-async Task<IResult> TagExecute(
-[FromRoute(Name = "tagName")] string tagName,
-HttpRequest request,
-HttpContext httpContext
-)
-{
-    app.Logger.LogInformation("ExecuteTag is calling");
-
-    DtoTag tag;
-
-    try
-    {
-        tag = await client.InvokeMethodAsync<DtoTag>(HttpMethod.Get, $"{amorphie_tag}", $"Tag/getTag/{tagName}");
-    }
-    catch (Dapr.Client.InvocationException ex)
-    {
-        if (ex.Response.StatusCode == HttpStatusCode.NotFound)
-            return Results.NotFound("Tag is not found.");
-
-        if (ex.Response.StatusCode == HttpStatusCode.InternalServerError)
-            return Results.Problem("Tag query service is unavailable", null, 510);
-
-        return Results.Problem($"Tag query service error : {ex.Response.StatusCode}", null, 510);
-    }
-    catch (Exception ex)
-    {
-
-        return Results.Problem($"Unhandled Tag query service error : {ex.Message}", null, 510);
-    }
-
-    if (string.IsNullOrEmpty(tag.Url))
-    {
-        return Results.BadRequest("This tag does not have URL");
-    }
-
-    var parameters = tag.Url.Split(new Char[] { '/', '?', '&', '=' }, StringSplitOptions.RemoveEmptyEntries).Where(x => x.StartsWith('@')).ToList();
-    var urlToConsume = tag.Url;
-    foreach (var p in parameters)
-    {
-        if (!request.Query.ContainsKey(p.TrimStart('@')))
-            return Results.BadRequest($"Required Url parameter(s) is not supplied as query parameters. Required parameters : {string.Join(",", parameters)}");
-        // Düzeltildi
-        urlToConsume = urlToConsume.Replace(p, request!.QueryString.Value!.TrimStart('?').Split('&').FirstOrDefault(x => x.StartsWith(p.TrimStart('@')))!.Split('=').LastOrDefault() ?? string.Empty);
-        //urlToConsume = urlToConsume.Replace(p, request.Query.FirstOrDefault(x => x.Value != p).ToString());
-    }
-
-
-    var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, urlToConsume);
-
-    if (cachedResponse is not null)
-    {
-        httpContext.Response.Headers.Add("X-Cache", "Hit");
-        return Results.Ok(cachedResponse);
-    }
-    else
-    {
-        HttpClient httpClient = new();
-        var response = await httpClient.GetFromJsonAsync<dynamic>(urlToConsume);
-
-        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
-        await client.SaveStateAsync(STATE_STORE, urlToConsume, response, metadata: metadata);
-
-        httpContext.Response.Headers.Add("X-Cache", "Miss");
-
-
-        app.Logger.LogInformation($"ExecuteTag is responded with {response}");
-        return Results.Ok(response);
-    }
-};
-
-

@@ -8,8 +8,6 @@ using amorphie.core.Swagger;
 using amorphie.tag.data;
 using amorphie.core.Middleware.Logging;
 using Elastic.Apm.NetCoreAll;
-
-using Elastic.Apm.NetCoreAll;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
