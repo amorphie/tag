@@ -62,7 +62,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseLoggingHandlerMiddlewares();
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     amorphie_tag = builder.Configuration["amorphie-tags"];
 }
