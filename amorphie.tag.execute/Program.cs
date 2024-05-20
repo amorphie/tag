@@ -118,7 +118,6 @@ catch (Exception ex)
 {
     app.Logger.LogCritical(ex, "Application terminated unexpectedly");
 }
-
 async Task<IResult> ExecuteTag(
     [FromRoute] string tagName,
     [FromRoute] string domainName,
@@ -222,6 +221,7 @@ async Task<IResult> ExecuteTagInternal(string tagName, string domainName, string
             }
 
             app.Logger.LogInformation($"ExecuteTag filterData responded with {entityDataResult}");
+            Console.WriteLine(entityDataResult);
         }
 
         var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, tagName);
@@ -456,6 +456,7 @@ void GetFieldSource(GetEntityDataResponse field, string tagName, string jsondata
             break;
         }
     }
+    Console.WriteLine(entityDataResult);
 }
 
 async Task<string> CallTemplateEngine(string version, HttpClient httpClient, string type, Dictionary<string, dynamic> entityDataResult, string viewTemplateName)
