@@ -224,19 +224,19 @@ async Task<IResult> ExecuteTagInternal(string tagName, string domainName, string
             Console.WriteLine(JsonSerializer.Serialize(entityDataResult));
         }
 
-        var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, tagName);
+        // var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, tagName);
 
-        if (cachedResponse is not null)
-        {
-            app.Logger.LogInformation("Cache hit");
-            httpContext.Response.Headers.Append("X-Cache", "Hit");
-            return Results.Ok(cachedResponse);
-        }
+        // if (cachedResponse is not null)
+        // {
+        //     app.Logger.LogInformation("Cache hit");
+        //     httpContext.Response.Headers.Append("X-Cache", "Hit");
+        //     return Results.Ok(cachedResponse);
+        // }
 
-        var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
-        await client.SaveStateAsync(STATE_STORE, tagName, entityDataResult, metadata: metadata);
+        // var metadata = new Dictionary<string, string> { { "ttlInSeconds", $"{tag.Ttl}" } };
+        // await client.SaveStateAsync(STATE_STORE, tagName, entityDataResult, metadata: metadata);
 
-        httpContext.Response.Headers.Append("X-Cache", "Miss");
+        // httpContext.Response.Headers.Append("X-Cache", "Miss");
 
         app.Logger.LogInformation($"ExecuteTag responded with {entityDataResult}");
         return Results.Ok(entityDataResult);
