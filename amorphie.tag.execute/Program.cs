@@ -221,7 +221,7 @@ async Task<IResult> ExecuteTagInternal(string tagName, string domainName, string
             }
 
             app.Logger.LogInformation($"ExecuteTag filterData responded with {entityDataResult}");
-            Console.WriteLine(entityDataResult);
+            Console.WriteLine(JsonSerializer.Serialize(entityDataResult));
         }
 
         var cachedResponse = await client.GetStateAsync<dynamic>(STATE_STORE, tagName);
@@ -426,7 +426,7 @@ async Task<ResultData> GetJsonData(string urlToConsume, HttpClient httpClient)
     {
         return new ResultData(Results.BadRequest(ex.Message));
     }
-
+    Console.WriteLine(JsonSerializer.Serialize(jsondata));
     return new ResultData(Results.Ok(), jsondata);
 }
 
@@ -456,7 +456,7 @@ void GetFieldSource(GetEntityDataResponse field, string tagName, string jsondata
             break;
         }
     }
-    Console.WriteLine(entityDataResult);
+    Console.WriteLine(JsonSerializer.Serialize(entityDataResult));
 }
 
 async Task<string> CallTemplateEngine(string version, HttpClient httpClient, string type, Dictionary<string, dynamic> entityDataResult, string viewTemplateName)
