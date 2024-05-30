@@ -55,6 +55,7 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod();
         });
 });
+builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -68,7 +69,7 @@ var db = scope.ServiceProvider.GetRequiredService<TagDBContext>();
 
 db.Database.Migrate();
 DbInitializer.Initialize(db);
-
+app.MapHealthChecks("/health");
 db.Database.Migrate();
 app.UseCloudEvents();
 app.UseRouting();
